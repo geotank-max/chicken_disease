@@ -25,6 +25,11 @@
                     </div>
 
                     <div class="mb-4">
+                        <label class="form-label fw-bold">ប្រភេទ</label>
+                        {{ form.category_id(class="form-select") }}
+                    </div>
+
+                    <div class="mb-4">
                         <label for="description" class="form-label fw-bold">ការពិពណ៌នា</label>
                         {{ form.description(class="form-control", placeholder="ការពន្យល់សង្ខេបអំពីរោគសញ្ញា", style="height: 120px", **{"data-preview-target": "#preview-description"}) }}
                         {% if form.description.errors %}

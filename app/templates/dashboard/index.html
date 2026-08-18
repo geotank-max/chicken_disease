@@ -1,0 +1,189 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}ផ្ទាំងគ្រប់គ្រង{% endblock %}
+{% block page_title %}ផ្ទាំងគ្រប់គ្រង{% endblock %}
+{% block page_subtitle %}ទិដ្ឋភាពទូទៅនៃប្រព័ន្ធរោគវិនិច្ឆ័យមាន់{% endblock %}
+
+{% block content %}
+<div class="row g-4 mb-4">
+    <div class="col-md-6 col-xl-3">
+        <div class="card border-0 shadow-sm stat-card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="text-muted small text-uppercase fw-bold mb-1">ករណីសរុប</p>
+                        <h3 class="fw-bold mb-0">{{ summary.total_cases }}</h3>
+                    </div>
+                    <div class="stat-icon bg-primary bg-opacity-10 text-primary"><i class="bi bi-clipboard-data"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+        <div class="card border-0 shadow-sm stat-card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="text-muted small text-uppercase fw-bold mb-1">សប្តាហ៍នេះ</p>
+                        <h3 class="fw-bold mb-0">{{ summary.cases_this_week }}</h3>
+                    </div>
+                    <div class="stat-icon bg-success bg-opacity-10 text-success"><i class="bi bi-graph-up"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+        <div class="card border-0 shadow-sm stat-card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="text-muted small text-uppercase fw-bold mb-1">រង់ចាំពិនិត្យ</p>
+                        <h3 class="fw-bold mb-0">{{ summary.pending_reviews }}</h3>
+                    </div>
+                    <div class="stat-icon bg-warning bg-opacity-10 text-warning"><i class="bi bi-hourglass-split"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+        <div class="card border-0 shadow-sm stat-card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="text-muted small text-uppercase fw-bold mb-1">មូលដ្ឋានចំណេះដឹង</p>
+                        <h3 class="fw-bold mb-0">{{ summary.total_diseases }}/{{ summary.total_symptoms }}</h3>
+                        <small class="text-muted">ជំងឺ / រោគសញ្ញា</small>
+                    </div>
+                    <div class="stat-icon bg-info bg-opacity-10 text-info"><i class="bi bi-journal-medical"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-0 py-3">
+                <h5 class="mb-0 fw-bold">ករណី ៧ ថ្ងៃចុងក្រោយ</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="casesChart" height="100"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-0 py-3">
+                <h5 class="mb-0 fw-bold">ស្ថានភាពករណី</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="statusChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-0 py-3">
+                <h5 class="mb-0 fw-bold">ជំងឺដែលរកញឹកញាប់</h5>
+            </div>
+            <div class="card-body">
+                {% if top_diseases %}
+                <canvas id="diseaseChart" height="180"></canvas>
+                {% else %}
+                <p class="text-muted text-center py-4 mb-0">មិនទាន់មានទិន្នន័យទេ</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-7">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold">ករណីថ្មីៗ</h5>
+                <a href="{{ url_for('expert_system.cases_index') }}" class="btn btn-sm btn-outline-primary">មើលទាំងអស់</a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">កាលបរិច្ឆេទ</th>
+                            <th>អ្នកប្រើ</th>
+                            <th>ជំងឺ</th>
+                            <th>ស្ថានភាព</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for case in recent_cases %}
+                        <tr>
+                            <td class="ps-4 small">{{ case.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                            <td class="small">{{ case.user.username if case.user else '—' }}</td>
+                            <td class="small">{{ case.final_disease.name if case.final_disease else '—' }}</td>
+                            <td>
+                                <span class="badge rounded-pill status-badge status-{{ case.status }}">{{ case.status_label_km }}</span>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="4" class="text-center text-muted py-4">មិនទាន់មានករណីទេ</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const casesData = {{ cases_by_day | tojson }};
+    const topDiseases = {{ top_diseases | tojson }};
+    const statusData = {{ status_breakdown | tojson }};
+
+    new Chart(document.getElementById('casesChart'), {
+        type: 'line',
+        data: {
+            labels: casesData.map(d => d.date),
+            datasets: [{
+                label: 'ករណី',
+                data: casesData.map(d => d.count),
+                borderColor: '#2563eb',
+                backgroundColor: 'rgba(37,99,235,0.1)',
+                fill: true,
+                tension: 0.3
+            }]
+        },
+        options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+    });
+
+    const statusLabels = { pending: 'រង់ចាំ', confirmed: 'បានបញ្ជាក់', rejected: 'បានបដិសេធ' };
+    const statusColors = { pending: '#f59e0b', confirmed: '#10b981', rejected: '#ef4444' };
+    const sKeys = Object.keys(statusData);
+    new Chart(document.getElementById('statusChart'), {
+        type: 'doughnut',
+        data: {
+            labels: sKeys.map(k => statusLabels[k] || k),
+            datasets: [{ data: sKeys.map(k => statusData[k]), backgroundColor: sKeys.map(k => statusColors[k] || '#6b7280') }]
+        },
+        options: { plugins: { legend: { position: 'bottom' } } }
+    });
+
+    if (topDiseases.length && document.getElementById('diseaseChart')) {
+        new Chart(document.getElementById('diseaseChart'), {
+            type: 'bar',
+            data: {
+                labels: topDiseases.map(d => d.name),
+                datasets: [{ label: 'ចំនួន', data: topDiseases.map(d => d.count), backgroundColor: '#2563eb' }]
+            },
+            options: { indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+        });
+    }
+});
+</script>
+{% endblock %}

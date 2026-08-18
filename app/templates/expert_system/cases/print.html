@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <title>របាយការណ៍ករណី #{{ case.id }} - IDNS</title>
+    <style>
+        body { font-family: 'Noto Sans Khmer', Arial, sans-serif; color: #1f2937; margin: 40px; font-size: 14px; }
+        h1 { font-size: 22px; margin-bottom: 4px; }
+        h2 { font-size: 16px; color: #6b7280; margin-top: 0; }
+        .meta { color: #6b7280; font-size: 12px; margin-bottom: 24px; }
+        .section { margin-bottom: 20px; }
+        .label { font-weight: bold; color: #374151; font-size: 11px; text-transform: uppercase; margin-bottom: 4px; }
+        .box { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; }
+        .badge { display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: 11px; background: #eff6ff; color: #2563eb; }
+        ul { padding-left: 18px; }
+        .footer { margin-top: 40px; text-align: center; color: #9ca3af; font-size: 11px; border-top: 1px solid #e5e7eb; padding-top: 16px; }
+        @media print { body { margin: 20px; } .no-print { display: none; } }
+    </style>
+    {% if not pdf_mode %}
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@400;600;700&display=swap" rel="stylesheet">
+    {% endif %}
+</head>
+<body>
+    {% if not pdf_mode %}
+    <div class="no-print" style="margin-bottom: 20px;">
+        <button onclick="window.print()" style="padding: 8px 16px; cursor: pointer;">បោះពុម្ព</button>
+        <a href="{{ url_for('expert_system.cases_detail', case_id=case.id) }}" style="margin-left: 8px;">ត្រឡប់</a>
+    </div>
+    {% endif %}
+
+    <h1>របាយការណ៍រោគវិនិច្ឆ័យមាន់</h1>
+    <h2>IDNS — ករណី #{{ case.id }}</h2>
+    <div class="meta">
+        កាលបរិច្ឆេទ: {{ case.created_at.strftime('%d/%m/%Y %H:%M') }} |
+        ស្ថានភាព: {{ case.status_label_km }} |
+        {% if case.user %}អ្នកប្រើ: {{ case.user.full_name }}{% endif %}
+    </div>
+
+    {% if case.final_disease %}
+    <div class="section">
+        <div class="label">ជំងឺដែលកំណត់</div>
+        <div class="box">
+            <strong style="font-size: 18px;">{{ case.final_disease.name }}</strong>
+            {% if case.confidence is not none %}<span class="badge" style="margin-left: 8px;">{{ case.confidence }}% ទំនុកចិត្ត</span>{% endif %}
+            {% if case.final_disease.severity %}<span class="badge" style="margin-left: 4px; background:#fef2f2;color:#dc2626;">{{ case.final_disease.severity }}</span>{% endif %}
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="label">ការពិពណ៌នា</div>
+        <p>{{ case.final_disease.description }}</p>
+    </div>
+
+    <div class="section">
+        <div class="label">ការព្យាបាល</div>
+        <div class="box">{{ case.final_disease.treatment }}</div>
+    </div>
+
+    {% if case.final_disease.prevention %}
+    <div class="section">
+        <div class="label">ការការពារ</div>
+        <p>{{ case.final_disease.prevention }}</p>
+    </div>
+    {% endif %}
+    {% endif %}
+
+    {% if case.flock_size or case.bird_age or case.breed or case.location %}
+    <div class="section">
+        <div class="label">ព័ត៌មានចំការ</div>
+        <div class="box">
+            {% if case.flock_size %}ចំនួន: {{ case.flock_size }} • {% endif %}
+            {% if case.bird_age %}អាយុ: {{ case.bird_age }} • {% endif %}
+            {% if case.breed %}ប្រភេទ: {{ case.breed }} • {% endif %}
+            {% if case.location %}ទីតាំง: {{ case.location }}{% endif %}
+            {% if case.notes %}<br><em>{{ case.notes }}</em>{% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="section">
+        <div class="label">រោគសញ្ញាដែលបានសង្កេត</div>
+        <ul>
+            {% for symptom in case.symptoms %}
+            <li>{{ symptom.name }}{% if symptom.description %} — {{ symptom.description }}{% endif %}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    {% if case.reviewed_by %}
+    <div class="section">
+        <div class="label">ការពិនិត្យវេជ្ជបណ្ឌិត</div>
+        <p>{{ case.reviewed_by.full_name }} ({{ case.reviewed_at.strftime('%d/%m/%Y') if case.reviewed_at else '' }})</p>
+        {% if case.doctor_notes %}<p>{{ case.doctor_notes }}</p>{% endif %}
+    </div>
+    {% endif %}
+
+    <div class="footer">របាយការណ៍បង្កើតដោយប្រព័ន្ធជំនាញ IDNS</div>
+</body>
+</html>

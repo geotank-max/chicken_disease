@@ -3,6 +3,10 @@ from datetime import datetime
 from extensions import db
 from app.models.associations import tbl_cases_symptoms, tbl_rules_symptoms
 
+CASE_STATUS_PENDING = "pending"
+CASE_STATUS_CONFIRMED = "confirmed"
+CASE_STATUS_REJECTED = "rejected"
+
 
 class Category(db.Model):
     __tablename__ = "tbl_categories"
@@ -13,6 +17,7 @@ class Category(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
     diseases = db.relationship("Disease", back_populates="category")
+    symptoms = db.relationship("Symptom", back_populates="category")
 
     def __repr__(self) -> str:
         return f"<Category {self.name}>"
@@ -24,8 +29,10 @@ class Symptom(db.Model):
     id = db.Column(db.Integer, db.Sequence('seq_symptoms_id'), primary_key=True)
     name = db.Column(db.String(120), unique=True, nullable=False)
     description = db.Column(db.String(255))
+    category_id = db.Column(db.Integer, db.ForeignKey("tbl_categories.id"))
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
+    category = db.relationship("Category", back_populates="symptoms")
     cases = db.relationship(
         "Case",
         secondary=tbl_cases_symptoms,
@@ -48,12 +55,15 @@ class Disease(db.Model):
     name = db.Column(db.String(120), unique=True, nullable=False)
     description = db.Column(db.String(255), nullable=False)
     treatment = db.Column(db.String(255), nullable=False)
+    prevention = db.Column(db.String(500))
+    severity = db.Column(db.String(50))
+    is_contagious = db.Column(db.Boolean, default=False, nullable=False)
     category_id = db.Column(db.Integer, db.ForeignKey("tbl_categories.id"))
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
     category = db.relationship("Category", back_populates="diseases")
     rules = db.relationship("Rule", back_populates="disease", cascade="all, delete-orphan")
-    cases = db.relationship("Case", back_populates="disease")
+    cases = db.relationship("Case", back_populates="disease", foreign_keys="Case.disease_id")
 
     def __repr__(self) -> str:
         return f"<Disease {self.name}>"
@@ -88,6 +98,19 @@ class Case(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("tbl_users.id"))
     disease_id = db.Column(db.Integer, db.ForeignKey("tbl_diseases.id"))
     confidence = db.Column(db.Float)
+    flock_size = db.Column(db.Integer)
+    bird_age = db.Column(db.String(80))
+    breed = db.Column(db.String(80))
+    location = db.Column(db.String(120))
+    notes = db.Column(db.Text)
+    status = db.Column(db.String(20), default=CASE_STATUS_PENDING, nullable=False)
+    reviewed_by_id = db.Column(db.Integer, db.ForeignKey("tbl_users.id"))
+    reviewed_at = db.Column(db.DateTime)
+    doctor_notes = db.Column(db.Text)
+    override_disease_id = db.Column(db.Integer, db.ForeignKey("tbl_diseases.id"))
+    feedback_rating = db.Column(db.Integer)  # 1-5 stars
+    feedback_text = db.Column(db.Text)
+    feedback_at = db.Column(db.DateTime)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
     symptoms = db.relationship(
@@ -95,8 +118,25 @@ class Case(db.Model):
         secondary=tbl_cases_symptoms,
         back_populates="cases",
     )
-    disease = db.relationship("Disease", back_populates="cases")
-    user = db.relationship("UserTable")
+    disease = db.relationship("Disease", back_populates="cases", foreign_keys=[disease_id])
+    override_disease = db.relationship("Disease", foreign_keys=[override_disease_id])
+    user = db.relationship("UserTable", foreign_keys=[user_id])
+    reviewed_by = db.relationship("UserTable", foreign_keys=[reviewed_by_id])
+
+    @property
+    def final_disease(self):
+        if self.status == CASE_STATUS_CONFIRMED and self.override_disease:
+            return self.override_disease
+        return self.disease
+
+    @property
+    def status_label_km(self) -> str:
+        labels = {
+            CASE_STATUS_PENDING: "រង់ចាំពិនិត្យ",
+            CASE_STATUS_CONFIRMED: "បានបញ្ជាក់",
+            CASE_STATUS_REJECTED: "បានបដិសេធ",
+        }
+        return labels.get(self.status, self.status)
 
     def __repr__(self) -> str:
         return f"<Case {self.id}>"

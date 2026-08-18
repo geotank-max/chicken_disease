@@ -33,6 +33,11 @@
                         {% endif %}
                     </div>
 
+                    <div class="form-floating mb-3">
+                        {{ form.category_id(class="form-select") }}
+                        {{ form.category_id.label }}
+                    </div>
+
                     <div class="form-floating mb-4">
                         {{ form.description(class="form-control", placeholder="ការពិពណ៌នា", style="height: 100px") }}
                         {{ form.description.label }}

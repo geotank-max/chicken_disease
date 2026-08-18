@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const msg = document.querySelector("#passwordHelp");
     if (!msg) return;
 
-    const v = pwd.ariaValueMax;
+    const v = pwd.value;
     const strong =
       v.length >= 8 &&
       /[A-Z]/.test(v) &&
@@ -15,8 +15,8 @@ document.addEventListener("DOMContentLoaded", () => {
       /[!@#$%^&*(),.?":{}|<>_\-+=]/.test(v);
 
     msg.textContent = strong
-      ? "Strong password ✅"
-      : "Use at least 8 chars, with upper, lower, number, and special symbol.";
+      ? "ពាក្យសម្ងាត់រឹងមាំ ✅"
+      : "ប្រើយ៉ាងហោចណាស់ ៨ តួអក្សរ រួមមានអក្សរធំ តូច លេខ និងសញ្ញាពិសេស";
     msg.className = strong ? "form-text text-success" : "form-text text-danger";
   });
 });

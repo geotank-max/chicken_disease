@@ -1,7 +1,11 @@
 # app/services/expert_system_service.py
+from datetime import datetime
 from typing import List, Optional
 from extensions import db
-from app.models.expert_system import Category, Symptom, Disease, Rule, Case
+from app.models.expert_system import (
+    Category, Symptom, Disease, Rule, Case,
+    CASE_STATUS_CONFIRMED, CASE_STATUS_REJECTED, CASE_STATUS_PENDING,
+)
 
 
 class CategoryService:
@@ -47,9 +51,13 @@ class SymptomService:
 
     @staticmethod
     def create(data: dict) -> Symptom:
+        category_id = data.get("category_id") or None
+        if category_id == 0:
+            category_id = None
         symptom = Symptom(
             name=data["name"],
             description=data.get("description") or "",
+            category_id=category_id,
         )
         db.session.add(symptom)
         db.session.commit()
@@ -57,8 +65,12 @@ class SymptomService:
 
     @staticmethod
     def update(symptom: Symptom, data: dict) -> Symptom:
+        category_id = data.get("category_id") or None
+        if category_id == 0:
+            category_id = None
         symptom.name = data["name"]
         symptom.description = data.get("description") or ""
+        symptom.category_id = category_id
         db.session.commit()
         return symptom
 
@@ -79,11 +91,17 @@ class DiseaseService:
 
     @staticmethod
     def create(data: dict) -> Disease:
+        category_id = data.get("category_id") or None
+        if category_id == 0:
+            category_id = None
         disease = Disease(
             name=data["name"],
             description=data["description"],
             treatment=data["treatment"],
-            category_id=data.get("category_id") or None,
+            prevention=data.get("prevention") or "",
+            severity=data.get("severity") or "",
+            is_contagious=bool(data.get("is_contagious")),
+            category_id=category_id,
         )
         db.session.add(disease)
         db.session.commit()
@@ -91,10 +109,16 @@ class DiseaseService:
 
     @staticmethod
     def update(disease: Disease, data: dict) -> Disease:
+        category_id = data.get("category_id") or None
+        if category_id == 0:
+            category_id = None
         disease.name = data["name"]
         disease.description = data["description"]
         disease.treatment = data["treatment"]
-        disease.category_id = data.get("category_id") or None
+        disease.prevention = data.get("prevention") or ""
+        disease.severity = data.get("severity") or ""
+        disease.is_contagious = bool(data.get("is_contagious"))
+        disease.category_id = category_id
         db.session.commit()
         return disease
 
@@ -158,9 +182,71 @@ class CaseService:
         return Case.query.order_by(Case.created_at.desc()).all()
 
     @staticmethod
+    def get_paginated(page: int = 1, per_page: int = 10, user_id: int | None = None,
+                      status: str | None = None, disease_id: int | None = None,
+                      date_from: str | None = None, date_to: str | None = None):
+        """Return paginated and filtered cases."""
+        from datetime import datetime
+        query = Case.query
+
+        if user_id:
+            query = query.filter_by(user_id=user_id)
+        if status:
+            query = query.filter_by(status=status)
+        if disease_id:
+            query = query.filter_by(disease_id=disease_id)
+        if date_from:
+            try:
+                dt = datetime.strptime(date_from, "%Y-%m-%d")
+                query = query.filter(Case.created_at >= dt)
+            except ValueError:
+                pass
+        if date_to:
+            try:
+                dt = datetime.strptime(date_to, "%Y-%m-%d")
+                dt = dt.replace(hour=23, minute=59, second=59)
+                query = query.filter(Case.created_at <= dt)
+            except ValueError:
+                pass
+
+        return query.order_by(Case.created_at.desc()).paginate(
+            page=page, per_page=per_page, error_out=False
+        )
+
+    @staticmethod
     def get_by_user(user_id: int) -> List[Case]:
         return Case.query.filter_by(user_id=user_id).order_by(Case.created_at.desc()).all()
 
     @staticmethod
     def get_by_id(case_id: int) -> Optional[Case]:
         return Case.query.get(case_id)
+
+    @staticmethod
+    def get_pending() -> List[Case]:
+        return Case.query.filter_by(status=CASE_STATUS_PENDING).order_by(Case.created_at.desc()).all()
+
+    @staticmethod
+    def review_case(case: Case, reviewer_id: int, action: str, doctor_notes: str = "", override_disease_id: int | None = None) -> Case:
+        case.reviewed_by_id = reviewer_id
+        case.reviewed_at = datetime.utcnow()
+        case.doctor_notes = doctor_notes or None
+
+        if action == "confirm":
+            case.status = CASE_STATUS_CONFIRMED
+            case.override_disease_id = override_disease_id or None
+        elif action == "reject":
+            case.status = CASE_STATUS_REJECTED
+            case.override_disease_id = None
+        else:
+            case.status = CASE_STATUS_PENDING
+
+        db.session.commit()
+        return case
+
+    @staticmethod
+    def submit_feedback(case: Case, rating: int, text: str = "") -> Case:
+        case.feedback_rating = rating
+        case.feedback_text = text or None
+        case.feedback_at = datetime.utcnow()
+        db.session.commit()
+        return case

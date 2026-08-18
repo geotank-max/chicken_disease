@@ -1,12 +1,15 @@
 # app/routes/expert_system.py
-from flask import Blueprint, render_template, request, redirect, url_for, flash, abort
+from flask import Blueprint, render_template, request, redirect, url_for, flash, abort, send_file, session
 from flask_login import login_required, current_user
+from extensions import db
 from utils.decorators import require_permission
 from app.forms.expert_system_forms import (
     CategoryForm,
     SymptomForm,
     DiseaseForm,
     RuleForm,
+    FlockInfoForm,
+    CaseReviewForm,
 )
 from app.services.diagnosis_service import DiagnosisService
 from app.services.expert_system_service import (
@@ -17,8 +20,21 @@ from app.services.expert_system_service import (
     CaseService,
 )
 from app.services.audit_service import AuditService
+from app.services.pdf_service import PdfService
+from app.models.expert_system import CASE_STATUS_PENDING
 
 expert_system_bp = Blueprint("expert_system", __name__, url_prefix="/expert-system")
+
+
+def _parse_flock_data(form_data):
+    flock_size = form_data.get("flock_size", "").strip()
+    return {
+        "flock_size": int(flock_size) if flock_size.isdigit() else None,
+        "bird_age": form_data.get("bird_age", "").strip(),
+        "breed": form_data.get("breed", "").strip(),
+        "location": form_data.get("location", "").strip(),
+        "notes": form_data.get("notes", "").strip(),
+    }
 
 
 @expert_system_bp.route("/author-rules")
@@ -32,29 +48,73 @@ def author_rules():
 @login_required
 @require_permission("run_diagnosis")
 def diagnose():
-    symptoms = DiagnosisService.get_all_symptoms()
+    step = request.args.get("step", "1")
+    if request.method == "POST":
+        step = request.form.get("step", "1")
+
+    flock_form = FlockInfoForm()
     diagnosis_results = None
     selected_ids = []
+    saved_case = None
 
-    if request.method == "POST":
-        selected_ids = [int(id) for id in request.form.getlist("symptoms")]
-        if selected_ids:
+    if request.method == "POST" and step == "1":
+        flock_data = _parse_flock_data(request.form)
+        session["diagnosis_wizard"] = flock_data
+        return redirect(url_for("expert_system.diagnose", step="2"))
+
+    if request.method == "POST" and step == "2":
+        selected_ids = [int(sid) for sid in request.form.getlist("symptoms")]
+        session["diagnosis_symptoms"] = selected_ids
+        if not selected_ids:
+            flash("សូមជ្រើសរើសរោគសញ្ញាយ៉ាងហោចណាស់មួយ។", "warning")
+            return redirect(url_for("expert_system.diagnose", step="2"))
+        return redirect(url_for("expert_system.diagnose", step="3"))
+
+    if step == "3":
+        selected_ids = session.get("diagnosis_symptoms", [])
+        flock_data = session.get("diagnosis_wizard", {})
+        if not selected_ids:
+            flash("សូមជ្រើសរើសរោគសញ្ញាមុនពេលវិភាគ។", "warning")
+            return redirect(url_for("expert_system.diagnose", step="2"))
+
+        if request.method == "POST" and request.form.get("action") == "save":
             diagnosis_results = DiagnosisService.run_inference(selected_ids)
-            if diagnosis_results:
-                case = DiagnosisService.record_case(
-                    current_user.id,
-                    selected_ids,
-                    diagnosis_results[0],
-                )
-                AuditService.log("DIAGNOSE", "Case", case.id, f"User ran diagnosis, result: {case.disease.name}")
-        else:
-            flash("Please select at least one symptom.", "warning")
+            saved_case = DiagnosisService.record_case(
+                current_user.id,
+                selected_ids,
+                diagnosis_results[0] if diagnosis_results else None,
+                flock_data=flock_data,
+            )
+            session.pop("diagnosis_wizard", None)
+            session.pop("diagnosis_symptoms", None)
+            if saved_case and saved_case.disease:
+                AuditService.log("DIAGNOSE", "Case", saved_case.id, f"Diagnosis saved: {saved_case.disease.name}")
+            flash("ករណីត្រូវបានរក្សាទុកដោយជោគជ័យ។", "success")
+            return redirect(url_for("expert_system.cases_detail", case_id=saved_case.id))
+
+        diagnosis_results = DiagnosisService.run_inference(selected_ids)
+
+    if step == "2" and session.get("diagnosis_wizard"):
+        flock_form.flock_size.data = session["diagnosis_wizard"].get("flock_size")
+        flock_form.bird_age.data = session["diagnosis_wizard"].get("bird_age")
+        flock_form.breed.data = session["diagnosis_wizard"].get("breed")
+        flock_form.location.data = session["diagnosis_wizard"].get("location")
+        flock_form.notes.data = session["diagnosis_wizard"].get("notes")
+
+    if step in ("2", "3"):
+        selected_ids = session.get("diagnosis_symptoms", selected_ids)
+
+    symptoms_grouped = DiagnosisService.get_symptoms_grouped()
 
     return render_template(
         "expert_system/diagnose.html",
-        symptoms=symptoms,
+        step=step,
+        flock_form=flock_form,
+        symptoms_grouped=symptoms_grouped,
         results=diagnosis_results,
         selected_ids=set(selected_ids),
+        flock_data=session.get("diagnosis_wizard", {}),
+        saved_case=saved_case,
     )
 
 
@@ -62,14 +122,42 @@ def diagnose():
 @login_required
 @require_permission("view_cases")
 def cases_index():
-    # If user is Admin or Doctor, show all cases
-    if current_user.has_role("Admin") or current_user.has_role("Doctor"):
-        cases = CaseService.get_all()
-    else:
-        # Otherwise, show only their own cases
-        cases = CaseService.get_by_user(current_user.id)
-        
-    return render_template("expert_system/cases/index.html", cases=cases)
+    from app.services.expert_system_service import DiseaseService as _DS
+
+    page = request.args.get("page", 1, type=int)
+    status_filter = request.args.get("status", "").strip() or None
+    disease_filter = request.args.get("disease_id", 0, type=int) or None
+    date_from = request.args.get("date_from", "").strip() or None
+    date_to = request.args.get("date_to", "").strip() or None
+
+    user_id = None
+    if not (current_user.has_role("Admin") or current_user.has_role("Doctor")):
+        user_id = current_user.id
+
+    pagination = CaseService.get_paginated(
+        page=page,
+        per_page=10,
+        user_id=user_id,
+        status=status_filter,
+        disease_id=disease_filter,
+        date_from=date_from,
+        date_to=date_to,
+    )
+
+    diseases = _DS.get_all()
+
+    return render_template(
+        "expert_system/cases/index.html",
+        cases=pagination.items,
+        pagination=pagination,
+        diseases=diseases,
+        filters={
+            "status": status_filter or "",
+            "disease_id": disease_filter or 0,
+            "date_from": date_from or "",
+            "date_to": date_to or "",
+        },
+    )
 
 
 @expert_system_bp.route("/cases/<int:case_id>")
@@ -79,13 +167,176 @@ def cases_detail(case_id: int):
     case = CaseService.get_by_id(case_id)
     if case is None:
         abort(404)
-        
-    # Security check: User can only view their own case unless they are Admin/Doctor
+
     if not (current_user.has_role("Admin") or current_user.has_role("Doctor")):
         if case.user_id != current_user.id:
             abort(403)
-            
-    return render_template("expert_system/cases/detail.html", case=case)
+
+    review_form = CaseReviewForm()
+    can_review = (
+        current_user.has_permission("review_cases")
+        and case.status == CASE_STATUS_PENDING
+    )
+
+    return render_template(
+        "expert_system/cases/detail.html",
+        case=case,
+        review_form=review_form,
+        can_review=can_review,
+    )
+
+
+@expert_system_bp.route("/cases/<int:case_id>/review", methods=["POST"])
+@login_required
+@require_permission("review_cases")
+def cases_review(case_id: int):
+    case = CaseService.get_by_id(case_id)
+    if case is None:
+        abort(404)
+
+    form = CaseReviewForm()
+    if form.validate_on_submit():
+        override_id = form.override_disease_id.data if form.override_disease_id.data else None
+        if override_id == 0:
+            override_id = None
+        CaseService.review_case(
+            case,
+            current_user.id,
+            form.action.data,
+            doctor_notes=form.doctor_notes.data or "",
+            override_disease_id=override_id,
+        )
+        AuditService.log("REVIEW", "Case", case.id, f"Case reviewed: {form.action.data}")
+        flash("ការពិនិត្យត្រូវបានរក្សាទុក។", "success")
+    else:
+        flash("មិនអាចដាក់ស្នើការពិនិត្យបានទេ។", "danger")
+
+    return redirect(url_for("expert_system.cases_detail", case_id=case_id))
+
+
+@expert_system_bp.route("/cases/<int:case_id>/feedback", methods=["POST"])
+@login_required
+@require_permission("view_cases")
+def cases_feedback(case_id: int):
+    case = CaseService.get_by_id(case_id)
+    if case is None:
+        abort(404)
+
+    # Only the case owner can leave feedback
+    if case.user_id != current_user.id:
+        abort(403)
+
+    # Prevent double feedback
+    if case.feedback_rating is not None:
+        flash("អ្នកបានផ្តល់មតិប្រតិកម្មរួចហើយ។", "info")
+        return redirect(url_for("expert_system.cases_detail", case_id=case_id))
+
+    rating = request.form.get("rating", 0, type=int)
+    feedback_text = request.form.get("feedback_text", "").strip()
+
+    if rating < 1 or rating > 5:
+        flash("សូមជ្រើសរើសពិន្ទុវាយតម្លៃ។", "warning")
+        return redirect(url_for("expert_system.cases_detail", case_id=case_id))
+
+    CaseService.submit_feedback(case, rating, feedback_text)
+    flash("សូមអរគុណសម្រាប់មតិប្រតិកម្មរបស់អ្នក!", "success")
+    return redirect(url_for("expert_system.cases_detail", case_id=case_id))
+
+
+@expert_system_bp.route("/cases/<int:case_id>/print")
+@login_required
+@require_permission("view_cases")
+def cases_print(case_id: int):
+    case = CaseService.get_by_id(case_id)
+    if case is None:
+        abort(404)
+    if not (current_user.has_role("Admin") or current_user.has_role("Doctor")):
+        if case.user_id != current_user.id:
+            abort(403)
+    return render_template("expert_system/cases/print.html", case=case, pdf_mode=False)
+
+
+@expert_system_bp.route("/cases/<int:case_id>/pdf")
+@login_required
+@require_permission("view_cases")
+def cases_pdf(case_id: int):
+    case = CaseService.get_by_id(case_id)
+    if case is None:
+        abort(404)
+    if not (current_user.has_role("Admin") or current_user.has_role("Doctor")):
+        if case.user_id != current_user.id:
+            abort(403)
+
+    pdf_buffer = PdfService.render_case_pdf(case)
+    if pdf_buffer is None:
+        flash("មិនអាចបង្កើត PDF បានទេ។ សូមប្រើមុខងារបោះពុម្ព។", "warning")
+        return redirect(url_for("expert_system.cases_print", case_id=case_id))
+
+    return send_file(
+        pdf_buffer,
+        as_attachment=True,
+        download_name=f"case_{case_id}_report.pdf",
+        mimetype="application/pdf",
+    )
+
+
+@expert_system_bp.route("/cases/export-csv")
+@login_required
+@require_permission("view_cases")
+def cases_export_csv():
+    import csv
+    from io import StringIO, BytesIO
+
+    if not (current_user.has_role("Admin") or current_user.has_role("Doctor")):
+        abort(403)
+
+    status_filter = request.args.get("status", "").strip() or None
+    disease_filter = request.args.get("disease_id", 0, type=int) or None
+    date_from = request.args.get("date_from", "").strip() or None
+    date_to = request.args.get("date_to", "").strip() or None
+
+    pagination = CaseService.get_paginated(
+        page=1, per_page=10000,
+        status=status_filter, disease_id=disease_filter,
+        date_from=date_from, date_to=date_to,
+    )
+    cases = pagination.items
+
+    si = StringIO()
+    writer = csv.writer(si)
+    writer.writerow([
+        "ID", "Date", "User", "Disease", "Confidence (%)",
+        "Status", "Flock Size", "Bird Age", "Breed", "Location",
+        "Symptoms", "Reviewed By", "Doctor Notes",
+    ])
+    for c in cases:
+        writer.writerow([
+            c.id,
+            c.created_at.strftime("%Y-%m-%d %H:%M"),
+            c.user.username if c.user else "",
+            c.final_disease.name if c.final_disease else "",
+            c.confidence or "",
+            c.status,
+            c.flock_size or "",
+            c.bird_age or "",
+            c.breed or "",
+            c.location or "",
+            "; ".join(s.name for s in c.symptoms),
+            c.reviewed_by.full_name if c.reviewed_by else "",
+            c.doctor_notes or "",
+        ])
+
+    output = BytesIO()
+    output.write("\ufeff".encode("utf-8"))  # BOM for Excel Khmer support
+    output.write(si.getvalue().encode("utf-8"))
+    output.seek(0)
+
+    return send_file(
+        output,
+        as_attachment=True,
+        download_name="cases_export.csv",
+        mimetype="text/csv; charset=utf-8",
+    )
 
 
 @expert_system_bp.route("/categories")
@@ -106,7 +357,7 @@ def categories_create():
             {"name": form.name.data, "description": form.description.data}
         )
         AuditService.log("CREATE", "Category", category.id, f"Created category: {category.name}")
-        flash(f"Category '{category.name}' created successfully.", "success")
+        flash(f"ប្រភេទ '{category.name}' ត្រូវបានបង្កើត។", "success")
         return redirect(url_for("expert_system.categories_index"))
     return render_template("expert_system/categories/create.html", form=form)
 
@@ -125,7 +376,7 @@ def categories_edit(category_id: int):
             {"name": form.name.data, "description": form.description.data},
         )
         AuditService.log("UPDATE", "Category", category.id, f"Updated category: {category.name}")
-        flash("Category updated successfully.", "success")
+        flash("ប្រភេទត្រូវបានកែប្រែ។", "success")
         return redirect(url_for("expert_system.categories_index"))
     return render_template(
         "expert_system/categories/edit.html",
@@ -145,7 +396,7 @@ def categories_delete(category_id: int):
         category_name = category.name
         CategoryService.delete(category)
         AuditService.log("DELETE", "Category", category_id, f"Deleted category: {category_name}")
-        flash("Category deleted successfully.", "success")
+        flash("ប្រភេទត្រូវបានលុប។", "success")
         return redirect(url_for("expert_system.categories_index"))
     return render_template(
         "expert_system/categories/delete_confirm.html",
@@ -167,12 +418,20 @@ def symptoms_index():
 def symptoms_create():
     form = SymptomForm()
     if form.validate_on_submit():
-        symptom = SymptomService.create(
-            {"name": form.name.data, "description": form.description.data}
-        )
-        AuditService.log("CREATE", "Symptom", symptom.id, f"Created symptom: {symptom.name}")
-        flash(f"Symptom '{symptom.name}' created successfully.", "success")
-        return redirect(url_for("expert_system.symptoms_index"))
+        try:
+            symptom = SymptomService.create(
+                {
+                    "name": form.name.data,
+                    "description": form.description.data,
+                    "category_id": form.category_id.data,
+                }
+            )
+            AuditService.log("CREATE", "Symptom", symptom.id, f"Created symptom: {symptom.name}")
+            flash(f"Symptom '{symptom.name}' created successfully.", "success")
+            return redirect(url_for("expert_system.symptoms_index"))
+        except Exception:
+            db.session.rollback()
+            flash("A symptom with this name already exists.", "danger")
     return render_template("expert_system/symptoms/create.html", form=form)
 
 
@@ -187,10 +446,14 @@ def symptoms_edit(symptom_id: int):
     if form.validate_on_submit():
         SymptomService.update(
             symptom,
-            {"name": form.name.data, "description": form.description.data},
+            {
+                "name": form.name.data,
+                "description": form.description.data,
+                "category_id": form.category_id.data,
+            },
         )
         AuditService.log("UPDATE", "Symptom", symptom.id, f"Updated symptom: {symptom.name}")
-        flash("Symptom updated successfully.", "success")
+        flash("រោគសញ្ញាត្រូវបានកែប្រែ។", "success")
         return redirect(url_for("expert_system.symptoms_index"))
     return render_template(
         "expert_system/symptoms/edit.html",
@@ -210,7 +473,7 @@ def symptoms_delete(symptom_id: int):
         symptom_name = symptom.name
         SymptomService.delete(symptom)
         AuditService.log("DELETE", "Symptom", symptom_id, f"Deleted symptom: {symptom_name}")
-        flash("Symptom deleted successfully.", "success")
+        flash("រោគសញ្ញាត្រូវបានលុប។", "success")
         return redirect(url_for("expert_system.symptoms_index"))
     return render_template(
         "expert_system/symptoms/delete_confirm.html",
@@ -232,17 +495,24 @@ def diseases_index():
 def diseases_create():
     form = DiseaseForm()
     if form.validate_on_submit():
-        disease = DiseaseService.create(
-            {
-                "name": form.name.data,
-                "description": form.description.data,
-                "treatment": form.treatment.data,
-                "category_id": form.category_id.data,
-            }
-        )
-        AuditService.log("CREATE", "Disease", disease.id, f"Created disease: {disease.name}")
-        flash(f"Disease '{disease.name}' created successfully.", "success")
-        return redirect(url_for("expert_system.diseases_index"))
+        try:
+            disease = DiseaseService.create(
+                {
+                    "name": form.name.data,
+                    "description": form.description.data,
+                    "treatment": form.treatment.data,
+                    "prevention": form.prevention.data,
+                    "severity": form.severity.data,
+                    "is_contagious": form.is_contagious.data,
+                    "category_id": form.category_id.data,
+                }
+            )
+            AuditService.log("CREATE", "Disease", disease.id, f"Created disease: {disease.name}")
+            flash(f"Disease '{disease.name}' created successfully.", "success")
+            return redirect(url_for("expert_system.diseases_index"))
+        except Exception:
+            db.session.rollback()
+            flash("A disease with this name already exists.", "danger")
     return render_template("expert_system/diseases/create.html", form=form)
 
 
@@ -261,11 +531,14 @@ def diseases_edit(disease_id: int):
                 "name": form.name.data,
                 "description": form.description.data,
                 "treatment": form.treatment.data,
+                "prevention": form.prevention.data,
+                "severity": form.severity.data,
+                "is_contagious": form.is_contagious.data,
                 "category_id": form.category_id.data,
             },
         )
         AuditService.log("UPDATE", "Disease", disease.id, f"Updated disease: {disease.name}")
-        flash("Disease updated successfully.", "success")
+        flash("ជំងឺត្រូវបានកែប្រែ។", "success")
         return redirect(url_for("expert_system.diseases_index"))
     return render_template(
         "expert_system/diseases/edit.html",
@@ -285,7 +558,7 @@ def diseases_delete(disease_id: int):
         disease_name = disease.name
         DiseaseService.delete(disease)
         AuditService.log("DELETE", "Disease", disease_id, f"Deleted disease: {disease_name}")
-        flash("Disease deleted successfully.", "success")
+        flash("ជំងឺត្រូវបានលុប។", "success")
         return redirect(url_for("expert_system.diseases_index"))
     return render_template(
         "expert_system/diseases/delete_confirm.html",
@@ -318,13 +591,8 @@ def rules_create():
             symptom_ids=form.symptom_ids.data or [],
         )
         AuditService.log("CREATE", "Rule", rule.id, f"Created rule: {rule.title}")
-        flash(f"Rule '{rule.title}' created successfully.", "success")
+        flash(f"វិធាន '{rule.title}' ត្រូវបានបង្កើត។", "success")
         return redirect(url_for("expert_system.rules_index"))
-    
-    # If validation fails, print errors to console for debugging
-    if form.errors:
-        print(f"Form validation errors: {form.errors}")
-        
     return render_template("expert_system/rules/create.html", form=form)
 
 
@@ -349,13 +617,8 @@ def rules_edit(rule_id: int):
             symptom_ids=form.symptom_ids.data or [],
         )
         AuditService.log("UPDATE", "Rule", rule.id, f"Updated rule: {rule.title}")
-        flash("Rule updated successfully.", "success")
+        flash("វិធានត្រូវបានកែប្រែ។", "success")
         return redirect(url_for("expert_system.rules_index"))
-        
-    # If validation fails, print errors to console for debugging
-    if form.errors:
-        print(f"Form validation errors: {form.errors}")
-
     return render_template(
         "expert_system/rules/edit.html",
         form=form,
@@ -374,7 +637,7 @@ def rules_delete(rule_id: int):
         rule_title = rule.title
         RuleService.delete(rule)
         AuditService.log("DELETE", "Rule", rule_id, f"Deleted rule: {rule_title}")
-        flash("Rule deleted successfully.", "success")
+        flash("វិធានត្រូវបានលុប។", "success")
         return redirect(url_for("expert_system.rules_index"))
     return render_template(
         "expert_system/rules/delete_confirm.html",

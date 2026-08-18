@@ -21,7 +21,7 @@
             <!-- Sidebar -->
             <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse" id="sidebarMenu">
                 <div class="brand-section">
-                    <a href="{{ url_for('expert_system.diagnose') }}" class="text-decoration-none text-dark">
+                    <a href="{{ url_for('dashboard.index') if (current_user.has_role('Admin') or current_user.has_role('Doctor')) else url_for('expert_system.diagnose') }}" class="text-decoration-none text-dark">
                         <img src="{{ url_for('static', filename='images/logo1.png') }}" alt="VetAssist Logo" class="brand-logo">
                         <h5 class="brand-font fw-bold mb-0">IDNS</h5>
                         <small class="text-muted">ការធ្វើរោគវិនិច្ឆ័យមាន់</small>
@@ -30,6 +30,17 @@
 
                 <div class="position-sticky pt-2">
                     {% if current_user.is_authenticated %}
+                        {% if current_user.has_role('Admin') or current_user.has_role('Doctor') %}
+                        <div class="nav-section-label">ទិដ្ឋភាពទូទៅ</div>
+                        <ul class="nav flex-column">
+                            <li class="nav-item">
+                                <a class="nav-link {% if 'dashboard.index' in request.endpoint %}active{% endif %}" href="{{ url_for('dashboard.index') }}">
+                                    <i class="bi bi-speedometer2"></i> ផ្ទាំងគ្រប់គ្រង
+                                </a>
+                            </li>
+                        </ul>
+                        {% endif %}
+
                         <div class="nav-section-label">មេ</div>
                         <ul class="nav flex-column">
                             <li class="nav-item">
@@ -199,5 +210,7 @@
     {% endblock %}
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block extra_scripts %}{% endblock %}
 </body>
 </html>

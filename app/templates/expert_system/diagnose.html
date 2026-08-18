@@ -1,163 +1,205 @@
 {% extends "layouts/base.html" %}
 
 {% block title %}ធ្វើរោគវិនិច្ឆ័យ{% endblock %}
-{% block page_title %}ការធ្វើរោគវិនិច្ឆ័យថ្មី{% endblock %}
-{% block page_subtitle %}ជ្រើសរើសរោគសញ្ញាដែលបានសង្កេតឃើញដើម្បីកំណត់អត្តសញ្ញាណជំងឺដែលអាចកើតមាន។{% endblock %}
+{% block page_title %}ការធ្វើរោគវិនិច្ឆ័យ{% endblock %}
+{% block page_subtitle %}បំពេញព័ត៌មាន ជ្រើសរើសរោគសញ្ញា ហើយមើលលទ្ធផល{% endblock %}
 
 {% block content %}
-<div class="row g-4">
-    <!-- Symptom Selection Column -->
-    <div class="col-lg-4">
-        <div class="card h-100 border-0 shadow-sm">
-            <div class="card-header bg-white pt-4 pb-0 border-0">
-                <div class="d-flex align-items-center mb-2">
-                    <div class="bg-primary bg-opacity-10 text-primary rounded p-2 me-3">
-                        <i class="bi bi-clipboard-check fs-4"></i>
-                    </div>
-                    <div>
-                        <h5 class="card-title fw-bold mb-0">ការសង្កេត</h5>
-                        <p class="text-muted small mb-0">តើអ្នកឃើញរោគសញ្ញាអ្វីខ្លះ?</p>
-                    </div>
-                </div>
+<!-- Wizard Steps -->
+<div class="wizard-steps mb-4">
+    <div class="wizard-step {% if step == '1' %}active{% elif step != '1' %}completed{% endif %}">
+        <span class="wizard-num">1</span>
+        <span class="wizard-label">ព័ត៌មានរុញ</span>
+    </div>
+    <div class="wizard-step {% if step == '2' %}active{% elif step == '3' %}completed{% endif %}">
+        <span class="wizard-num">2</span>
+        <span class="wizard-label">រោគសញ្ញា</span>
+    </div>
+    <div class="wizard-step {% if step == '3' %}active{% endif %}">
+        <span class="wizard-num">3</span>
+        <span class="wizard-label">លទ្ធផល</span>
+    </div>
+</div>
+
+{% if step == '1' %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white py-3">
+                <h5 class="mb-0 fw-bold"><i class="bi bi-house-heart me-2 text-primary"></i>ព័ត៌មានចំការ (ស្រេចចិត្ត)</h5>
             </div>
-            <div class="card-body">
-                <form method="POST" action="{{ url_for('expert_system.diagnose') }}">
+            <div class="card-body p-4">
+                <form method="POST">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-
-                    <div class="symptom-list mb-4 pe-2" style="max-height: 60vh; overflow-y: auto;">
-                        {% for symptom in symptoms %}
-                        <div class="mb-2">
-                            <input type="checkbox" class="btn-check" id="symptom-{{ symptom.id }}" name="symptoms" value="{{ symptom.id }}" {% if symptom.id in selected_ids %}checked{% endif %} autocomplete="off">
-                            <label class="btn btn-outline-light text-start w-100 p-3 d-flex align-items-center border text-dark symptom-card" for="symptom-{{ symptom.id }}">
-                                <div class="check-indicator me-3 text-muted">
-                                    <i class="bi bi-circle fs-5"></i>
-                                </div>
-                                <div>
-                                    <div class="fw-semibold">{{ symptom.name }}</div>
-                                    <div class="small text-muted text-truncate" style="max-width: 200px;">{{ symptom.description }}</div>
-                                </div>
-                            </label>
+                    <input type="hidden" name="step" value="1">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">ចំនួនមាន់</label>
+                            <input type="number" name="flock_size" class="form-control" min="1" placeholder="ឧ. 100">
                         </div>
-                        {% endfor %}
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">អាយុ</label>
+                            <input type="text" name="bird_age" class="form-control" placeholder="ឧ. ៨ សប្តាហ៍">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">ប្រភេទមាន់</label>
+                            <input type="text" name="breed" class="form-control" placeholder="ឧ. សាច់ ឬពង">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">ទីតាំង</label>
+                            <input type="text" name="location" class="form-control" placeholder="ឧ. ខេត្តកំពង់ចាម">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-bold">កំណត់ចំណាំ</label>
+                            <textarea name="notes" class="form-control" rows="3" placeholder="ព័ត៌មានបន្ថែម..."></textarea>
+                        </div>
                     </div>
-
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-primary py-3 fw-bold shadow-sm">
-                            <i class="bi bi-magic me-2"></i> វិភាគរោគសញ្ញា
+                    <div class="d-flex justify-content-end mt-4">
+                        <button type="submit" class="btn btn-primary px-4 py-2 fw-bold">
+                            បន្ត <i class="bi bi-arrow-right ms-1"></i>
                         </button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Results Column -->
-    <div class="col-lg-8">
-        {% if results is not none %}
-            {% if results %}
-                <div class="d-flex align-items-center justify-content-between mb-4">
-                    <h4 class="fw-bold mb-0">លទ្ធផលនៃការវិភាគ</h4>
-                    <span class="badge bg-primary rounded-pill">រកឃើញ {{ results|length }}</span>
-                </div>
-
-                <div class="row g-4">
-                    {% for result in results %}
-                    <div class="col-12">
-                        <div class="card border-0 shadow-sm h-100 overflow-hidden">
-                            <div class="card-body p-0">
-                                <div class="row g-0">
-                                    <div class="col-md-1 bg-light d-flex align-items-center justify-content-center border-end">
-                                        <h2 class="h4 text-muted fw-bold mb-0">#{{ loop.index }}</h2>
-                                    </div>
-                                    <div class="col-md-11 p-4">
-                                        <div class="d-flex justify-content-between align-items-start mb-3">
-                                            <div>
-                                                <h3 class="h4 fw-bold text-primary mb-1">{{ result.disease.name }}</h3>
-                                                <span class="badge bg-secondary bg-opacity-10 text-secondary border">{{ result.disease.category.name }}</span>
-                                            </div>
-                                            <div class="text-end">
-                                                <div class="display-6 fw-bold {% if result.confidence > 80 %}text-success{% elif result.confidence > 50 %}text-warning{% else %}text-danger{% endif %}">
-                                                    {{ result.confidence }}%
-                                                </div>
-                                                <div class="small text-muted text-uppercase fw-bold" style="font-size: 0.7rem;">ទំនុកចិត្ត</div>
-                                            </div>
-                                        </div>
-
-                                        <div class="progress mb-4" style="height: 6px; background-color: #f3f4f6;">
-                                            <div class="progress-bar rounded-pill {% if result.confidence > 80 %}bg-success{% elif result.confidence > 50 %}bg-warning{% else %}bg-danger{% endif %}"
-                                                 role="progressbar"
-                                                 style="width: {{ result.confidence }}%"
-                                                 aria-valuenow="{{ result.confidence }}"
-                                                 aria-valuemin="0"
-                                                 aria-valuemax="100"></div>
-                                        </div>
-
-                                        <div class="row g-4">
-                                            <div class="col-md-6">
-                                                <div class="d-flex">
-                                                    <i class="bi bi-info-circle text-primary mt-1 me-2"></i>
-                                                    <div>
-                                                        <h6 class="fw-bold small text-uppercase text-muted mb-1">ការពិពណ៌នា</h6>
-                                                        <p class="mb-0 text-secondary">{{ result.disease.description }}</p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <div class="d-flex">
-                                                    <i class="bi bi-bandaid text-success mt-1 me-2"></i>
-                                                    <div>
-                                                        <h6 class="fw-bold small text-uppercase text-muted mb-1">ការព្យាបាល</h6>
-                                                        <p class="mb-0 text-secondary">{{ result.disease.treatment }}</p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card-footer bg-light border-0 py-2 px-4">
-                                <small class="text-muted">
-                                    <i class="bi bi-diagram-2 me-1"></i>
-                                    វិធានដែលត្រូវគ្នា៖ <strong>{{ result.rule.title }}</strong> ({{ result.matched_count }} រោគសញ្ញាត្រូវគ្នា)
-                                </small>
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            {% else %}
-                <div class="card border-0 shadow-sm text-center py-5">
-                    <div class="card-body">
-                        <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
-                            <i class="bi bi-search text-muted fs-1"></i>
-                        </div>
-                        <h3 class="h4 fw-bold text-dark">រកមិនឃើញការផ្គូផ្គងទេ</h3>
-                        <p class="text-muted mb-0 col-md-6 mx-auto">យើងមិនអាចរកឃើញជំងឺដែលត្រូវនឹងបន្សំនៃរោគសញ្ញានេះទេ។ សូមព្យាយាមជ្រើសរើសរោគសញ្ញាផ្សេង ឬតិចជាងនេះ។</p>
-                    </div>
-                </div>
-            {% endif %}
-        {% else %}
-            <!-- Empty State -->
-            <div class="card border-0 shadow-sm text-center py-5 h-100 d-flex justify-content-center align-items-center bg-white">
-                <div class="card-body">
-                    <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-4" style="width: 100px; height: 100px;">
-                        <i class="bi bi-clipboard-pulse fs-1"></i>
-                    </div>
-                    <h2 class="h3 fw-bold">ត្រៀមខ្លួនធ្វើរោគវិនិច្ឆ័យ</h2>
-                    <p class="text-muted col-md-8 mx-auto mb-4">
-                        ជ្រើសរើសរោគសញ្ញាដែលអ្នកសង្កេតឃើញពីបញ្ជីនៅខាងឆ្វេង។ ប្រព័ន្ធជំនាញរបស់យើងនឹងវិភាគពួកវា និងណែនាំជំងឺ និងការព្យាបាលដែលអាចកើតមាន។
-                    </p>
-                    <div class="d-flex justify-content-center gap-3">
-                        <div class="d-flex align-items-center text-muted small">
-                            <i class="bi bi-check-circle-fill text-success me-1"></i> ការវិភាគរហ័ស
-                        </div>
-                        <div class="d-flex align-items-center text-muted small">
-                            <i class="bi bi-check-circle-fill text-success me-1"></i> វិធានអ្នកជំនាញ
-                        </div>
-                    </div>
-                </div>
+{% elif step == '2' %}
+<div class="row g-4">
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <h6 class="fw-bold text-muted text-uppercase small mb-3">ព័ត៌មានដែលបានបញ្ចូល</h6>
+                {% if flock_data %}
+                <ul class="list-unstyled small mb-0">
+                    {% if flock_data.flock_size %}<li><strong>ចំនួន:</strong> {{ flock_data.flock_size }}</li>{% endif %}
+                    {% if flock_data.bird_age %}<li><strong>អាយុ:</strong> {{ flock_data.bird_age }}</li>{% endif %}
+                    {% if flock_data.breed %}<li><strong>ប្រភេទ:</strong> {{ flock_data.breed }}</li>{% endif %}
+                    {% if flock_data.location %}<li><strong>ទីតាំង:</strong> {{ flock_data.location }}</li>{% endif %}
+                </ul>
+                {% else %}
+                <p class="text-muted small mb-0">គ្មានព័ត៌មានចំការ</p>
+                {% endif %}
+                <a href="{{ url_for('expert_system.diagnose', step='1') }}" class="btn btn-sm btn-outline-secondary mt-3">កែប្រែ</a>
             </div>
+        </div>
+    </div>
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white py-3">
+                <h5 class="mb-3 fw-bold">ជ្រើសរើសរោគសញ្ញា</h5>
+                <input type="text" id="symptomSearch" class="form-control" placeholder="ស្វែងរករោគសញ្ញា...">
+            </div>
+            <div class="card-body">
+                <form method="POST" id="symptomForm">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="step" value="2">
+
+                    <ul class="nav nav-pills mb-3 flex-wrap gap-1" id="categoryTabs">
+                        <li class="nav-item"><button type="button" class="nav-link active category-tab" data-category="all">ទាំងអស់</button></li>
+                        {% for cat_name in symptoms_grouped.keys() %}
+                        <li class="nav-item"><button type="button" class="nav-link category-tab" data-category="{{ cat_name }}">{{ cat_name }}</button></li>
+                        {% endfor %}
+                    </ul>
+
+                    <div class="symptom-list pe-2" style="max-height: 50vh; overflow-y: auto;">
+                        {% for cat_name, cat_symptoms in symptoms_grouped.items() %}
+                        {% for symptom in cat_symptoms %}
+                        <div class="mb-2 symptom-item" data-category="{{ cat_name }}" data-name="{{ symptom.name|lower }}">
+                            <input type="checkbox" class="btn-check" id="symptom-{{ symptom.id }}" name="symptoms" value="{{ symptom.id }}" {% if symptom.id in selected_ids %}checked{% endif %} autocomplete="off">
+                            <label class="btn btn-outline-light text-start w-100 p-3 d-flex align-items-center border text-dark symptom-card" for="symptom-{{ symptom.id }}">
+                                <div class="check-indicator me-3 text-muted"><i class="bi bi-circle fs-5"></i></div>
+                                <div>
+                                    <div class="fw-semibold">{{ symptom.name }}</div>
+                                    <div class="small text-muted">{{ symptom.description }}</div>
+                                </div>
+                            </label>
+                        </div>
+                        {% endfor %}
+                        {% endfor %}
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{{ url_for('expert_system.diagnose', step='1') }}" class="btn btn-outline-secondary">ថយក្រោយ</a>
+                        <button type="submit" class="btn btn-primary px-4 fw-bold">
+                            <i class="bi bi-magic me-1"></i> វិភាគរោគសញ្ញា
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% elif step == '3' %}
+<div class="row g-4">
+    <div class="col-12">
+        {% if results %}
+        <div class="d-flex align-items-center justify-content-between mb-3">
+            <h4 class="fw-bold mb-0">លទ្ធផលនៃការវិភាគ</h4>
+            <span class="badge bg-primary rounded-pill">រកឃើញ {{ results|length }}</span>
+        </div>
+
+        {% for result in results %}
+        <div class="card border-0 shadow-sm mb-3 overflow-hidden {% if loop.first %}border-primary border-2{% endif %}">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        {% if loop.first %}<span class="badge bg-primary mb-2">លទ្ធផលដែលអាចទំនង</span>{% endif %}
+                        <h3 class="h4 fw-bold text-primary mb-1">{{ result.disease.name }}</h3>
+                        {% if result.disease.category %}
+                        <span class="badge bg-secondary bg-opacity-10 text-secondary border">{{ result.disease.category.name }}</span>
+                        {% endif %}
+                        {% if result.disease.severity %}
+                        <span class="badge bg-danger bg-opacity-10 text-danger border ms-1">{{ result.disease.severity }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="text-end">
+                        <div class="display-6 fw-bold {% if result.confidence > 80 %}text-success{% elif result.confidence > 50 %}text-warning{% else %}text-danger{% endif %}">{{ result.confidence }}%</div>
+                        <div class="small text-muted text-uppercase fw-bold">ទំនុកចិត្ត</div>
+                    </div>
+                </div>
+                <div class="progress mb-3" style="height: 6px;">
+                    <div class="progress-bar {% if result.confidence > 80 %}bg-success{% elif result.confidence > 50 %}bg-warning{% else %}bg-danger{% endif %}" style="width: {{ result.confidence }}%"></div>
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-6"><p class="mb-1 small text-muted fw-bold">ការពិពណ៌នា</p><p class="mb-0">{{ result.disease.description }}</p></div>
+                    <div class="col-md-6"><p class="mb-1 small text-muted fw-bold">ការព្យាបាល</p><p class="mb-0">{{ result.disease.treatment }}</p></div>
+                    {% if result.disease.prevention %}
+                    <div class="col-12"><p class="mb-1 small text-muted fw-bold">ការការពារ</p><p class="mb-0">{{ result.disease.prevention }}</p></div>
+                    {% endif %}
+                </div>
+                <small class="text-muted d-block mt-2"><i class="bi bi-diagram-2 me-1"></i>{{ result.rule.title }} ({{ result.matched_count }}/{{ result.required_count }} រោគសញ្ញា)</small>
+            </div>
+        </div>
+        {% endfor %}
+
+        <form method="POST" class="d-flex gap-2 justify-content-end">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="step" value="3">
+            <input type="hidden" name="action" value="save">
+            <a href="{{ url_for('expert_system.diagnose', step='2') }}" class="btn btn-outline-secondary">ថយក្រោយ</a>
+            <button type="submit" class="btn btn-success px-4 fw-bold"><i class="bi bi-save me-1"></i> រក្សាទុកករណី</button>
+        </form>
+
+        {% else %}
+        <div class="card border-0 shadow-sm text-center py-5">
+            <div class="card-body">
+                <i class="bi bi-search text-muted display-4 d-block mb-3"></i>
+                <h4 class="fw-bold">រកមិនឃើញការផ្គូផ្គង</h4>
+                <p class="text-muted">សូមជ្រើសរើសរោគសញ្ញាផ្សេង ឬបន្ថែមរោគសញ្ញា។</p>
+                <a href="{{ url_for('expert_system.diagnose', step='2') }}" class="btn btn-primary">ត្រឡប់ទៅជ្រើសរើសរោគសញ្ញា</a>
+            </div>
+        </div>
         {% endif %}
     </div>
 </div>
+{% endif %}
+{% endblock %}
+
+{% block extra_scripts %}
+{% if step == '2' %}
+<script src="{{ url_for('static', filename='js/diagnose.js') }}"></script>
+{% endif %}
 {% endblock %}

@@ -1,98 +1,245 @@
 {% extends "layouts/base.html" %}
 
-{% block title %}ព័ត៌មានលម្អិតនៃការធ្វើរោគវិនិច្ឆ័យ{% endblock %}
+{% block title %}ព័ត៌មានលម្អិត{% endblock %}
 {% block page_title %}របាយការណ៍រោគវិនិច្ឆ័យ{% endblock %}
-{% block page_subtitle %}ទិដ្ឋភាពលម្អិតនៃករណី #{{ case.id }}{% endblock %}
+{% block page_subtitle %}ករណី #{{ case.id }} • {{ case.status_label_km }}{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-lg-10">
-        <div class="mb-3">
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
             <a href="{{ url_for('expert_system.cases_index') }}" class="text-decoration-none text-muted">
                 <i class="bi bi-arrow-left me-1"></i> ត្រឡប់ទៅប្រវត្តិ
             </a>
+            <div class="d-flex gap-2">
+                <a href="{{ url_for('expert_system.cases_print', case_id=case.id) }}" target="_blank" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-printer me-1"></i> បោះពុម្ព
+                </a>
+                <a href="{{ url_for('expert_system.cases_pdf', case_id=case.id) }}" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-file-pdf me-1"></i> PDF
+                </a>
+            </div>
         </div>
 
-        <div class="card border-0 shadow-sm overflow-hidden">
-            <!-- Header Section -->
+        <div class="card border-0 shadow-sm overflow-hidden mb-4">
             <div class="card-header bg-white border-bottom p-4">
-                <div class="d-flex justify-content-between align-items-start">
+                <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
                     <div>
+                        <span class="badge rounded-pill status-badge status-{{ case.status }} mb-2">{{ case.status_label_km }}</span>
                         <h5 class="text-uppercase text-muted small fw-bold mb-1">ការធ្វើរោគវិនិច្ឆ័យសម្រាប់</h5>
-                        <h3 class="fw-bold text-dark mb-0">{{ case.disease.name }}</h3>
-                        <span class="badge bg-primary bg-opacity-10 text-primary mt-2">{{ case.disease.category.name }}</span>
+                        <h3 class="fw-bold text-dark mb-0">{{ case.final_disease.name if case.final_disease else 'មិនស្គាល់' }}</h3>
+                        {% if case.final_disease and case.final_disease.category %}
+                        <span class="badge bg-primary bg-opacity-10 text-primary mt-2">{{ case.final_disease.category.name }}</span>
+                        {% endif %}
                     </div>
                     <div class="text-end">
                         <div class="text-uppercase text-muted small fw-bold mb-1">កាលបរិច្ឆេទ</div>
-                        <div class="fw-semibold">{{ case.created_at.strftime('%B %d, %Y') }}</div>
-                        <div class="small text-muted">{{ case.created_at.strftime('%I:%M %p') }}</div>
+                        <div class="fw-semibold">{{ case.created_at.strftime('%d/%m/%Y') }}</div>
+                        <div class="small text-muted">{{ case.created_at.strftime('%H:%M') }}</div>
                     </div>
                 </div>
             </div>
 
             <div class="card-body p-0">
-                <!-- Confidence Meter -->
+                {% if case.confidence is not none %}
                 <div class="bg-light p-4 border-bottom">
                     <div class="d-flex justify-content-between align-items-end mb-2">
                         <span class="fw-bold text-muted text-uppercase small">កម្រិតទំនុកចិត្ត</span>
-                        <span class="fw-bold fs-4 {% if case.confidence > 80 %}text-success{% elif case.confidence > 50 %}text-warning{% else %}text-danger{% endif %}">
-                            {{ case.confidence }}%
-                        </span>
+                        <span class="fw-bold fs-4 {% if case.confidence > 80 %}text-success{% elif case.confidence > 50 %}text-warning{% else %}text-danger{% endif %}">{{ case.confidence }}%</span>
                     </div>
                     <div class="progress" style="height: 8px;">
-                        <div class="progress-bar {% if case.confidence > 80 %}bg-success{% elif case.confidence > 50 %}bg-warning{% else %}bg-danger{% endif %}"
-                             role="progressbar"
-                             style="width: {{ case.confidence }}%"
-                             aria-valuenow="{{ case.confidence }}"
-                             aria-valuemin="0"
-                             aria-valuemax="100"></div>
+                        <div class="progress-bar {% if case.confidence > 80 %}bg-success{% elif case.confidence > 50 %}bg-warning{% else %}bg-danger{% endif %}" style="width: {{ case.confidence }}%"></div>
                     </div>
                 </div>
+                {% endif %}
+
+                {% if case.flock_size or case.bird_age or case.breed or case.location %}
+                <div class="p-4 border-bottom">
+                    <h6 class="fw-bold text-uppercase text-muted small mb-3"><i class="bi bi-house-heart me-2"></i>ព័ត៌មានចំការ</h6>
+                    <div class="row g-2 small">
+                        {% if case.flock_size %}<div class="col-md-3"><strong>ចំនួន:</strong> {{ case.flock_size }}</div>{% endif %}
+                        {% if case.bird_age %}<div class="col-md-3"><strong>អាយុ:</strong> {{ case.bird_age }}</div>{% endif %}
+                        {% if case.breed %}<div class="col-md-3"><strong>ប្រភេទ:</strong> {{ case.breed }}</div>{% endif %}
+                        {% if case.location %}<div class="col-md-3"><strong>ទីតាំង:</strong> {{ case.location }}</div>{% endif %}
+                    </div>
+                    {% if case.notes %}<p class="small text-muted mt-2 mb-0">{{ case.notes }}</p>{% endif %}
+                </div>
+                {% endif %}
 
                 <div class="row g-0">
-                    <!-- Left Column: Disease Info -->
                     <div class="col-md-7 p-4 border-end">
+                        {% if case.final_disease %}
                         <div class="mb-4">
-                            <h6 class="fw-bold text-uppercase text-muted small mb-3">
-                                <i class="bi bi-info-circle me-2"></i>ការពិពណ៌នា
-                            </h6>
-                            <p class="text-secondary">{{ case.disease.description }}</p>
+                            <h6 class="fw-bold text-uppercase text-muted small mb-2">ការពិពណ៌នា</h6>
+                            <p class="text-secondary mb-0">{{ case.final_disease.description }}</p>
                         </div>
-
-                        <div>
-                            <h6 class="fw-bold text-uppercase text-muted small mb-3">
-                                <i class="bi bi-bandaid me-2"></i>ការព្យាបាលដែលបានណែនាំ
-                            </h6>
+                        <div class="mb-4">
+                            <h6 class="fw-bold text-uppercase text-muted small mb-2">ការព្យាបាល</h6>
                             <div class="p-3 bg-success bg-opacity-10 rounded border border-success border-opacity-10">
-                                <p class="mb-0 text-dark">{{ case.disease.treatment }}</p>
+                                <p class="mb-0">{{ case.final_disease.treatment }}</p>
                             </div>
                         </div>
+                        {% if case.final_disease.prevention %}
+                        <div>
+                            <h6 class="fw-bold text-uppercase text-muted small mb-2">ការការពារ</h6>
+                            <p class="text-secondary mb-0">{{ case.final_disease.prevention }}</p>
+                        </div>
+                        {% endif %}
+                        {% endif %}
                     </div>
-
-                    <!-- Right Column: Symptoms Observed -->
                     <div class="col-md-5 p-4 bg-light">
-                        <h6 class="fw-bold text-uppercase text-muted small mb-3">
-                            <i class="bi bi-clipboard-check me-2"></i>រោគសញ្ញាដែលបានសង្កេត
-                        </h6>
+                        <h6 class="fw-bold text-uppercase text-muted small mb-3">រោគសញ្ញាដែលបានសង្កេត</h6>
                         <div class="d-flex flex-column gap-2">
                             {% for symptom in case.symptoms %}
                             <div class="d-flex align-items-center bg-white p-2 rounded border shadow-sm">
-                                <i class="bi bi-check-circle-fill text-primary me-2 ms-1"></i>
+                                <i class="bi bi-check-circle-fill text-primary me-2"></i>
                                 <span class="fw-medium">{{ symptom.name }}</span>
                             </div>
                             {% endfor %}
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Footer -->
-            <div class="card-footer bg-white p-3 text-center border-top">
-                <small class="text-muted">
-                    របាយការណ៍បង្កើតដោយប្រព័ន្ធជំនាញ IDNS • លេខសម្គាល់ករណី៖ #{{ case.id }}
-                </small>
+                {% if case.reviewed_by %}
+                <div class="p-4 border-top bg-light">
+                    <h6 class="fw-bold text-uppercase text-muted small mb-2">ការពិនិត្យដោយវេជ្ជបណ្ឌិត</h6>
+                    <p class="small mb-1"><strong>{{ case.reviewed_by.full_name }}</strong> • {{ case.reviewed_at.strftime('%d/%m/%Y %H:%M') if case.reviewed_at else '' }}</p>
+                    {% if case.doctor_notes %}<p class="mb-0">{{ case.doctor_notes }}</p>{% endif %}
+                </div>
+                {% endif %}
             </div>
         </div>
+
+        {% if can_review %}
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white py-3">
+                <h5 class="mb-0 fw-bold"><i class="bi bi-patch-check me-2 text-primary"></i>ពិនិត្យករណី</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('expert_system.cases_review', case_id=case.id) }}">
+                    {{ review_form.hidden_tag() }}
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            {{ review_form.action.label(class="form-label fw-bold") }}
+                            {{ review_form.action(class="form-select") }}
+                        </div>
+                        <div class="col-md-8">
+                            {{ review_form.override_disease_id.label(class="form-label fw-bold") }}
+                            {{ review_form.override_disease_id(class="form-select") }}
+                        </div>
+                        <div class="col-12">
+                            {{ review_form.doctor_notes.label(class="form-label fw-bold") }}
+                            {{ review_form.doctor_notes(class="form-control", rows=3) }}
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary mt-3">{{ review_form.submit.label.text }}</button>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Feedback Section -->
+        {% if case.user_id == current_user.id %}
+        <div class="card border-0 shadow-sm mt-4">
+            <div class="card-header bg-white py-3">
+                <h5 class="mb-0 fw-bold"><i class="bi bi-chat-heart me-2 text-success"></i>មតិប្រតិកម្ម</h5>
+            </div>
+            <div class="card-body">
+                {% if case.feedback_rating %}
+                <div class="text-center py-3">
+                    <div class="mb-2">
+                        {% for i in range(1, 6) %}
+                        <i class="bi bi-star-fill fs-4 {% if i <= case.feedback_rating %}text-warning{% else %}text-muted opacity-25{% endif %}"></i>
+                        {% endfor %}
+                    </div>
+                    <p class="fw-bold text-muted mb-1">អ្នកបានវាយតម្លៃ: {{ case.feedback_rating }}/5</p>
+                    {% if case.feedback_text %}
+                    <p class="text-secondary mb-0">"{{ case.feedback_text }}"</p>
+                    {% endif %}
+                    <small class="text-muted">{{ case.feedback_at.strftime('%d/%m/%Y %H:%M') if case.feedback_at else '' }}</small>
+                </div>
+                {% else %}
+                <form method="POST" action="{{ url_for('expert_system.cases_feedback', case_id=case.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <p class="text-muted mb-3">តើការវិនិច្ឆ័យនេះមានប្រយោជន៍សម្រាប់អ្នកដែរឬទេ?</p>
+                    <div class="mb-3">
+                        <div class="star-rating d-flex gap-1 justify-content-center mb-2" id="starRating">
+                            {% for i in range(1, 6) %}
+                            <label class="star-label" data-value="{{ i }}" style="cursor: pointer;">
+                                <i class="bi bi-star fs-3 text-muted" id="star-{{ i }}"></i>
+                            </label>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" name="rating" id="ratingInput" value="0">
+                    </div>
+                    <div class="mb-3">
+                        <textarea name="feedback_text" class="form-control" rows="2" placeholder="មតិបន្ថែម (ស្រេចចិត្ត)..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-success btn-sm px-4" id="feedbackSubmit" disabled>
+                        <i class="bi bi-send me-1"></i> ផ្ញើមតិប្រតិកម្ម
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+        {% elif (current_user.has_role('Admin') or current_user.has_role('Doctor')) and case.feedback_rating %}
+        <div class="card border-0 shadow-sm mt-4">
+            <div class="card-header bg-white py-3">
+                <h5 class="mb-0 fw-bold"><i class="bi bi-chat-heart me-2 text-success"></i>មតិប្រតិកម្មអ្នកប្រើ</h5>
+            </div>
+            <div class="card-body text-center py-3">
+                <div class="mb-2">
+                    {% for i in range(1, 6) %}
+                    <i class="bi bi-star-fill fs-4 {% if i <= case.feedback_rating %}text-warning{% else %}text-muted opacity-25{% endif %}"></i>
+                    {% endfor %}
+                </div>
+                <p class="fw-bold text-muted mb-1">{{ case.feedback_rating }}/5</p>
+                {% if case.feedback_text %}
+                <p class="text-secondary mb-0">"{{ case.feedback_text }}"</p>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
     </div>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const stars = document.querySelectorAll('.star-label');
+    const ratingInput = document.getElementById('ratingInput');
+    const submitBtn = document.getElementById('feedbackSubmit');
+
+    if (!stars.length) return;
+
+    stars.forEach(star => {
+        star.addEventListener('mouseenter', function() {
+            const val = parseInt(this.dataset.value);
+            highlightStars(val);
+        });
+        star.addEventListener('mouseleave', function() {
+            highlightStars(parseInt(ratingInput.value));
+        });
+        star.addEventListener('click', function() {
+            const val = parseInt(this.dataset.value);
+            ratingInput.value = val;
+            highlightStars(val);
+            if (submitBtn) submitBtn.disabled = false;
+        });
+    });
+
+    function highlightStars(count) {
+        for (let i = 1; i <= 5; i++) {
+            const icon = document.getElementById('star-' + i);
+            if (!icon) continue;
+            if (i <= count) {
+                icon.className = 'bi bi-star-fill fs-3 text-warning';
+            } else {
+                icon.className = 'bi bi-star fs-3 text-muted';
+            }
+        }
+    }
+});
+</script>
 {% endblock %}

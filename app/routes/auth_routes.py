@@ -26,10 +26,9 @@ def login():
             flash("Logged in successfully.", "success")
             
             # Redirect based on role
-            if user.has_role("Admin"):
-                return redirect(url_for("tbl_users.index"))
+            if user.has_role("Admin") or user.has_role("Doctor"):
+                return redirect(url_for("dashboard.index"))
             else:
-                # Doctor and User go to diagnosis page
                 return redirect(url_for("expert_system.diagnose"))
         
         flash("Invalid username or password.", "danger")
