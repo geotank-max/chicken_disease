@@ -1,20 +1,27 @@
 <!DOCTYPE html>
-<html lang="km">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>របាយការណ៍ករណី #{{ case.id }} - IDNS</title>
+    <title>Case Report #{{ case.id }} - IDNS</title>
     <style>
         @page { size: A4; margin: 2cm; }
-        body { font-family: 'NotoSansKhmer'; color: #1f2937; margin: 40px; font-size: 14px; }
-        h1 { font-size: 22px; margin-bottom: 4px; }
-        h2 { font-size: 16px; color: #6b7280; margin-top: 0; }
-        .meta { color: #6b7280; font-size: 12px; margin-bottom: 24px; }
-        .section { margin-bottom: 20px; }
-        .label { font-weight: bold; color: #374151; font-size: 11px; text-transform: uppercase; margin-bottom: 4px; }
-        .box { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; }
-        .badge { display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: 11px; background: #eff6ff; color: #2563eb; }
-        ul { padding-left: 18px; }
-        .footer { margin-top: 40px; text-align: center; color: #9ca3af; font-size: 11px; border-top: 1px solid #e5e7eb; padding-top: 16px; }
+        body { font-family: Helvetica, Arial, sans-serif; color: #1f2937; margin: 40px; font-size: 13px; line-height: 1.5; }
+        h1 { font-size: 22px; margin-bottom: 4px; color: #111827; }
+        h2 { font-size: 15px; color: #6b7280; margin-top: 0; font-weight: normal; }
+        .meta { color: #6b7280; font-size: 11px; margin-bottom: 24px; border-bottom: 1px solid #e5e7eb; padding-bottom: 12px; }
+        .section { margin-bottom: 18px; }
+        .label { font-weight: bold; color: #374151; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+        .box { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 12px; }
+        .badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 10px; font-weight: bold; }
+        .badge-blue { background: #eff6ff; color: #2563eb; }
+        .badge-red { background: #fef2f2; color: #dc2626; }
+        .badge-green { background: #ecfdf5; color: #059669; }
+        ul { padding-left: 18px; margin: 0; }
+        li { margin-bottom: 4px; }
+        .footer { margin-top: 40px; text-align: center; color: #9ca3af; font-size: 10px; border-top: 1px solid #e5e7eb; padding-top: 16px; }
+        table.info { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+        table.info td { padding: 4px 8px; font-size: 12px; }
+        table.info td.lbl { font-weight: bold; color: #6b7280; width: 120px; }
         @media print { body { margin: 20px; } .no-print { display: none; } }
     </style>
     {% if not pdf_mode %}
@@ -24,77 +31,96 @@
 <body>
     {% if not pdf_mode %}
     <div class="no-print" style="margin-bottom: 20px;">
-        <button onclick="window.print()" style="padding: 8px 16px; cursor: pointer;">បោះពុម្ព</button>
-        <a href="{{ url_for('expert_system.cases_detail', case_id=case.id) }}" style="margin-left: 8px;">ត្រឡប់</a>
+        <button onclick="window.print()" style="padding: 8px 16px; cursor: pointer; background: #2563eb; color: white; border: none; border-radius: 4px;">Print</button>
+        <a href="{{ url_for('expert_system.cases_detail', case_id=case.id) }}" style="margin-left: 8px; color: #2563eb;">Back to Case</a>
     </div>
     {% endif %}
 
-    <h1>របាយការណ៍រោគវិនិច្ឆ័យមាន់</h1>
-    <h2>IDNS — ករណី #{{ case.id }}</h2>
+    <h1>Chicken Disease Diagnosis Report</h1>
+    <h2>IDNS Expert System &mdash; Case #{{ case.id }}</h2>
+
     <div class="meta">
-        កាលបរិច្ឆេទ: {{ case.created_at.strftime('%d/%m/%Y %H:%M') }} |
-        ស្ថានភាព: {{ case.status_label_km }} |
-        {% if case.user %}អ្នកប្រើ: {{ case.user.full_name }}{% endif %}
+        Date: {{ case.created_at.strftime('%d/%m/%Y %H:%M') }} |
+        Status: {{ case.status_label_km }} |
+        {% if case.user %}User: {{ case.user.full_name }}{% endif %}
     </div>
 
     {% if case.final_disease %}
     <div class="section">
-        <div class="label">ជំងឺដែលកំណត់</div>
+        <div class="label">Diagnosed Disease</div>
         <div class="box">
-            <strong style="font-size: 18px;">{{ case.final_disease.name }}</strong>
-            {% if case.confidence is not none %}<span class="badge" style="margin-left: 8px;">{{ case.confidence }}% ទំនុកចិត្ត</span>{% endif %}
-            {% if case.final_disease.severity %}<span class="badge" style="margin-left: 4px; background:#fef2f2;color:#dc2626;">{{ case.final_disease.severity }}</span>{% endif %}
+            <strong style="font-size: 16px;">{{ case.final_disease.name }}</strong>
+            {% if case.confidence is not none %}
+            <span class="badge badge-blue" style="margin-left: 8px;">{{ case.confidence }}% confidence</span>
+            {% endif %}
+            {% if case.final_disease.severity %}
+            <span class="badge badge-red" style="margin-left: 4px;">Severity: {{ case.final_disease.severity }}</span>
+            {% endif %}
+            {% if case.final_disease.is_contagious %}
+            <span class="badge badge-red" style="margin-left: 4px;">Contagious</span>
+            {% endif %}
         </div>
     </div>
 
     <div class="section">
-        <div class="label">ការពិពណ៌នា</div>
+        <div class="label">Description</div>
         <p>{{ case.final_disease.description }}</p>
     </div>
 
     <div class="section">
-        <div class="label">ការព្យាបាល</div>
+        <div class="label">Treatment</div>
         <div class="box">{{ case.final_disease.treatment }}</div>
     </div>
 
     {% if case.final_disease.prevention %}
     <div class="section">
-        <div class="label">ការការពារ</div>
+        <div class="label">Prevention</div>
         <p>{{ case.final_disease.prevention }}</p>
     </div>
     {% endif %}
+    {% else %}
+    <div class="section">
+        <div class="box"><strong>No disease match found.</strong></div>
+    </div>
     {% endif %}
 
     {% if case.flock_size or case.bird_age or case.breed or case.location %}
     <div class="section">
-        <div class="label">ព័ត៌មានចំការ</div>
-        <div class="box">
-            {% if case.flock_size %}ចំនួន: {{ case.flock_size }} • {% endif %}
-            {% if case.bird_age %}អាយុ: {{ case.bird_age }} • {% endif %}
-            {% if case.breed %}ប្រភេទ: {{ case.breed }} • {% endif %}
-            {% if case.location %}ទីតាំง: {{ case.location }}{% endif %}
-            {% if case.notes %}<br><em>{{ case.notes }}</em>{% endif %}
-        </div>
+        <div class="label">Flock Information</div>
+        <table class="info">
+            {% if case.flock_size %}<tr><td class="lbl">Flock Size:</td><td>{{ case.flock_size }} birds</td></tr>{% endif %}
+            {% if case.bird_age %}<tr><td class="lbl">Bird Age:</td><td>{{ case.bird_age }}</td></tr>{% endif %}
+            {% if case.breed %}<tr><td class="lbl">Breed:</td><td>{{ case.breed }}</td></tr>{% endif %}
+            {% if case.location %}<tr><td class="lbl">Location:</td><td>{{ case.location }}</td></tr>{% endif %}
+        </table>
+        {% if case.notes %}<p><em>Notes: {{ case.notes }}</em></p>{% endif %}
     </div>
     {% endif %}
 
     <div class="section">
-        <div class="label">រោគសញ្ញាដែលបានសង្កេត</div>
+        <div class="label">Observed Symptoms ({{ case.symptoms|length }})</div>
         <ul>
             {% for symptom in case.symptoms %}
-            <li>{{ symptom.name }}{% if symptom.description %} — {{ symptom.description }}{% endif %}</li>
+            <li><strong>{{ symptom.name }}</strong>{% if symptom.description %} &mdash; {{ symptom.description }}{% endif %}</li>
             {% endfor %}
         </ul>
     </div>
 
     {% if case.reviewed_by %}
     <div class="section">
-        <div class="label">ការពិនិត្យវេជ្ជបណ្ឌិត</div>
-        <p>{{ case.reviewed_by.full_name }} ({{ case.reviewed_at.strftime('%d/%m/%Y') if case.reviewed_at else '' }})</p>
-        {% if case.doctor_notes %}<p>{{ case.doctor_notes }}</p>{% endif %}
+        <div class="label">Doctor Review</div>
+        <div class="box">
+            <p style="margin: 0 0 4px 0;"><strong>Reviewed by:</strong> {{ case.reviewed_by.full_name }} ({{ case.reviewed_at.strftime('%d/%m/%Y') if case.reviewed_at else '' }})</p>
+            <p style="margin: 0 0 4px 0;"><strong>Decision:</strong> {{ case.status|capitalize }}</p>
+            {% if case.doctor_notes %}<p style="margin: 0;"><strong>Notes:</strong> {{ case.doctor_notes }}</p>{% endif %}
+            {% if case.override_disease %}<p style="margin: 4px 0 0 0;"><strong>Override Disease:</strong> {{ case.override_disease.name }}</p>{% endif %}
+        </div>
     </div>
     {% endif %}
 
-    <div class="footer">របាយការណ៍បង្កើតដោយប្រព័ន្ធជំនាញ IDNS</div>
+    <div class="footer">
+        Report generated by IDNS Chicken Disease Expert System<br>
+        {{ case.created_at.strftime('%d %B %Y') }}
+    </div>
 </body>
 </html>
