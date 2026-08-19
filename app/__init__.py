@@ -49,7 +49,7 @@ def create_app(config_class: type[Config] = Config):
     def inject_badges():
         from flask_login import current_user
         badges = {}
-        if current_user.is_authenticated:
+        if current_user and hasattr(current_user, 'is_authenticated') and current_user.is_authenticated:
             from app.services.notification_service import NotificationService
             badges["notif_count"] = NotificationService.get_unread_count(current_user.id)
             if current_user.has_role("Admin"):

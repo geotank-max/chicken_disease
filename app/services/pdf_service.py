@@ -40,7 +40,11 @@ class PdfService:
     @staticmethod
     def render_case_pdf(case) -> BytesIO | None:
         _register_khmer_font()
-        html = render_template("expert_system/cases/print.html", case=case, pdf_mode=True)
+        html = render_template(
+            "expert_system/cases/print.html",
+            case=case,
+            pdf_mode=True,
+        )
         buffer = BytesIO()
         result = pisa.CreatePDF(
             html,
