@@ -1,35 +1,50 @@
 {% extends "layouts/base.html" %}
-{% block title %}លុបតួនាទី{% endblock %}
+{% block title %}Delete Role{% endblock %}
+{% block page_title %}Delete Role{% endblock %}
+{% block page_subtitle %}This action cannot be undone.{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
-    <div class="col-md-6">
-        <div class="card border-danger">
-            <div class="card-header bg-danger text-white">
-                <h5 class="mb-0">បញ្ជាក់ការលុប</h5>
+    <div class="col-md-6 col-lg-5">
+        <div class="card border-0 shadow-sm overflow-hidden">
+            <div class="card-header bg-danger bg-opacity-10 py-4 text-center">
+                <div class="mx-auto mb-3 d-flex align-items-center justify-content-center rounded-circle bg-danger bg-opacity-10" style="width: 64px; height: 64px;">
+                    <i class="bi bi-exclamation-triangle text-danger fs-3"></i>
+                </div>
+                <h4 class="fw-bold text-danger mb-1">Delete "{{ role.name }}"?</h4>
+                <p class="text-muted mb-0 small">This will permanently remove this role.</p>
             </div>
-            <div class="card-body">
-                <p>
-                    តើអ្នកប្រាកដថាចង់លុបតួនាទី
-                    <strong>{{ role.name }}</strong> ទេ?
-                </p>
-
+            <div class="card-body p-4">
                 {% if role.users %}
-                <p class="text-warning small">
-                    តួនាទីនេះបច្ចុប្បន្នត្រូវបានចាត់តាំងឱ្យ {{ role.users|length }} អ្នកប្រើប្រាស់។
-                </p>
+                <div class="alert alert-warning d-flex align-items-start gap-2 mb-4">
+                    <i class="bi bi-exclamation-triangle-fill mt-1"></i>
+                    <div>
+                        <strong>Warning:</strong> This role is currently assigned to <strong>{{ role.users|length }}</strong> user(s). They will lose these permissions.
+                    </div>
+                </div>
                 {% endif %}
 
-                <form method="post">
-                    {{ form.hidden_tag() }}
+                <div class="bg-light rounded p-3 mb-4">
+                    <div class="small">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">Role:</span>
+                            <span class="fw-bold">{{ role.name }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted">Permissions:</span>
+                            <span>{{ role.permissions|length }}</span>
+                        </div>
+                    </div>
+                </div>
 
-                    <button type="submit" class="btn btn-danger">
-                        លុប
+                <form method="post" class="d-flex gap-2">
+                    {{ form.hidden_tag() }}
+                    <a href="{{ url_for('tbl_roles.detail', role_id=role.id) }}" class="btn btn-outline-secondary flex-fill">
+                        Cancel
+                    </a>
+                    <button type="submit" class="btn btn-danger flex-fill fw-bold">
+                        <i class="bi bi-trash me-1"></i> Delete Role
                     </button>
-                    <a href="{{ url_for('tbl_roles.detail', role_id=role.id) }}" 
-                        class="btn btn-secondary">
-                        បោះបង់
-                        </a>
                 </form>
             </div>
         </div>

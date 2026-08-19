@@ -1,21 +1,102 @@
 {% extends "layouts/base.html" %}
-{% block title %}បង្កើតតួនាទី{% endblock %}
+{% block title %}Create Role{% endblock %}
+{% block page_title %}Create Role{% endblock %}
+{% block page_subtitle %}Define a new role with specific permissions.{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-lg-8 col-xl-7">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h1 class="h3 mb-0">បង្កើតតួនាទី</h1>
-            <a href="{{ url_for('tbl_roles.index') }}" class="btn btn-outline-secondary btn-sm">
-                ← ត្រឡប់ទៅតួនាទី
-            </a>
+<div class="d-flex mb-4">
+    <a href="{{ url_for('tbl_roles.index') }}" class="text-decoration-none text-muted">
+        <i class="bi bi-arrow-left me-1"></i> Back to Roles
+    </a>
+</div>
+
+<form method="post">
+    {{ form.hidden_tag() }}
+
+    {% if form.errors %}
+    <div class="alert alert-danger alert-dismissible fade show mb-4">
+        <div class="d-flex align-items-center">
+            <i class="bi bi-exclamation-circle-fill me-2 fs-5"></i>
+            <div>
+                <strong>Please fix the following errors:</strong>
+                <ul class="mb-0 mt-1">
+                {% for field, errors in form.errors.items() %}
+                    {% for error in errors %}
+                    <li>{{ form[field].label.text }}: {{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+                </ul>
+            </div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endif %}
+
+    <div class="row g-4">
+        <div class="col-lg-5">
+            <!-- Role Info -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-bold"><i class="bi bi-shield me-2 text-primary"></i>Role Information</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="mb-3">
+                        <label for="name" class="form-label fw-bold">Role Name</label>
+                        {{ form.name(class="form-control" + (" is-invalid" if form.name.errors else ""), placeholder="e.g. Editor, Moderator") }}
+                        {% if form.name.errors %}<div class="invalid-feedback">{{ form.name.errors[0] }}</div>{% endif %}
+                    </div>
+                    <div class="mb-0">
+                        <label for="description" class="form-label fw-bold">Description</label>
+                        {{ form.description(class="form-control", rows=3, placeholder="What does this role do?") }}
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="card">
-            <div class="card-body">
-                {% include "roles/_form.html" %}
+        <div class="col-lg-7">
+            <!-- Permissions -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-bold"><i class="bi bi-key me-2 text-primary"></i>Permissions</h5>
+                </div>
+                <div class="card-body p-4">
+                    <p class="text-muted small mb-3">Select permissions to grant to this role.</p>
+                    {% if form.permissions_by_module is defined and form.permissions_by_module %}
+                    {% for module, perms in form.permissions_by_module.items() %}
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-uppercase small text-muted">{{ module }}</label>
+                        <div class="border rounded p-3 bg-light">
+                            {% for perm in perms %}
+                            <div class="form-check mb-2">
+                                <input type="checkbox" class="form-check-input" name="permission_ids" id="perm-{{ perm.id }}" value="{{ perm.id }}"
+                                    {% if form.permission_ids.data and perm.id in form.permission_ids.data %}checked{% endif %}>
+                                <label class="form-check-label" for="perm-{{ perm.id }}">
+                                    <span class="fw-medium">{{ perm.name }}</span>
+                                    <small class="text-muted ms-1">({{ perm.code }})</small>
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <div class="border rounded p-3" style="max-height: 400px; overflow-y: auto;">
+                        {{ form.permission_ids() }}
+                    </div>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </div>
-</div>
+
+    <!-- Actions -->
+    <div class="d-flex gap-2 justify-content-between mt-4">
+        <a href="{{ url_for('tbl_roles.index') }}" class="btn btn-outline-secondary px-4">
+            <i class="bi bi-x-lg me-1"></i> Cancel
+        </a>
+        <button type="submit" class="btn btn-primary px-4 fw-bold">
+            <i class="bi bi-check-lg me-1"></i> Create Role
+        </button>
+    </div>
+</form>
 {% endblock %}
