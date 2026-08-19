@@ -76,45 +76,38 @@ def edit(user_id: int):
     if user is None:
         abort(404)
 
+    is_admin = current_user.has_role("Admin")
     form = UserEditForm(original_user=user, obj=user)
 
-    # Restrict role choices for non-Admin users (prevent self-escalation)
-    if not current_user.has_role("Admin"):
-        from app.models.role import RoleTable as _RT
-        # Non-admins can only see non-admin roles
-        form.role_id.choices = [
-            (r.id, r.name) for r in
-            db.session.scalars(db.select(_RT).filter(_RT.name != "Admin").order_by(_RT.name))
-        ]
+    # Non-admins cannot change roles or active status at all
+    if not is_admin:
+        del form.role_id
+        del form.is_active
 
     if form.validate_on_submit():
-        # Security check: non-Admin cannot assign Admin role
-        if not current_user.has_role("Admin"):
-            from app.models.role import RoleTable as _RT
-            admin_role = db.session.scalar(db.select(_RT).filter_by(name="Admin"))
-            if admin_role and form.role_id.data == admin_role.id:
-                flash("You do not have permission to assign the Admin role.", "danger")
-                return render_template("users/edit.html", form=form, user=user)
-
         data = {
             "username": form.username.data,
             "email": form.email.data,
             "full_name": form.full_name.data,
-            "is_active": form.is_active.data,
+            "is_active": form.is_active.data if is_admin else user.is_active,
         }
         password = form.password.data or None
-        role_id = form.role_id.data or None
+
+        # Only admin can change role
+        role_id = None
+        if is_admin:
+            role_id = form.role_id.data or None
 
         UserService.update_user(user, data, password, role_id)
         AuditService.log("UPDATE", "User", user.id, f"Updated user: {user.username}")
         flash(f"User '{user.username}' was updated successfully.", "success")
 
-        if current_user.has_role("Admin"):
+        if is_admin:
             return redirect(url_for("tbl_users.detail", user_id=user.id))
         else:
             return redirect(url_for("tbl_users.profile"))
 
-    return render_template("users/edit.html", form=form, user=user)
+    return render_template("users/edit.html", form=form, user=user, is_admin=is_admin)
 
 
 @user_bp.route("/<int:user_id>/delete", methods=["GET"])

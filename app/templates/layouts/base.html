@@ -105,6 +105,11 @@
                                     <i class="bi bi-journal-text"></i> កំណត់ហេតុសវនកម្ម
                                 </a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link {% if 'doctor_app.admin' in request.endpoint %}active{% endif %}" href="{{ url_for('doctor_app.admin_list') }}">
+                                    <i class="bi bi-file-earmark-medical"></i> Doctor Applications
+                                </a>
+                            </li>
                         </ul>
                         {% endif %}
 
@@ -115,6 +120,13 @@
                                     <i class="bi bi-person-circle"></i> ប្រវត្តិរូប
                                 </a>
                             </li>
+                            {% if not current_user.has_role('Admin') and not current_user.has_role('Doctor') %}
+                            <li class="nav-item">
+                                <a class="nav-link {% if 'doctor_app' in request.endpoint %}active{% endif %}" href="{{ url_for('doctor_app.apply') }}">
+                                    <i class="bi bi-mortarboard"></i> Apply as Doctor
+                                </a>
+                            </li>
+                            {% endif %}
                             <li class="nav-item">
                                 <a class="nav-link text-danger" href="{{ url_for('auth.logout') }}">
                                     <i class="bi bi-box-arrow-right text-danger"></i> ចាកចេញ

@@ -38,6 +38,9 @@ def create_app(config_class: type[Config] = Config):
     app.register_blueprint(audit_bp)
     app.register_blueprint(dashboard_bp)
 
+    from app.routes.doctor_application_routes import doctor_app_bp
+    app.register_blueprint(doctor_app_bp)
+
     @app.route("/")
     def home():
         return redirect(url_for("auth.login"))
@@ -47,6 +50,7 @@ def create_app(config_class: type[Config] = Config):
         from app.models.permission import PermissionTable
         from app.models.expert_system import Category, Symptom, Disease, Rule, Case
         from app.models.audit_log import AuditLog
+        from app.models.doctor_application import DoctorApplication
 
         if os.environ.get("RESET_DB", "0") == "1":
             db.drop_all()

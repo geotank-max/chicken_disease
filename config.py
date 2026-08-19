@@ -4,7 +4,11 @@ BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
 class Config:
     SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret-key-change-me")
-    
+
+    # Upload config
+    UPLOAD_FOLDER = os.path.join(BASE_DIR, "uploads")
+    MAX_CONTENT_LENGTH = 10 * 1024 * 1024  # 10MB max
+
     # PostgreSQL Connection Details
     DB_USER = os.environ.get("DB_USER", "postgres")
     DB_PASSWORD = os.environ.get("DB_PASSWORD", "123")

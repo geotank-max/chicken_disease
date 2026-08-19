@@ -55,7 +55,8 @@
                 </div>
             </div>
 
-            <!-- Role & Status -->
+            <!-- Role & Status (Admin only) -->
+            {% if is_admin %}
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-white py-3">
                     <h5 class="mb-0 fw-bold"><i class="bi bi-shield-lock me-2 text-primary"></i>Role & Status</h5>
@@ -66,9 +67,6 @@
                             <label for="role_id" class="form-label fw-bold">Role</label>
                             {{ form.role_id(class="form-select" + (" is-invalid" if form.role_id.errors else "")) }}
                             {% if form.role_id.errors %}<div class="invalid-feedback">{{ form.role_id.errors[0] }}</div>{% endif %}
-                            {% if not current_user.has_role('Admin') %}
-                            <small class="text-muted">You cannot assign the Admin role.</small>
-                            {% endif %}
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-bold d-block">Account Status</label>
@@ -83,6 +81,7 @@
                     </div>
                 </div>
             </div>
+            {% endif %}
 
             <!-- Change Password -->
             <div class="card border-0 shadow-sm mb-4">
