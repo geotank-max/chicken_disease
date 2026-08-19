@@ -1,6 +1,6 @@
 {% extends "layouts/base.html" %}
 
-{% block title %}ធ្វើរោគវិនិច្ឆ័យ{% endblock %}
+{% block title %}–{% endblock %}
 {% block page_title %}ការធ្វើរោគវិនិច្ឆ័យ{% endblock %}
 {% block page_subtitle %}បំពេញព័ត៌មាន ជ្រើសរើសរោគសញ្ញា ហើយមើលលទ្ធផល{% endblock %}
 
@@ -103,7 +103,7 @@
                         {% endfor %}
                     </ul>
 
-                    <div class="symptom-list pe-2" style="max-height: 50vh; overflow-y: auto;">
+                    <div class="symptom-list pe-2" style="max-height: 70vh; overflow-y: auto; scrollbar-width: thin;">
                         {% for cat_name, cat_symptoms in symptoms_grouped.items() %}
                         {% for symptom in cat_symptoms %}
                         <div class="mb-2 symptom-item" data-category="{{ cat_name }}" data-name="{{ symptom.name|lower }}">
