@@ -13,7 +13,7 @@ def _register_khmer_font():
     from reportlab.pdfbase.ttfonts import TTFont
 
     font_path = os.path.join(
-        current_app.root_path, "static", "fonts", "NotoSansKhmer-VariableFont_wdth,wght.ttf"
+        current_app.root_path, "static", "fonts", "NotoSansKhmer.ttf"
     )
     if os.path.exists(font_path):
         try:
