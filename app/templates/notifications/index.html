@@ -1,0 +1,67 @@
+{% extends "layouts/base.html" %}
+{% block title %}Notifications{% endblock %}
+{% block page_title %}Notifications{% endblock %}
+{% block page_subtitle %}Stay updated on system activity.{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2">
+        {{ notifications|selectattr('is_read', 'false')|list|length }} unread
+    </span>
+    {% if notifications %}
+    <form method="post" action="{{ url_for('notifications.mark_all_read') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-check-all me-1"></i> Mark all as read
+        </button>
+    </form>
+    {% endif %}
+</div>
+
+{% if notifications %}
+<div class="card border-0 shadow-sm">
+    <div class="list-group list-group-flush">
+        {% for n in notifications %}
+        <a href="{{ url_for('notifications.mark_read', notif_id=n.id) }}"
+           class="list-group-item list-group-item-action py-3 px-4 {% if not n.is_read %}bg-primary bg-opacity-5 border-start border-primary border-3{% endif %}">
+            <div class="d-flex justify-content-between align-items-start">
+                <div class="d-flex align-items-start">
+                    <div class="me-3 mt-1">
+                        {% if n.category == 'disease' %}
+                        <i class="bi bi-virus text-danger fs-5"></i>
+                        {% elif n.category == 'application' %}
+                        <i class="bi bi-file-earmark-medical text-primary fs-5"></i>
+                        {% elif n.category == 'case' %}
+                        <i class="bi bi-clipboard-check text-success fs-5"></i>
+                        {% else %}
+                        <i class="bi bi-bell text-warning fs-5"></i>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <div class="fw-medium {% if not n.is_read %}text-dark{% else %}text-muted{% endif %}">{{ n.title }}</div>
+                        {% if n.message %}
+                        <small class="text-muted">{{ n.message }}</small>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="text-end ms-3">
+                    <small class="text-muted text-nowrap">{{ n.created_at.strftime('%d/%m %H:%M') }}</small>
+                    {% if not n.is_read %}
+                    <div><span class="badge bg-primary rounded-pill mt-1" style="width: 8px; height: 8px;"></span></div>
+                    {% endif %}
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+{% else %}
+<div class="card border-0 shadow-sm text-center py-5">
+    <div class="card-body">
+        <i class="bi bi-bell-slash text-muted display-4 d-block mb-3"></i>
+        <h5 class="fw-bold">No notifications</h5>
+        <p class="text-muted mb-0">You're all caught up!</p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

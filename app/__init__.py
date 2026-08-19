@@ -41,6 +41,24 @@ def create_app(config_class: type[Config] = Config):
     from app.routes.doctor_application_routes import doctor_app_bp
     app.register_blueprint(doctor_app_bp)
 
+    from app.routes.notification_routes import notification_bp
+    app.register_blueprint(notification_bp)
+
+    # Context processor: inject notification badges into all templates
+    @app.context_processor
+    def inject_badges():
+        from flask_login import current_user
+        badges = {}
+        if current_user.is_authenticated:
+            from app.services.notification_service import NotificationService
+            badges["notif_count"] = NotificationService.get_unread_count(current_user.id)
+            if current_user.has_role("Admin"):
+                badges["pending_applications"] = NotificationService.get_pending_applications_count()
+                badges["pending_cases"] = NotificationService.get_pending_cases_count()
+            elif current_user.has_role("Doctor"):
+                badges["pending_cases"] = NotificationService.get_pending_cases_count()
+        return badges
+
     @app.route("/")
     def home():
         return redirect(url_for("auth.login"))
@@ -51,6 +69,7 @@ def create_app(config_class: type[Config] = Config):
         from app.models.expert_system import Category, Symptom, Disease, Rule, Case
         from app.models.audit_log import AuditLog
         from app.models.doctor_application import DoctorApplication
+        from app.models.notification import Notification
 
         if os.environ.get("RESET_DB", "0") == "1":
             db.drop_all()

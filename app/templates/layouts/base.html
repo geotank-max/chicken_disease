@@ -50,8 +50,11 @@
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link {% if 'expert_system.cases' in request.endpoint %}active{% endif %}" href="{{ url_for('expert_system.cases_index') }}">
-                                    <i class="bi bi-clock-history"></i> ប្រវត្តិ
+                                <a class="nav-link {% if 'expert_system.cases' in request.endpoint %}active{% endif %} d-flex justify-content-between align-items-center" href="{{ url_for('expert_system.cases_index') }}">
+                                    <span><i class="bi bi-clock-history"></i> ប្រវត្តិ</span>
+                                    {% if pending_cases is defined and pending_cases > 0 %}
+                                    <span class="badge bg-warning rounded-pill">{{ pending_cases }}</span>
+                                    {% endif %}
                                 </a>
                             </li>
                         </ul>
@@ -106,8 +109,11 @@
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link {% if 'doctor_app.admin' in request.endpoint %}active{% endif %}" href="{{ url_for('doctor_app.admin_list') }}">
-                                    <i class="bi bi-file-earmark-medical"></i> Doctor Applications
+                                <a class="nav-link {% if 'doctor_app.admin' in request.endpoint %}active{% endif %} d-flex justify-content-between align-items-center" href="{{ url_for('doctor_app.admin_list') }}">
+                                    <span><i class="bi bi-file-earmark-medical"></i> Applications</span>
+                                    {% if pending_applications is defined and pending_applications > 0 %}
+                                    <span class="badge bg-danger rounded-pill">{{ pending_applications }}</span>
+                                    {% endif %}
                                 </a>
                             </li>
                         </ul>
@@ -115,6 +121,14 @@
 
                         <div class="nav-section-label">គណនី</div>
                         <ul class="nav flex-column mb-4">
+                            <li class="nav-item">
+                                <a class="nav-link {% if 'notifications' in request.endpoint %}active{% endif %} d-flex justify-content-between align-items-center" href="{{ url_for('notifications.index') }}">
+                                    <span><i class="bi bi-bell"></i> Notifications</span>
+                                    {% if notif_count is defined and notif_count > 0 %}
+                                    <span class="badge bg-danger rounded-pill">{{ notif_count }}</span>
+                                    {% endif %}
+                                </a>
+                            </li>
                             <li class="nav-item">
                                 <a class="nav-link {% if 'tbl_users.profile' in request.endpoint %}active{% endif %}" href="{{ url_for('tbl_users.profile') }}">
                                     <i class="bi bi-person-circle"></i> ប្រវត្តិរូប
