@@ -1,6 +1,7 @@
 # app/routes/user_routes.py
 from flask import Blueprint, render_template, redirect, url_for, flash, abort
 from flask_login import login_required, current_user
+from extensions import db
 from app.forms.user_forms import(
     UserCreateForm,
     UserEditForm,
@@ -67,18 +68,34 @@ def create():
 @user_bp.route("/<int:user_id>/edit", methods=["GET", "POST"])
 @login_required
 def edit(user_id: int):
-    # Only Admin can edit other users, users can edit themselves (if implemented, but usually restricted)
-    # For now, let's restrict to Admin or self
+    # Only Admin can edit other users; non-admins can only edit themselves
     if not current_user.has_role("Admin") and current_user.id != user_id:
         abort(403)
 
     user = UserService.get_user_by_id(user_id)
     if user is None:
         abort(404)
-        
+
     form = UserEditForm(original_user=user, obj=user)
-    
+
+    # Restrict role choices for non-Admin users (prevent self-escalation)
+    if not current_user.has_role("Admin"):
+        from app.models.role import RoleTable as _RT
+        # Non-admins can only see non-admin roles
+        form.role_id.choices = [
+            (r.id, r.name) for r in
+            db.session.scalars(db.select(_RT).filter(_RT.name != "Admin").order_by(_RT.name))
+        ]
+
     if form.validate_on_submit():
+        # Security check: non-Admin cannot assign Admin role
+        if not current_user.has_role("Admin"):
+            from app.models.role import RoleTable as _RT
+            admin_role = db.session.scalar(db.select(_RT).filter_by(name="Admin"))
+            if admin_role and form.role_id.data == admin_role.id:
+                flash("You do not have permission to assign the Admin role.", "danger")
+                return render_template("users/edit.html", form=form, user=user)
+
         data = {
             "username": form.username.data,
             "email": form.email.data,
@@ -87,17 +104,16 @@ def edit(user_id: int):
         }
         password = form.password.data or None
         role_id = form.role_id.data or None
-        
+
         UserService.update_user(user, data, password, role_id)
         AuditService.log("UPDATE", "User", user.id, f"Updated user: {user.username}")
         flash(f"User '{user.username}' was updated successfully.", "success")
-        
-        # Redirect logic: Admin -> list, User -> profile or detail
+
         if current_user.has_role("Admin"):
             return redirect(url_for("tbl_users.detail", user_id=user.id))
         else:
             return redirect(url_for("tbl_users.profile"))
-    
+
     return render_template("users/edit.html", form=form, user=user)
 
 
