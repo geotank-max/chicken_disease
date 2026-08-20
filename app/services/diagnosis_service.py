@@ -1,4 +1,5 @@
 from app.models.expert_system import Symptom, Rule, Case, CASE_STATUS_PENDING
+from flask_babel import gettext as _
 from extensions import db
 
 MIN_CONFIDENCE_THRESHOLD = 30.0
@@ -14,7 +15,7 @@ class DiagnosisService:
         symptoms = DiagnosisService.get_all_symptoms()
         grouped: dict[str, list] = {}
         for symptom in symptoms:
-            key = symptom.category.name if symptom.category else "ផ្សេងៗ"
+            key = symptom.category.name if symptom.category else _("Other")
             grouped.setdefault(key, []).append(symptom)
         return grouped
 

@@ -131,10 +131,11 @@ class Case(db.Model):
 
     @property
     def status_label_km(self) -> str:
+        from flask_babel import gettext as _
         labels = {
-            CASE_STATUS_PENDING: "រង់ចាំពិនិត្យ",
-            CASE_STATUS_CONFIRMED: "បានបញ្ជាក់",
-            CASE_STATUS_REJECTED: "បានបដិសេធ",
+            CASE_STATUS_PENDING: _("Pending Review"),
+            CASE_STATUS_CONFIRMED: _("Confirmed"),
+            CASE_STATUS_REJECTED: _("Rejected"),
         }
         return labels.get(self.status, self.status)
 

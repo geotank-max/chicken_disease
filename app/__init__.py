@@ -1,9 +1,18 @@
 # app/__init__.py
 import os
-from flask import Flask, redirect, url_for
+from flask import Flask, redirect, url_for, request, session
 from config import Config
-from extensions import db, csrf, login_manager
+from extensions import db, csrf, login_manager, babel
 from app.models.user import UserTable
+
+
+def get_locale():
+    # 1. User explicitly chose a language (stored in session)
+    lang = session.get("lang")
+    if lang and lang in Config.LANGUAGES:
+        return lang
+    # 2. Best match from Accept-Language header
+    return request.accept_languages.best_match(Config.LANGUAGES, default="en")
 
 
 def create_app(config_class: type[Config] = Config):
@@ -13,10 +22,14 @@ def create_app(config_class: type[Config] = Config):
     db.init_app(app)
     csrf.init_app(app)
     login_manager.init_app(app)
+    babel.init_app(app, locale_selector=get_locale)
 
     login_manager.login_view = "auth.login"
-    login_manager.login_message = "សូមចូលប្រើប្រាស់មុន។"
     login_manager.login_message_category = "warning"
+
+    # Use lazy_gettext so the message is translated at request time
+    from flask_babel import lazy_gettext as _l
+    login_manager.login_message = _l("Please log in first.")
 
     @login_manager.user_loader
     def load_user(user_id: str):
@@ -44,6 +57,12 @@ def create_app(config_class: type[Config] = Config):
     from app.routes.notification_routes import notification_bp
     app.register_blueprint(notification_bp)
 
+    from app.routes.api_routes import api_bp
+    app.register_blueprint(api_bp)
+
+    from app.routes.vet_routes import vets_bp
+    app.register_blueprint(vets_bp)
+
     # Context processor: inject notification badges into all templates
     @app.context_processor
     def inject_badges():
@@ -63,6 +82,29 @@ def create_app(config_class: type[Config] = Config):
     def home():
         return redirect(url_for("auth.login"))
 
+    @app.route("/sw.js")
+    def service_worker():
+        """Serve service worker from root so it can control the whole origin."""
+        from flask import send_from_directory
+        return send_from_directory(
+            app.static_folder, "sw.js",
+            mimetype="application/javascript",
+        )
+
+    @app.route("/set-language/<lang>")
+    def set_language(lang):
+        if lang in app.config["LANGUAGES"]:
+            session["lang"] = lang
+        return redirect(request.referrer or url_for("home"))
+
+    # Inject current locale and available languages into all templates
+    @app.context_processor
+    def inject_locale():
+        return {
+            "current_lang": get_locale(),
+            "available_languages": app.config["LANGUAGES"],
+        }
+
     with app.app_context():
         from app.models.role import RoleTable
         from app.models.permission import PermissionTable
@@ -70,6 +112,7 @@ def create_app(config_class: type[Config] = Config):
         from app.models.audit_log import AuditLog
         from app.models.doctor_application import DoctorApplication
         from app.models.notification import Notification
+        from app.models.vet_clinic import VetClinic
 
         if os.environ.get("RESET_DB", "0") == "1":
             db.drop_all()
@@ -85,5 +128,9 @@ def create_app(config_class: type[Config] = Config):
         else:
             from app.services.seed_service import upgrade_permissions
             upgrade_permissions()
+
+        # Seed vet clinics (idempotent)
+        from app.services.vet_seed_service import seed_vet_clinics
+        seed_vet_clinics()
 
     return app

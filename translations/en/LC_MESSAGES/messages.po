@@ -1,0 +1,258 @@
+# English translations for IDNS Chicken Diagnosis
+msgid ""
+msgstr ""
+"Project-Id-Version: IDNS 1.0\n"
+"POT-Creation-Date: 2026-08-20 00:00+0700\n"
+"PO-Revision-Date: 2026-08-20 00:00+0700\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+# --- Navigation ---
+msgid "Dashboard"
+msgstr "Dashboard"
+
+msgid "Run Diagnosis"
+msgstr "Run Diagnosis"
+
+msgid "Case History"
+msgstr "Case History"
+
+msgid "Rules"
+msgstr "Rules"
+
+msgid "Symptoms"
+msgstr "Symptoms"
+
+msgid "Diseases"
+msgstr "Diseases"
+
+msgid "Categories"
+msgstr "Categories"
+
+msgid "Users"
+msgstr "Users"
+
+msgid "Roles"
+msgstr "Roles"
+
+msgid "Permissions"
+msgstr "Permissions"
+
+msgid "Audit Logs"
+msgstr "Audit Logs"
+
+msgid "Applications"
+msgstr "Applications"
+
+msgid "Apply as Doctor"
+msgstr "Apply as Doctor"
+
+msgid "Login"
+msgstr "Login"
+
+msgid "Register"
+msgstr "Register"
+
+msgid "Logout"
+msgstr "Logout"
+
+msgid "Notifications"
+msgstr "Notifications"
+
+msgid "Vet Directory"
+msgstr "Vet Directory"
+
+# --- Diagnosis Wizard ---
+msgid "Flock Information"
+msgstr "Flock Information"
+
+msgid "Flock Size"
+msgstr "Flock Size"
+
+msgid "Bird Age"
+msgstr "Bird Age"
+
+msgid "Breed"
+msgstr "Breed"
+
+msgid "Location"
+msgstr "Location"
+
+msgid "Notes"
+msgstr "Notes"
+
+msgid "Next"
+msgstr "Next"
+
+msgid "Back"
+msgstr "Back"
+
+msgid "Select Symptoms"
+msgstr "Select Symptoms"
+
+msgid "Please select at least one symptom."
+msgstr "Please select at least one symptom."
+
+msgid "Please select symptoms before running analysis."
+msgstr "Please select symptoms before running analysis."
+
+msgid "Diagnosis Results"
+msgstr "Diagnosis Results"
+
+msgid "Save Case"
+msgstr "Save Case"
+
+msgid "Case saved successfully."
+msgstr "Case saved successfully."
+
+# --- Case Status ---
+msgid "Pending Review"
+msgstr "Pending Review"
+
+msgid "Confirmed"
+msgstr "Confirmed"
+
+msgid "Rejected"
+msgstr "Rejected"
+
+# --- Vet Directory ---
+msgid "Find Nearest Vet"
+msgstr "Find Nearest Vet"
+
+msgid "Escalate to Doctor"
+msgstr "Escalate to Doctor"
+
+msgid "Province"
+msgstr "Province"
+
+msgid "Phone"
+msgstr "Phone"
+
+msgid "Address"
+msgstr "Address"
+
+msgid "Distance"
+msgstr "Distance"
+
+msgid "No vets found in your area."
+msgstr "No vets found in your area."
+
+msgid "Case escalated successfully."
+msgstr "Case escalated successfully."
+
+# --- Auth ---
+msgid "Please log in first."
+msgstr "Please log in first."
+
+# --- Misc ---
+msgid "Overview"
+msgstr "Overview"
+
+msgid "Diagnosis"
+msgstr "Diagnosis"
+
+msgid "Knowledge Base"
+msgstr "Knowledge Base"
+
+msgid "System"
+msgstr "System"
+
+msgid "Account"
+msgstr "Account"
+
+msgid "Access"
+msgstr "Access"
+
+msgid "Search symptoms..."
+msgstr "Search symptoms..."
+
+msgid "All"
+msgstr "All"
+
+msgid "Other"
+msgstr "Other"
+
+msgid "Confidence"
+msgstr "Confidence"
+
+msgid "Treatment"
+msgstr "Treatment"
+
+msgid "Prevention"
+msgstr "Prevention"
+
+msgid "Severity"
+msgstr "Severity"
+
+msgid "Contagious"
+msgstr "Contagious"
+
+msgid "Yes"
+msgstr "Yes"
+
+msgid "No"
+msgstr "No"
+
+msgid "You are offline. Diagnosis is available using cached data."
+msgstr "You are offline. Diagnosis is available using cached data."
+
+# --- Additional flash messages ---
+msgid "Review saved successfully."
+msgstr "Review saved successfully."
+
+msgid "Could not submit review."
+msgstr "Could not submit review."
+
+msgid "You have already submitted feedback."
+msgstr "You have already submitted feedback."
+
+msgid "Please select a rating."
+msgstr "Please select a rating."
+
+msgid "Thank you for your feedback!"
+msgstr "Thank you for your feedback!"
+
+msgid "Could not generate PDF. Please use the print function."
+msgstr "Could not generate PDF. Please use the print function."
+
+msgid "Category updated."
+msgstr "Category updated."
+
+msgid "Category deleted."
+msgstr "Category deleted."
+
+msgid "Symptom updated."
+msgstr "Symptom updated."
+
+msgid "Symptom deleted."
+msgstr "Symptom deleted."
+
+msgid "Disease updated."
+msgstr "Disease updated."
+
+msgid "Disease deleted."
+msgstr "Disease deleted."
+
+msgid "Rule updated."
+msgstr "Rule updated."
+
+msgid "Rule deleted."
+msgstr "Rule deleted."
+
+# --- Vet escalation ---
+msgid "You cannot escalate this case."
+msgstr "You cannot escalate this case."
+
+msgid "Case escalated to you"
+msgstr "Case escalated to you"
+
+msgid "Send this case to a veterinarian for expert review. They will be notified and can review your diagnosis."
+msgstr "Send this case to a veterinarian for expert review. They will be notified and can review your diagnosis."
+
+msgid "Call"
+msgstr "Call"
+
+msgid "Search"
+msgstr "Search"

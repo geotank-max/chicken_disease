@@ -1,0 +1,258 @@
+# Khmer translations for IDNS Chicken Diagnosis
+msgid ""
+msgstr ""
+"Project-Id-Version: IDNS 1.0\n"
+"POT-Creation-Date: 2026-08-20 00:00+0700\n"
+"PO-Revision-Date: 2026-08-20 00:00+0700\n"
+"Language: km\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+# --- Navigation ---
+msgid "Dashboard"
+msgstr "ផ្ទាំងគ្រប់គ្រង"
+
+msgid "Run Diagnosis"
+msgstr "ធ្វើការវិភាគ"
+
+msgid "Case History"
+msgstr "ប្រវត្តិករណី"
+
+msgid "Rules"
+msgstr "ច្បាប់"
+
+msgid "Symptoms"
+msgstr "រោគសញ្ញា"
+
+msgid "Diseases"
+msgstr "ជំងឺ"
+
+msgid "Categories"
+msgstr "ប្រភេទ"
+
+msgid "Users"
+msgstr "អ្នកប្រើប្រាស់"
+
+msgid "Roles"
+msgstr "តួនាទី"
+
+msgid "Permissions"
+msgstr "សិទ្ធិ"
+
+msgid "Audit Logs"
+msgstr "កំណត់ហេតុសវនកម្ម"
+
+msgid "Applications"
+msgstr "ពាក្យសុំ"
+
+msgid "Apply as Doctor"
+msgstr "ដាក់ពាក្យជាវេជ្ជបណ្ឌិត"
+
+msgid "Login"
+msgstr "ចូលប្រើ"
+
+msgid "Register"
+msgstr "ចុះឈ្មោះ"
+
+msgid "Logout"
+msgstr "ចាកចេញ"
+
+msgid "Notifications"
+msgstr "ការជូនដំណឹង"
+
+msgid "Vet Directory"
+msgstr "បញ្ជីវេជ្ជបណ្ឌិតសត្វ"
+
+# --- Diagnosis Wizard ---
+msgid "Flock Information"
+msgstr "ព័ត៌មានហ្វូងសត្វ"
+
+msgid "Flock Size"
+msgstr "ចំនួនមាន់"
+
+msgid "Bird Age"
+msgstr "អាយុមាន់"
+
+msgid "Breed"
+msgstr "ពូជ"
+
+msgid "Location"
+msgstr "ទីតាំង"
+
+msgid "Notes"
+msgstr "កំណត់ចំណាំ"
+
+msgid "Next"
+msgstr "បន្ទាប់"
+
+msgid "Back"
+msgstr "ថយក្រោយ"
+
+msgid "Select Symptoms"
+msgstr "ជ្រើសរើសរោគសញ្ញា"
+
+msgid "Please select at least one symptom."
+msgstr "សូមជ្រើសរើសរោគសញ្ញាយ៉ាងហោចណាស់មួយ។"
+
+msgid "Please select symptoms before running analysis."
+msgstr "សូមជ្រើសរើសរោគសញ្ញាមុនពេលវិភាគ។"
+
+msgid "Diagnosis Results"
+msgstr "លទ្ធផលវិភាគ"
+
+msgid "Save Case"
+msgstr "រក្សាទុកករណី"
+
+msgid "Case saved successfully."
+msgstr "ករណីត្រូវបានរក្សាទុកដោយជោគជ័យ។"
+
+# --- Case Status ---
+msgid "Pending Review"
+msgstr "រង់ចាំពិនិត្យ"
+
+msgid "Confirmed"
+msgstr "បានបញ្ជាក់"
+
+msgid "Rejected"
+msgstr "បានបដិសេធ"
+
+# --- Vet Directory ---
+msgid "Find Nearest Vet"
+msgstr "រកវេជ្ជបណ្ឌិតសត្វជិតបំផុត"
+
+msgid "Escalate to Doctor"
+msgstr "បញ្ជូនទៅវេជ្ជបណ្ឌិត"
+
+msgid "Province"
+msgstr "ខេត្ត"
+
+msgid "Phone"
+msgstr "ទូរស័ព្ទ"
+
+msgid "Address"
+msgstr "អាសយដ្ឋាន"
+
+msgid "Distance"
+msgstr "ចម្ងាយ"
+
+msgid "No vets found in your area."
+msgstr "មិនមានវេជ្ជបណ្ឌិតសត្វនៅក្នុងតំបន់របស់អ្នកទេ។"
+
+msgid "Case escalated successfully."
+msgstr "ករណីត្រូវបានបញ្ជូនដោយជោគជ័យ។"
+
+# --- Auth ---
+msgid "Please log in first."
+msgstr "សូមចូលប្រើប្រាស់មុន។"
+
+# --- Misc ---
+msgid "Overview"
+msgstr "ទិដ្ឋភាពទូទៅ"
+
+msgid "Diagnosis"
+msgstr "ការវិភាគ"
+
+msgid "Knowledge Base"
+msgstr "មូលដ្ឋានចំណេះដឹង"
+
+msgid "System"
+msgstr "ប្រព័ន្ធ"
+
+msgid "Account"
+msgstr "គណនី"
+
+msgid "Access"
+msgstr "ការចូលប្រើ"
+
+msgid "Search symptoms..."
+msgstr "ស្វែងរករោគសញ្ញា..."
+
+msgid "All"
+msgstr "ទាំងអស់"
+
+msgid "Other"
+msgstr "ផ្សេងៗ"
+
+msgid "Confidence"
+msgstr "កម្រិតទំនុកចិត្ត"
+
+msgid "Treatment"
+msgstr "ការព្យាបាល"
+
+msgid "Prevention"
+msgstr "ការបង្ការ"
+
+msgid "Severity"
+msgstr "កម្រិតធ្ងន់ធ្ងរ"
+
+msgid "Contagious"
+msgstr "ឆ្លង"
+
+msgid "Yes"
+msgstr "បាទ/ចាស"
+
+msgid "No"
+msgstr "ទេ"
+
+msgid "You are offline. Diagnosis is available using cached data."
+msgstr "អ្នកគ្មានអ៊ីនធឺណិត។ ការវិភាគអាចប្រើបានដោយប្រើទិន្នន័យដែលបានរក្សាទុក។"
+
+# --- Additional flash messages ---
+msgid "Review saved successfully."
+msgstr "ការពិនិត្យត្រូវបានរក្សាទុក។"
+
+msgid "Could not submit review."
+msgstr "មិនអាចដាក់ស្នើការពិនិត្យបានទេ។"
+
+msgid "You have already submitted feedback."
+msgstr "អ្នកបានផ្តល់មតិប្រតិកម្មរួចហើយ។"
+
+msgid "Please select a rating."
+msgstr "សូមជ្រើសរើសពិន្ទុវាយតម្លៃ។"
+
+msgid "Thank you for your feedback!"
+msgstr "សូមអរគុណសម្រាប់មតិប្រតិកម្មរបស់អ្នក!"
+
+msgid "Could not generate PDF. Please use the print function."
+msgstr "មិនអាចបង្កើត PDF បានទេ។ សូមប្រើមុខងារបោះពុម្ព។"
+
+msgid "Category updated."
+msgstr "ប្រភេទត្រូវបានកែប្រែ។"
+
+msgid "Category deleted."
+msgstr "ប្រភេទត្រូវបានលុប។"
+
+msgid "Symptom updated."
+msgstr "រោគសញ្ញាត្រូវបានកែប្រែ។"
+
+msgid "Symptom deleted."
+msgstr "រោគសញ្ញាត្រូវបានលុប។"
+
+msgid "Disease updated."
+msgstr "ជំងឺត្រូវបានកែប្រែ។"
+
+msgid "Disease deleted."
+msgstr "ជំងឺត្រូវបានលុប។"
+
+msgid "Rule updated."
+msgstr "វិធានត្រូវបានកែប្រែ។"
+
+msgid "Rule deleted."
+msgstr "វិធានត្រូវបានលុប។"
+
+# --- Vet escalation ---
+msgid "You cannot escalate this case."
+msgstr "អ្នកមិនអាចបញ្ជូនករណីនេះបានទេ។"
+
+msgid "Case escalated to you"
+msgstr "ករណីត្រូវបានបញ្ជូនមកអ្នក"
+
+msgid "Send this case to a veterinarian for expert review. They will be notified and can review your diagnosis."
+msgstr "បញ្ជូនករណីនេះទៅវេជ្ជបណ្ឌិតសត្វសម្រាប់ការពិនិត្យ។ ពួកគេនឹងទទួលបានការជូនដំណឹង។"
+
+msgid "Call"
+msgstr "ទូរស័ព្ទ"
+
+msgid "Search"
+msgstr "ស្វែងរក"

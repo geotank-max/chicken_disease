@@ -1,0 +1,115 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}{{ _('Vet Directory') }}{% endblock %}
+{% block page_title %}{{ _('Vet Directory') }}{% endblock %}
+{% block page_subtitle %}{{ _('Find Nearest Vet') }}{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <form method="GET" action="{{ url_for('vets.index') }}" class="row g-2 align-items-end" id="vetFilterForm">
+                    <div class="col-md-4">
+                        <label class="form-label small fw-semibold">{{ _('Province') }}</label>
+                        <select name="province" class="form-select form-select-sm">
+                            <option value="">{{ _('All') }}</option>
+                            {% for prov in provinces %}
+                            <option value="{{ prov }}" {% if prov == selected_province %}selected{% endif %}>{{ prov }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <input type="hidden" name="lat" id="userLat" value="{{ user_lat or '' }}">
+                        <input type="hidden" name="lng" id="userLng" value="{{ user_lng or '' }}">
+                        <button type="button" class="btn btn-sm btn-outline-primary w-100" id="geolocateBtn">
+                            <i class="bi bi-geo-alt me-1"></i>{{ _('Find Nearest Vet') }}
+                        </button>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-sm btn-primary w-100">
+                            <i class="bi bi-search me-1"></i>{{ _('Search') if current_lang == 'en' else 'ស្វែងរក' }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if clinics %}
+<div class="row g-3">
+    {% for clinic in clinics %}
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100 vet-card">
+            <div class="card-body">
+                <h6 class="card-title mb-1">
+                    <i class="bi bi-hospital text-primary me-1"></i>{{ clinic.name }}
+                </h6>
+                <p class="text-muted small mb-2">{{ clinic.province }}{% if clinic.district %} &middot; {{ clinic.district }}{% endif %}</p>
+
+                {% if clinic.distance_km is not none %}
+                <span class="badge bg-info mb-2">
+                    <i class="bi bi-pin-map me-1"></i>{{ clinic.distance_km }} km
+                </span>
+                {% endif %}
+
+                {% if clinic.specialization %}
+                <p class="small mb-2"><i class="bi bi-tag me-1"></i>{{ clinic.specialization }}</p>
+                {% endif %}
+
+                {% if clinic.address %}
+                <p class="small mb-1"><i class="bi bi-geo-alt me-1 text-muted"></i>{{ clinic.address }}</p>
+                {% endif %}
+
+                {% if clinic.phone %}
+                <p class="small mb-0">
+                    <i class="bi bi-telephone me-1 text-muted"></i>
+                    <a href="tel:{{ clinic.phone }}" class="text-decoration-none">{{ clinic.phone }}</a>
+                </p>
+                {% endif %}
+            </div>
+            <div class="card-footer bg-transparent border-0 pt-0">
+                {% if clinic.phone %}
+                <a href="tel:{{ clinic.phone }}" class="btn btn-sm btn-outline-success w-100">
+                    <i class="bi bi-telephone-fill me-1"></i>{{ _('Call') if current_lang == 'en' else 'ទូរស័ព្ទ' }}
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="text-center py-5 text-muted">
+    <i class="bi bi-geo-alt fs-1"></i>
+    <p class="mt-2">{{ _('No vets found in your area.') }}</p>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.getElementById('geolocateBtn')?.addEventListener('click', function() {
+    if (!navigator.geolocation) {
+        alert('Geolocation not supported by your browser.');
+        return;
+    }
+    this.disabled = true;
+    this.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Locating...';
+    navigator.geolocation.getCurrentPosition(
+        (pos) => {
+            document.getElementById('userLat').value = pos.coords.latitude;
+            document.getElementById('userLng').value = pos.coords.longitude;
+            document.getElementById('vetFilterForm').submit();
+        },
+        (err) => {
+            this.disabled = false;
+            this.innerHTML = '<i class="bi bi-geo-alt me-1"></i>{{ _("Find Nearest Vet") }}';
+            alert('Could not get location: ' + err.message);
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
+    );
+});
+</script>
+{% endblock %}

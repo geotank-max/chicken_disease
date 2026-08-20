@@ -1,0 +1,27 @@
+{
+  "name": "IDNS Chicken Diagnosis",
+  "short_name": "IDNS",
+  "description": "Intelligent chicken disease diagnosis system for Cambodian farmers",
+  "start_url": "/expert-system/diagnose",
+  "display": "standalone",
+  "background_color": "#f8f9fc",
+  "theme_color": "#2563eb",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/static/images/logo1.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/images/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["health", "utilities"],
+  "lang": "en",
+  "dir": "ltr"
+}

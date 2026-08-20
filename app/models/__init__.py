@@ -5,6 +5,7 @@ from .permission import PermissionTable
 from .expert_system import Category, Symptom, Disease, Rule, Case
 from .doctor_application import DoctorApplication
 from .notification import Notification
+from .vet_clinic import VetClinic
 
 __all__ = [
     "UserTable",
@@ -17,4 +18,5 @@ __all__ = [
     "Case",
     "DoctorApplication",
     "Notification",
+    "VetClinic",
 ]

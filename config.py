@@ -22,3 +22,8 @@ class Config:
     )
     
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+    # i18n / Flask-Babel
+    LANGUAGES = ["en", "km"]
+    BABEL_DEFAULT_LOCALE = "en"
+    BABEL_DEFAULT_TIMEZONE = "Asia/Phnom_Penh"

@@ -1,6 +1,7 @@
 # app/routes/expert_system.py
 from flask import Blueprint, render_template, request, redirect, url_for, flash, abort, send_file, session
 from flask_login import login_required, current_user
+from flask_babel import gettext as _
 from extensions import db
 from utils.decorators import require_permission
 from app.forms.expert_system_forms import (
@@ -66,7 +67,7 @@ def diagnose():
         selected_ids = [int(sid) for sid in request.form.getlist("symptoms")]
         session["diagnosis_symptoms"] = selected_ids
         if not selected_ids:
-            flash("សូមជ្រើសរើសរោគសញ្ញាយ៉ាងហោចណាស់មួយ។", "warning")
+            flash(_("Please select at least one symptom."), "warning")
             return redirect(url_for("expert_system.diagnose", step="2"))
         return redirect(url_for("expert_system.diagnose", step="3"))
 
@@ -74,7 +75,7 @@ def diagnose():
         selected_ids = session.get("diagnosis_symptoms", [])
         flock_data = session.get("diagnosis_wizard", {})
         if not selected_ids:
-            flash("សូមជ្រើសរើសរោគសញ្ញាមុនពេលវិភាគ។", "warning")
+            flash(_("Please select symptoms before running analysis."), "warning")
             return redirect(url_for("expert_system.diagnose", step="2"))
 
         if request.method == "POST" and request.form.get("action") == "save":
@@ -89,7 +90,7 @@ def diagnose():
             session.pop("diagnosis_symptoms", None)
             if saved_case and saved_case.disease:
                 AuditService.log("DIAGNOSE", "Case", saved_case.id, f"Diagnosis saved: {saved_case.disease.name}")
-            flash("ករណីត្រូវបានរក្សាទុកដោយជោគជ័យ។", "success")
+            flash(_("Case saved successfully."), "success")
             return redirect(url_for("expert_system.cases_detail", case_id=saved_case.id))
 
         diagnosis_results = DiagnosisService.run_inference(selected_ids)
@@ -207,9 +208,9 @@ def cases_review(case_id: int):
             override_disease_id=override_id,
         )
         AuditService.log("REVIEW", "Case", case.id, f"Case reviewed: {form.action.data}")
-        flash("ការពិនិត្យត្រូវបានរក្សាទុក។", "success")
+        flash(_("Review saved successfully."), "success")
     else:
-        flash("មិនអាចដាក់ស្នើការពិនិត្យបានទេ។", "danger")
+        flash(_("Could not submit review."), "danger")
 
     return redirect(url_for("expert_system.cases_detail", case_id=case_id))
 
@@ -228,18 +229,18 @@ def cases_feedback(case_id: int):
 
     # Prevent double feedback
     if case.feedback_rating is not None:
-        flash("អ្នកបានផ្តល់មតិប្រតិកម្មរួចហើយ។", "info")
+        flash(_("You have already submitted feedback."), "info")
         return redirect(url_for("expert_system.cases_detail", case_id=case_id))
 
     rating = request.form.get("rating", 0, type=int)
     feedback_text = request.form.get("feedback_text", "").strip()
 
     if rating < 1 or rating > 5:
-        flash("សូមជ្រើសរើសពិន្ទុវាយតម្លៃ។", "warning")
+        flash(_("Please select a rating."), "warning")
         return redirect(url_for("expert_system.cases_detail", case_id=case_id))
 
     CaseService.submit_feedback(case, rating, feedback_text)
-    flash("សូមអរគុណសម្រាប់មតិប្រតិកម្មរបស់អ្នក!", "success")
+    flash(_("Thank you for your feedback!"), "success")
     return redirect(url_for("expert_system.cases_detail", case_id=case_id))
 
 
@@ -269,7 +270,7 @@ def cases_pdf(case_id: int):
 
     pdf_buffer = PdfService.render_case_pdf(case)
     if pdf_buffer is None:
-        flash("មិនអាចបង្កើត PDF បានទេ។ សូមប្រើមុខងារបោះពុម្ព។", "warning")
+        flash(_("Could not generate PDF. Please use the print function."), "warning")
         return redirect(url_for("expert_system.cases_print", case_id=case_id))
 
     return send_file(
@@ -357,7 +358,7 @@ def categories_create():
             {"name": form.name.data, "description": form.description.data}
         )
         AuditService.log("CREATE", "Category", category.id, f"Created category: {category.name}")
-        flash(f"ប្រភេទ '{category.name}' ត្រូវបានបង្កើត។", "success")
+        flash(f"Category '{category.name}' created.", "success")
         return redirect(url_for("expert_system.categories_index"))
     return render_template("expert_system/categories/create.html", form=form)
 
@@ -376,7 +377,7 @@ def categories_edit(category_id: int):
             {"name": form.name.data, "description": form.description.data},
         )
         AuditService.log("UPDATE", "Category", category.id, f"Updated category: {category.name}")
-        flash("ប្រភេទត្រូវបានកែប្រែ។", "success")
+        flash(_("Category updated."), "success")
         return redirect(url_for("expert_system.categories_index"))
     return render_template(
         "expert_system/categories/edit.html",
@@ -396,7 +397,7 @@ def categories_delete(category_id: int):
         category_name = category.name
         CategoryService.delete(category)
         AuditService.log("DELETE", "Category", category_id, f"Deleted category: {category_name}")
-        flash("ប្រភេទត្រូវបានលុប។", "success")
+        flash(_("Category deleted."), "success")
         return redirect(url_for("expert_system.categories_index"))
     return render_template(
         "expert_system/categories/delete_confirm.html",
@@ -453,7 +454,7 @@ def symptoms_edit(symptom_id: int):
             },
         )
         AuditService.log("UPDATE", "Symptom", symptom.id, f"Updated symptom: {symptom.name}")
-        flash("រោគសញ្ញាត្រូវបានកែប្រែ។", "success")
+        flash(_("Symptom updated."), "success")
         return redirect(url_for("expert_system.symptoms_index"))
     return render_template(
         "expert_system/symptoms/edit.html",
@@ -473,7 +474,7 @@ def symptoms_delete(symptom_id: int):
         symptom_name = symptom.name
         SymptomService.delete(symptom)
         AuditService.log("DELETE", "Symptom", symptom_id, f"Deleted symptom: {symptom_name}")
-        flash("រោគសញ្ញាត្រូវបានលុប។", "success")
+        flash(_("Symptom deleted."), "success")
         return redirect(url_for("expert_system.symptoms_index"))
     return render_template(
         "expert_system/symptoms/delete_confirm.html",
@@ -538,7 +539,7 @@ def diseases_edit(disease_id: int):
             },
         )
         AuditService.log("UPDATE", "Disease", disease.id, f"Updated disease: {disease.name}")
-        flash("ជំងឺត្រូវបានកែប្រែ។", "success")
+        flash(_("Disease updated."), "success")
         return redirect(url_for("expert_system.diseases_index"))
     return render_template(
         "expert_system/diseases/edit.html",
@@ -558,7 +559,7 @@ def diseases_delete(disease_id: int):
         disease_name = disease.name
         DiseaseService.delete(disease)
         AuditService.log("DELETE", "Disease", disease_id, f"Deleted disease: {disease_name}")
-        flash("ជំងឺត្រូវបានលុប។", "success")
+        flash(_("Disease deleted."), "success")
         return redirect(url_for("expert_system.diseases_index"))
     return render_template(
         "expert_system/diseases/delete_confirm.html",
@@ -591,7 +592,7 @@ def rules_create():
             symptom_ids=form.symptom_ids.data or [],
         )
         AuditService.log("CREATE", "Rule", rule.id, f"Created rule: {rule.title}")
-        flash(f"វិធាន '{rule.title}' ត្រូវបានបង្កើត។", "success")
+        flash(f"Rule '{rule.title}' created.", "success")
         return redirect(url_for("expert_system.rules_index"))
     return render_template("expert_system/rules/create.html", form=form)
 
@@ -617,7 +618,7 @@ def rules_edit(rule_id: int):
             symptom_ids=form.symptom_ids.data or [],
         )
         AuditService.log("UPDATE", "Rule", rule.id, f"Updated rule: {rule.title}")
-        flash("វិធានត្រូវបានកែប្រែ។", "success")
+        flash(_("Rule updated."), "success")
         return redirect(url_for("expert_system.rules_index"))
     return render_template(
         "expert_system/rules/edit.html",
@@ -637,7 +638,7 @@ def rules_delete(rule_id: int):
         rule_title = rule.title
         RuleService.delete(rule)
         AuditService.log("DELETE", "Rule", rule_id, f"Deleted rule: {rule_title}")
-        flash("វិធានត្រូវបានលុប។", "success")
+        flash(_("Rule deleted."), "success")
         return redirect(url_for("expert_system.rules_index"))
     return render_template(
         "expert_system/rules/delete_confirm.html",
