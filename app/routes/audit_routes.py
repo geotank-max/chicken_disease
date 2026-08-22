@@ -10,7 +10,7 @@ audit_bp = Blueprint("audit", __name__, url_prefix="/audit")
 @audit_bp.route("/")
 @login_required
 def index():
-    if not current_user.has_role("Admin"):
+    if not current_user.has_permission("USER_CREATE"):
         abort(403)
     
     search_query = request.args.get("q", "").strip()
@@ -25,7 +25,7 @@ def index():
 @audit_bp.route("/user/<int:user_id>")
 @login_required
 def user_logs(user_id):
-    if not current_user.has_role("Admin"):
+    if not current_user.has_permission("USER_CREATE"):
         abort(403)
         
     user = UserService.get_user_by_id(user_id)
@@ -38,7 +38,7 @@ def user_logs(user_id):
 @audit_bp.route("/export")
 @login_required
 def export():
-    if not current_user.has_role("Admin"):
+    if not current_user.has_permission("USER_CREATE"):
         abort(403)
         
     search_query = request.args.get("q", "").strip()

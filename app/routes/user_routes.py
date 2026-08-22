@@ -16,8 +16,8 @@ user_bp = Blueprint("tbl_users", __name__, url_prefix="/users")
 @user_bp.route("/")
 @login_required
 def index():
-    # Only Admin can view user list
-    if not current_user.has_role("Admin"):
+    # Only users with USER_CREATE permission can view user list
+    if not current_user.has_permission("USER_CREATE"):
         abort(403)
         
     users = UserService.get_user_all()
@@ -31,8 +31,8 @@ def profile():
 @user_bp.route("/<int:user_id>")
 @login_required
 def detail(user_id: int):
-    # Only Admin can view other user details
-    if not current_user.has_role("Admin") and current_user.id != user_id:
+    # Only users with USER_EDIT permission can view other user details
+    if not current_user.has_permission("USER_EDIT") and current_user.id != user_id:
         abort(403)
 
     user = UserService.get_user_by_id(user_id)
@@ -43,8 +43,8 @@ def detail(user_id: int):
 @user_bp.route("/create", methods=["GET", "POST"])
 @login_required
 def create():
-    # Only Admin can create users
-    if not current_user.has_role("Admin"):
+    # Only users with USER_CREATE permission can create users
+    if not current_user.has_permission("USER_CREATE"):
         abort(403)
 
     form = UserCreateForm()
@@ -68,15 +68,15 @@ def create():
 @user_bp.route("/<int:user_id>/edit", methods=["GET", "POST"])
 @login_required
 def edit(user_id: int):
-    # Only Admin can edit other users; non-admins can only edit themselves
-    if not current_user.has_role("Admin") and current_user.id != user_id:
+    # Only users with USER_EDIT permission can edit other users; others can only edit themselves
+    if not current_user.has_permission("USER_EDIT") and current_user.id != user_id:
         abort(403)
 
     user = UserService.get_user_by_id(user_id)
     if user is None:
         abort(404)
 
-    is_admin = current_user.has_role("Admin")
+    is_admin = current_user.has_permission("USER_EDIT")
     form = UserEditForm(original_user=user, obj=user)
 
     # Non-admins cannot change roles or active status at all
@@ -113,7 +113,7 @@ def edit(user_id: int):
 @user_bp.route("/<int:user_id>/delete", methods=["GET"])
 @login_required
 def delete_confirm(user_id: int):
-    if not current_user.has_role("Admin"):
+    if not current_user.has_permission("USER_DELETE"):
         abort(403)
 
     # Prevent deleting self
@@ -132,7 +132,7 @@ def delete_confirm(user_id: int):
 @user_bp.route("/<int:user_id>/delete", methods=["POST"])
 @login_required
 def delete(user_id: int):
-    if not current_user.has_role("Admin"):
+    if not current_user.has_permission("USER_DELETE"):
         abort(403)
 
     # Prevent deleting self

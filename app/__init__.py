@@ -1,6 +1,6 @@
 # app/__init__.py
 import os
-from flask import Flask, redirect, url_for
+from flask import Flask, redirect, url_for, render_template, request, session
 from config import Config
 from extensions import db, csrf, login_manager
 from app.models.user import UserTable
@@ -52,12 +52,43 @@ def create_app(config_class: type[Config] = Config):
         if current_user and hasattr(current_user, 'is_authenticated') and current_user.is_authenticated:
             from app.services.notification_service import NotificationService
             badges["notif_count"] = NotificationService.get_unread_count(current_user.id)
-            if current_user.has_role("Admin"):
+            if current_user.has_permission("USER_CREATE"):
                 badges["pending_applications"] = NotificationService.get_pending_applications_count()
                 badges["pending_cases"] = NotificationService.get_pending_cases_count()
-            elif current_user.has_role("Doctor"):
+            elif current_user.has_permission("review_cases"):
                 badges["pending_cases"] = NotificationService.get_pending_cases_count()
         return badges
+
+    # ── Error handlers ────────────────────────────────────────────
+    @app.errorhandler(403)
+    def forbidden(e):
+        return render_template("errors/error.html",
+            error_code=403,
+            title="Access Denied",
+            message="You don't have permission to access this page. If you believe this is a mistake, contact your administrator.",
+            icon="bi-shield-x",
+            icon_class="forbidden",
+        ), 403
+
+    @app.errorhandler(404)
+    def not_found(e):
+        return render_template("errors/error.html",
+            error_code=404,
+            title="Page Not Found",
+            message="The page you're looking for doesn't exist or has been moved. Check the URL or head back to the homepage.",
+            icon="bi-search",
+            icon_class="not-found",
+        ), 404
+
+    @app.errorhandler(500)
+    def server_error(e):
+        return render_template("errors/error.html",
+            error_code=500,
+            title="Something Went Wrong",
+            message="An unexpected error occurred on our end. Please try again later or contact support if the problem persists.",
+            icon="bi-exclamation-octagon",
+            icon_class="server-error",
+        ), 500
 
     @app.route("/")
     def home():

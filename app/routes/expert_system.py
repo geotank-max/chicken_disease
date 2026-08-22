@@ -131,7 +131,7 @@ def cases_index():
     date_to = request.args.get("date_to", "").strip() or None
 
     user_id = None
-    if not (current_user.has_role("Admin") or current_user.has_role("Doctor")):
+    if not (current_user.has_permission("review_cases")):
         user_id = current_user.id
 
     pagination = CaseService.get_paginated(
@@ -168,7 +168,7 @@ def cases_detail(case_id: int):
     if case is None:
         abort(404)
 
-    if not (current_user.has_role("Admin") or current_user.has_role("Doctor")):
+    if not current_user.has_permission("review_cases"):
         if case.user_id != current_user.id:
             abort(403)
 
@@ -250,7 +250,7 @@ def cases_print(case_id: int):
     case = CaseService.get_by_id(case_id)
     if case is None:
         abort(404)
-    if not (current_user.has_role("Admin") or current_user.has_role("Doctor")):
+    if not current_user.has_permission("review_cases"):
         if case.user_id != current_user.id:
             abort(403)
     return render_template("expert_system/cases/print.html", case=case, pdf_mode=False)
@@ -263,7 +263,7 @@ def cases_pdf(case_id: int):
     case = CaseService.get_by_id(case_id)
     if case is None:
         abort(404)
-    if not (current_user.has_role("Admin") or current_user.has_role("Doctor")):
+    if not current_user.has_permission("review_cases"):
         if case.user_id != current_user.id:
             abort(403)
 
@@ -287,7 +287,7 @@ def cases_export_csv():
     import csv
     from io import StringIO, BytesIO
 
-    if not (current_user.has_role("Admin") or current_user.has_role("Doctor")):
+    if not current_user.has_permission("review_cases"):
         abort(403)
 
     status_filter = request.args.get("status", "").strip() or None

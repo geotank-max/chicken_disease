@@ -148,7 +148,17 @@ def admin_review(app_id):
 @login_required
 def serve_upload(filename):
     """Serve uploaded PDF files (admin only)."""
-    if not current_user.has_role("Admin"):
+    if not current_user.has_permission("USER_CREATE"):
         abort(403)
     upload_dir = current_app.config["UPLOAD_FOLDER"]
-    return send_from_directory(upload_dir, filename)
+    # Ensure safe path join on Windows — normalize separators
+    safe_path = os.path.normpath(filename)
+    # Prevent directory traversal
+    if safe_path.startswith("..") or os.path.isabs(safe_path):
+        abort(404)
+    full_path = os.path.join(upload_dir, safe_path)
+    if not os.path.isfile(full_path):
+        abort(404)
+    directory = os.path.dirname(full_path)
+    file_name = os.path.basename(full_path)
+    return send_from_directory(directory, file_name)

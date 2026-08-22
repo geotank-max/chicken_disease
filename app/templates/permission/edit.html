@@ -1,7 +1,22 @@
 {% extends "layouts/base.html" %}
-{% block title %}កែប្រែសិទ្ធិ{% endblock %}
+{% block title %}Edit Permission: {{ permission.code }}{% endblock %}
+{% block page_title %}Edit Permission{% endblock %}
+{% block page_subtitle %}{{ permission.code }}{% endblock %}
 
 {% block content %}
-    <h1 class="h3 mb-3">កែប្រែសិទ្ធិ៖ {{ permission.code }}</h1>
-    {% include "permission/_form.html" %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="mb-3">
+            <a href="{{ url_for('tbl_permissions.detail', permission_id=permission.id) }}" class="text-decoration-none text-muted small">
+                <i class="bi bi-arrow-left me-1"></i> Back to Details
+            </a>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                {% include "permission/_form.html" %}
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

@@ -21,7 +21,7 @@
         <aside class="app-sidebar" id="sidebarMenu">
             <!-- Brand -->
             <div class="sidebar-brand">
-                <a href="{{ url_for('dashboard.index') if current_user.is_authenticated and (current_user.has_role('Admin') or current_user.has_role('Doctor')) else url_for('expert_system.diagnose') if current_user.is_authenticated else url_for('auth.login') }}" class="text-decoration-none">
+                <a href="{{ url_for('dashboard.index') if current_user.is_authenticated and current_user.has_permission('view_dashboard') else url_for('expert_system.diagnose') if current_user.is_authenticated else url_for('auth.login') }}" class="text-decoration-none">
                     <img src="{{ url_for('static', filename='images/logo1.png') }}" alt="IDNS" class="sidebar-logo">
                     <div class="sidebar-brand-text">
                         <span class="fw-bold">IDNS</span>
@@ -33,7 +33,7 @@
             <!-- Navigation -->
             <nav class="sidebar-nav">
                 {% if current_user.is_authenticated %}
-                    {% if current_user.has_role('Admin') or current_user.has_role('Doctor') %}
+                    {% if current_user.has_permission('view_dashboard') %}
                     <div class="nav-section-label">Overview</div>
                     <ul class="nav flex-column">
                         <li class="nav-item">
@@ -64,7 +64,7 @@
                         </li>
                     </ul>
 
-                    {% if current_user.has_role('Admin') or current_user.has_role('Doctor') %}
+                    {% if current_user.has_permission('manage_rules') or current_user.has_permission('manage_symptoms') %}
                     <div class="nav-section-label">Knowledge Base</div>
                     <ul class="nav flex-column">
                         <li class="nav-item">
@@ -94,7 +94,7 @@
                     </ul>
                     {% endif %}
 
-                    {% if current_user.has_role('Admin') %}
+                    {% if current_user.has_permission('USER_CREATE') or current_user.has_permission('ROLE_MANAGE') %}
                     <div class="nav-section-label">System</div>
                     <ul class="nav flex-column">
                         <li class="nav-item">
@@ -133,7 +133,7 @@
                     </ul>
                     {% endif %}
 
-                    {% if not current_user.has_role('Admin') and not current_user.has_role('Doctor') %}
+                    {% if not current_user.has_permission('review_cases') and not current_user.has_permission('USER_CREATE') %}
                     <div class="nav-section-label">Account</div>
                     <ul class="nav flex-column">
                         <li class="nav-item">

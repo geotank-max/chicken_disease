@@ -1,43 +1,114 @@
 {% extends "layouts/base.html" %}
-{% block title %}សិទ្ធិ{% endblock %}
+{% block title %}Permissions{% endblock %}
+{% block page_title %}Permissions{% endblock %}
+{% block page_subtitle %}Manage system access controls{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="h3">សិទ្ធិ</h1>
-    <a href="{{ url_for('tbl_permissions.create') }}" class="btn btn-primary">បង្កើតសិទ្ធិ</a>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <span class="badge bg-primary bg-opacity-10 text-primary fs-6">{{ permissions | length }} total</span>
+    </div>
+    <a href="{{ url_for('tbl_permissions.create') }}" class="btn btn-primary btn-sm px-3">
+        <i class="bi bi-plus-lg me-1"></i> New Permission
+    </a>
 </div>
 
 {% if permissions %}
-<table class="table table-striped align-middle">
-    <thead>
-        <tr>
-            <th>កូដ</th>
-            <th>ឈ្មោះ</th>
-            <th>ម៉ូឌុល</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for perm in permissions %}
-        <tr>
-            <td>
-                <a href="{{ url_for('tbl_permissions.detail', permission_id=perm.id) }}">
-                    {{ perm.code }}
-                </a>
-            </td>
-            <td>{{ perm.name }}</td>
-            <td>{{ perm.module }}</td>
-            <td class="text-end">
-                <a href="{{ url_for('tbl_permissions.edit', permission_id=perm.id) }}"
-                class="btn btn-sm btn-warning">✏️</a>
-                <a href="{{ url_for('tbl_permissions.delete_confirm', permission_id=perm.id) }}"
-                class="btn btn-sm btn-danger">🗑️</a>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+{% set grouped = {} %}
+{% for perm in permissions %}
+    {% set module = perm.module or 'General' %}
+    {% if module not in grouped %}
+        {% set _ = grouped.update({module: []}) %}
+    {% endif %}
+    {% set _ = grouped[module].append(perm) %}
+{% endfor %}
+
+{% for module, perms in grouped.items() %}
+<div class="card border-0 shadow-sm mb-3">
+    <div class="card-header bg-white border-bottom py-3">
+        <div class="d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center gap-2">
+                <div class="module-icon">
+                    {% if module == 'Users' %}
+                    <i class="bi bi-people"></i>
+                    {% elif module == 'Roles' %}
+                    <i class="bi bi-shield-lock"></i>
+                    {% elif module == 'Permissions' %}
+                    <i class="bi bi-key"></i>
+                    {% elif module == 'Dashboard' %}
+                    <i class="bi bi-grid-1x2"></i>
+                    {% elif module == 'Expert System' %}
+                    <i class="bi bi-cpu"></i>
+                    {% else %}
+                    <i class="bi bi-folder"></i>
+                    {% endif %}
+                </div>
+                <div>
+                    <h6 class="mb-0 fw-bold">{{ module }}</h6>
+                    <small class="text-muted">{{ perms | length }} permission{{ 's' if perms | length > 1 else '' }}</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4 py-2 fw-semibold text-muted small text-uppercase" style="width: 200px;">Code</th>
+                        <th class="py-2 fw-semibold text-muted small text-uppercase">Name</th>
+                        <th class="py-2 fw-semibold text-muted small text-uppercase" style="width: 100px;">Roles</th>
+                        <th class="pe-4 py-2 text-end" style="width: 100px;"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for perm in perms %}
+                    <tr>
+                        <td class="ps-4">
+                            <a href="{{ url_for('tbl_permissions.detail', permission_id=perm.id) }}" class="text-decoration-none fw-semibold">
+                                <code class="text-primary">{{ perm.code }}</code>
+                            </a>
+                        </td>
+                        <td>
+                            <span class="text-dark">{{ perm.name }}</span>
+                            {% if perm.description %}
+                            <br><small class="text-muted">{{ perm.description }}</small>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge bg-secondary bg-opacity-10 text-secondary">{{ perm.roles | length }}</span>
+                        </td>
+                        <td class="pe-4 text-end">
+                            <div class="btn-group btn-group-sm">
+                                <a href="{{ url_for('tbl_permissions.edit', permission_id=perm.id) }}" class="btn btn-outline-secondary btn-sm" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a href="{{ url_for('tbl_permissions.delete_confirm', permission_id=perm.id) }}" class="btn btn-outline-danger btn-sm" title="Delete">
+                                    <i class="bi bi-trash3"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
 {% else %}
-    <p class="text-muted">មិនទាន់មានសិទ្ធិត្រូវបានកំណត់ទេ។</p>
+<div class="card border-0 shadow-sm">
+    <div class="card-body text-center py-5">
+        <div class="text-muted mb-3">
+            <i class="bi bi-key fs-1 opacity-50"></i>
+        </div>
+        <h6 class="text-muted">No permissions defined yet</h6>
+        <p class="small text-muted mb-3">Create your first permission to start managing access control.</p>
+        <a href="{{ url_for('tbl_permissions.create') }}" class="btn btn-primary btn-sm">
+            <i class="bi bi-plus-lg me-1"></i> Create Permission
+        </a>
+    </div>
+</div>
 {% endif %}
 {% endblock %}

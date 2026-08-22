@@ -19,22 +19,22 @@ def login():
         if user and user.check_password(password):
             if not user.is_active:
                 flash("Your account is inactive. Please contact administrator.", "warning")
-                return redirect(url_for("auth.login"))
+                return render_template("auth/login.html", username=username)
             
             login_user(user)
             AuditService.log("LOGIN", "User", user.id, "User logged in")
             flash("Logged in successfully.", "success")
             
-            # Redirect based on role
-            if user.has_role("Admin") or user.has_role("Doctor"):
+            # Redirect based on permissions
+            if user.has_permission("view_dashboard"):
                 return redirect(url_for("dashboard.index"))
             else:
                 return redirect(url_for("expert_system.diagnose"))
         
         flash("Invalid username or password.", "danger")
-        return redirect(url_for("auth.login"))
+        return render_template("auth/login.html", username=username)
     
-    return render_template("auth/login.html")
+    return render_template("auth/login.html", username="")
 
 
 @auth_bp.route("/register", methods=["GET", "POST"])
@@ -94,9 +94,9 @@ def register():
         AuditService.log("REGISTER", "User", new_user.id, "New user registered")
         flash("Account created successfully. You are now logged in.", "success")
         
-        # Redirect based on role (new users are typically 'User' role)
-        if new_user.has_role("Admin"):
-            return redirect(url_for("tbl_users.index"))
+        # Redirect based on permissions (new users are typically 'User' role)
+        if new_user.has_permission("view_dashboard"):
+            return redirect(url_for("dashboard.index"))
         else:
             return redirect(url_for("expert_system.diagnose"))
     

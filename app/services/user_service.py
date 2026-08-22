@@ -61,5 +61,41 @@ class UserService:
     
     @staticmethod
     def delete_user(user: UserTable) -> None:
+        from app.models.expert_system import Case
+        from app.models.audit_log import AuditLog
+        from app.models.notification import Notification
+        from app.models.doctor_application import DoctorApplication
+        from app.models.vet_clinic import VetClinic
+
+        user_id = user.id
+
+        # Remove notifications belonging to the user
+        Notification.query.filter_by(user_id=user_id).delete()
+
+        # Nullify audit log references (preserve history)
+        AuditLog.query.filter_by(user_id=user_id).update({"user_id": None})
+
+        # Nullify case.reviewed_by_id where this user reviewed
+        Case.query.filter_by(reviewed_by_id=user_id).update({"reviewed_by_id": None})
+
+        # Delete cases owned by this user (or nullify if you prefer to keep them)
+        owned_cases = Case.query.filter_by(user_id=user_id).all()
+        for case in owned_cases:
+            # Clear the M2M symptom associations first
+            case.symptoms = []
+            db.session.delete(case)
+
+        # Delete doctor applications by this user
+        DoctorApplication.query.filter_by(user_id=user_id).delete()
+        # Nullify reviewed_by on applications reviewed by this user
+        DoctorApplication.query.filter_by(reviewed_by_id=user_id).update({"reviewed_by_id": None})
+
+        # Nullify vet clinic link
+        VetClinic.query.filter_by(user_id=user_id).update({"user_id": None})
+
+        # Clear role associations (M2M)
+        user.roles = []
+
+        db.session.flush()
         db.session.delete(user)
         db.session.commit()

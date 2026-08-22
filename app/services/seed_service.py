@@ -360,8 +360,42 @@ def seed_expert_data():
 
 
 def upgrade_permissions():
-    """Ensure new permissions exist on existing databases."""
-    seed_permissions_and_roles()
+    """Ensure new permissions exist on existing databases.
+    Only creates missing permissions — does NOT overwrite
+    role-permission assignments made via the admin UI.
+    """
+    permissions = [
+        ("USER_CREATE", "Create Users", "Users"),
+        ("USER_EDIT", "Edit Users", "Users"),
+        ("USER_DELETE", "Delete Users", "Users"),
+        ("ROLE_MANAGE", "Manage Roles", "Roles"),
+        ("PERMISSION_MANAGE", "Manage Permissions", "Permissions"),
+        ("view_dashboard", "View Dashboard", "Dashboard"),
+        ("author_rules", "Author Expert Rules", "Expert System"),
+        ("manage_symptoms", "Manage Symptoms", "Expert System"),
+        ("manage_diseases", "Manage Diseases", "Expert System"),
+        ("manage_rules", "Manage Rules", "Expert System"),
+        ("manage_categories", "Manage Categories", "Expert System"),
+        ("run_diagnosis", "Run Diagnosis", "Expert System"),
+        ("view_cases", "View Case History", "Expert System"),
+        ("review_cases", "Review Diagnosis Cases", "Expert System"),
+    ]
+
+    for code, name, module in permissions:
+        existing = db.session.scalar(
+            db.select(PermissionTable).filter_by(code=code)
+        )
+        if not existing:
+            perm = PermissionTable(code=code, name=name, module=module)
+            db.session.add(perm)
+
+    # Ensure the three base roles exist (but don't touch their permissions)
+    for role_name, desc in [("Admin", "System administrator"), ("Doctor", "Knowledge author"), ("User", "Diagnosis user")]:
+        existing = db.session.scalar(db.select(RoleTable).filter_by(name=role_name))
+        if not existing:
+            db.session.add(RoleTable(name=role_name, description=desc))
+
+    db.session.commit()
 
 
 def seed_all():
