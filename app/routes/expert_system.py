@@ -21,6 +21,7 @@ from app.services.expert_system_service import (
 )
 from app.services.audit_service import AuditService
 from app.services.pdf_service import PdfService
+from app.services.notification_service import NotificationService
 from app.models.expert_system import CASE_STATUS_PENDING
 
 expert_system_bp = Blueprint("expert_system", __name__, url_prefix="/expert-system")
@@ -207,6 +208,18 @@ def cases_review(case_id: int):
             override_disease_id=override_id,
         )
         AuditService.log("REVIEW", "Case", case.id, f"Case reviewed: {form.action.data}")
+        
+        # Notify the case owner
+        if case.user_id:
+            status_km = "បានបញ្ជាក់" if form.action.data == "confirm" else "បានបដិសេធ"
+            NotificationService.notify_user(
+                user_id=case.user_id,
+                title=f"ករណី #{case.id} របស់អ្នកត្រូវបាន{status_km}",
+                message=form.doctor_notes.data or "",
+                category="case",
+                link=url_for("expert_system.cases_detail", case_id=case.id),
+            )
+        
         flash("ការពិនិត្យត្រូវបានរក្សាទុក។", "success")
     else:
         flash("មិនអាចដាក់ស្នើការពិនិត្យបានទេ។", "danger")
