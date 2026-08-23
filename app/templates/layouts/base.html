@@ -21,7 +21,7 @@
         <aside class="app-sidebar" id="sidebarMenu">
             <!-- Brand -->
             <div class="sidebar-brand">
-                <a href="{{ url_for('dashboard.index') if current_user.is_authenticated and current_user.has_permission('view_dashboard') else url_for('expert_system.diagnose') if current_user.is_authenticated else url_for('auth.login') }}" class="text-decoration-none">
+                <a href="{{ url_for('dashboard.index') if current_user.is_authenticated and current_user.has_permission('view_dashboard') else url_for('user_home.index') if current_user.is_authenticated else url_for('auth.login') }}" class="text-decoration-none">
                     <img src="{{ url_for('static', filename='images/logo1.png') }}" alt="IDNS" class="sidebar-logo">
                     <div class="sidebar-brand-text">
                         <span class="fw-bold">IDNS</span>
@@ -40,6 +40,16 @@
                             <a class="nav-link {% if 'dashboard.index' in request.endpoint %}active{% endif %}" href="{{ url_for('dashboard.index') }}">
                                 <i class="bi bi-grid-1x2"></i>
                                 <span>Dashboard</span>
+                            </a>
+                        </li>
+                    </ul>
+                    {% else %}
+                    <div class="nav-section-label">ទំព័រដើម</div>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link {% if 'user_home.index' in request.endpoint %}active{% endif %}" href="{{ url_for('user_home.index') }}">
+                                <i class="bi bi-house-door"></i>
+                                <span>ទំព័រដើម</span>
                             </a>
                         </li>
                     </ul>

@@ -44,6 +44,9 @@ def create_app(config_class: type[Config] = Config):
     from app.routes.notification_routes import notification_bp
     app.register_blueprint(notification_bp)
 
+    from app.routes.user_home_routes import user_home_bp
+    app.register_blueprint(user_home_bp)
+
     # Context processor: inject notification badges into all templates
     @app.context_processor
     def inject_badges():

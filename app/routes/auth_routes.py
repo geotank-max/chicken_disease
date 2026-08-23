@@ -32,7 +32,7 @@ def login():
             if user.has_permission("view_dashboard"):
                 return redirect(url_for("dashboard.index"))
             else:
-                return redirect(url_for("expert_system.diagnose"))
+                return redirect(url_for("user_home.index"))
         
         flash("Invalid username or password.", "danger")
         return render_template("auth/login.html", username=username)
@@ -106,7 +106,7 @@ def register():
         if new_user.has_permission("view_dashboard"):
             return redirect(url_for("dashboard.index"))
         else:
-            return redirect(url_for("expert_system.diagnose"))
+            return redirect(url_for("user_home.index"))
     
     return render_template("auth/register.html")
 

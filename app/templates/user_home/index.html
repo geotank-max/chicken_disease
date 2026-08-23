@@ -1,0 +1,250 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}ទំព័រដើម{% endblock %}
+{% block page_title %}ទំព័រដើម{% endblock %}
+{% block page_subtitle %}សួស្តី {{ current_user.full_name }}! សង្ខេបស្ថានភាពវិភាគរបស់អ្នក។{% endblock %}
+
+{% block content %}
+<!-- Welcome Banner + New Diagnosis CTA -->
+<div class="card border-0 shadow-sm mb-4 bg-primary bg-gradient text-white overflow-hidden">
+    <div class="card-body p-4">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h4 class="fw-bold mb-1">សួស្តី {{ current_user.full_name }}!</h4>
+                <p class="mb-3 opacity-75">ចាប់ផ្តើមវិភាគជំងឺមាន់ថ្មី ឬមើលប្រវត្តិករណីរបស់អ្នក។</p>
+                <a href="{{ url_for('expert_system.diagnose') }}" class="btn btn-light btn-lg fw-semibold px-4">
+                    <i class="bi bi-plus-circle me-2"></i>វិភាគថ្មី
+                </a>
+            </div>
+            <div class="col-md-4 text-end d-none d-md-block">
+                <i class="bi bi-activity display-3 opacity-25"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stat Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-xl-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body p-3">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0 me-3">
+                        <div class="stat-icon bg-primary bg-opacity-10 text-primary">
+                            <i class="bi bi-clipboard-data"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="text-muted small mb-0">ករណីសរុប</p>
+                        <h3 class="fw-bold mb-0">{{ stats.total }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body p-3">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0 me-3">
+                        <div class="stat-icon bg-warning bg-opacity-10 text-warning">
+                            <i class="bi bi-hourglass-split"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="text-muted small mb-0">រង់ចាំពិនិត្យ</p>
+                        <h3 class="fw-bold mb-0">{{ stats.pending }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body p-3">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0 me-3">
+                        <div class="stat-icon bg-success bg-opacity-10 text-success">
+                            <i class="bi bi-check-circle"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="text-muted small mb-0">បានបញ្ជាក់</p>
+                        <h3 class="fw-bold mb-0">{{ stats.confirmed }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body p-3">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0 me-3">
+                        <div class="stat-icon bg-info bg-opacity-10 text-info">
+                            <i class="bi bi-calendar-week"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="text-muted small mb-0">សប្តាហ៍នេះ</p>
+                        <h3 class="fw-bold mb-0">{{ stats.this_week }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Recent Cases -->
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom-0 pt-3 pb-0 d-flex justify-content-between align-items-center">
+                <h6 class="fw-bold mb-0"><i class="bi bi-clock-history me-2 text-primary"></i>ករណីថ្មីៗ</h6>
+                <a href="{{ url_for('expert_system.cases_index') }}" class="btn btn-sm btn-outline-primary">មើលទាំងអស់</a>
+            </div>
+            <div class="card-body p-0">
+                {% if recent_cases %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-3">ជំងឺ</th>
+                                <th>ភាពជឿជាក់</th>
+                                <th>ស្ថានភាព</th>
+                                <th>កាលបរិច្ឆេទ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for case in recent_cases %}
+                            <tr>
+                                <td class="ps-3 fw-semibold">
+                                    {{ case.final_disease.name if case.final_disease else '—' }}
+                                </td>
+                                <td>
+                                    <span class="badge bg-primary bg-opacity-10 text-primary">
+                                        {{ "%.0f"|format(case.confidence) }}%
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if case.status == 'confirmed' %}
+                                    <span class="badge bg-success bg-opacity-10 text-success">បានបញ្ជាក់</span>
+                                    {% elif case.status == 'rejected' %}
+                                    <span class="badge bg-danger bg-opacity-10 text-danger">បានបដិសេធ</span>
+                                    {% else %}
+                                    <span class="badge bg-warning bg-opacity-10 text-warning">រង់ចាំពិនិត្យ</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-muted small">{{ case.created_at.strftime('%d/%m/%Y') }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-inbox display-5 d-block mb-2 opacity-50"></i>
+                    <p class="mb-0">អ្នកមិនទាន់មានករណីវិភាគទេ។</p>
+                    <a href="{{ url_for('expert_system.diagnose') }}" class="btn btn-sm btn-primary mt-3">
+                        <i class="bi bi-plus-circle me-1"></i>ចាប់ផ្តើមវិភាគ
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Tips + Quick Links -->
+    <div class="col-lg-4">
+        <!-- Tips / Alerts -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white border-bottom-0 pt-3 pb-0">
+                <h6 class="fw-bold mb-0"><i class="bi bi-lightbulb me-2 text-warning"></i>គន្លឹះ & ការជូនដំណឹង</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-flex mb-3">
+                    <div class="flex-shrink-0 me-2">
+                        <span class="badge bg-info bg-opacity-10 text-info p-2"><i class="bi bi-info-circle"></i></span>
+                    </div>
+                    <div>
+                        <p class="small mb-0">ជ្រើសរើសរោគសញ្ញាច្រើនជាងមួយ ដើម្បីទទួលបានលទ្ធផលវិភាគត្រឹមត្រូវជាងមុន។</p>
+                    </div>
+                </div>
+                <div class="d-flex mb-3">
+                    <div class="flex-shrink-0 me-2">
+                        <span class="badge bg-success bg-opacity-10 text-success p-2"><i class="bi bi-shield-check"></i></span>
+                    </div>
+                    <div>
+                        <p class="small mb-0">ករណីដែលបានបញ្ជាក់ដោយបណ្ឌិតមានភាពជឿជាក់ខ្ពស់ជាង។</p>
+                    </div>
+                </div>
+                <div class="d-flex">
+                    <div class="flex-shrink-0 me-2">
+                        <span class="badge bg-warning bg-opacity-10 text-warning p-2"><i class="bi bi-exclamation-triangle"></i></span>
+                    </div>
+                    <div>
+                        <p class="small mb-0">បើមាន់មានរោគសញ្ញាធ្ងន់ សូមទាក់ទងបណ្ឌិតសត្វភ្លាមៗ។</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom-0 pt-3 pb-0">
+                <h6 class="fw-bold mb-0"><i class="bi bi-link-45deg me-2 text-primary"></i>តំណរហ័ស</h6>
+            </div>
+            <div class="card-body">
+                <a href="{{ url_for('expert_system.diagnose') }}" class="d-flex align-items-center text-decoration-none text-dark mb-3 p-2 rounded hover-bg">
+                    <div class="flex-shrink-0 me-3">
+                        <div class="stat-icon bg-primary bg-opacity-10 text-primary" style="width:36px;height:36px;font-size:0.9rem;">
+                            <i class="bi bi-activity"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="fw-semibold small mb-0">វិភាគជំងឺ</p>
+                        <p class="text-muted small mb-0" style="font-size:0.72rem;">ចាប់ផ្តើមវិភាគថ្មី</p>
+                    </div>
+                </a>
+                <a href="{{ url_for('expert_system.cases_index') }}" class="d-flex align-items-center text-decoration-none text-dark mb-3 p-2 rounded hover-bg">
+                    <div class="flex-shrink-0 me-3">
+                        <div class="stat-icon bg-success bg-opacity-10 text-success" style="width:36px;height:36px;font-size:0.9rem;">
+                            <i class="bi bi-clock-history"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="fw-semibold small mb-0">ប្រវត្តិករណី</p>
+                        <p class="text-muted small mb-0" style="font-size:0.72rem;">មើលករណីវិភាគមុនៗ</p>
+                    </div>
+                </a>
+                <a href="{{ url_for('notifications.index') }}" class="d-flex align-items-center text-decoration-none text-dark mb-3 p-2 rounded hover-bg">
+                    <div class="flex-shrink-0 me-3">
+                        <div class="stat-icon bg-warning bg-opacity-10 text-warning" style="width:36px;height:36px;font-size:0.9rem;">
+                            <i class="bi bi-bell"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="fw-semibold small mb-0">ការជូនដំណឹង</p>
+                        <p class="text-muted small mb-0" style="font-size:0.72rem;">ពិនិត្យមើលសារថ្មីៗ</p>
+                    </div>
+                </a>
+                <a href="{{ url_for('tbl_users.profile') }}" class="d-flex align-items-center text-decoration-none text-dark p-2 rounded hover-bg">
+                    <div class="flex-shrink-0 me-3">
+                        <div class="stat-icon bg-info bg-opacity-10 text-info" style="width:36px;height:36px;font-size:0.9rem;">
+                            <i class="bi bi-person-circle"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="fw-semibold small mb-0">គណនីរបស់ខ្ញុំ</p>
+                        <p class="text-muted small mb-0" style="font-size:0.72rem;">កែប្រែព័ត៌មានផ្ទាល់ខ្លួន</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.hover-bg:hover { background: #f8f9fa; }
+</style>
+{% endblock %}
