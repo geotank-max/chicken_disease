@@ -27,6 +27,19 @@ def migrate_schema() -> None:
             if not _column_exists(inspector, "tbl_diseases", col):
                 alterations.append(f"ALTER TABLE tbl_diseases ADD COLUMN {col} {col_type}")
 
+    # ── tbl_users: email verification & password reset ──────────
+    user_new_cols = {
+        "email_verified": "BOOLEAN DEFAULT FALSE NOT NULL",
+        "email_verify_token_hash": "VARCHAR(255)",
+        "email_verify_token_expires": "TIMESTAMP",
+        "reset_token_hash": "VARCHAR(255)",
+        "reset_token_expires": "TIMESTAMP",
+    }
+    if inspector.has_table("tbl_users"):
+        for col, col_type in user_new_cols.items():
+            if not _column_exists(inspector, "tbl_users", col):
+                alterations.append(f"ALTER TABLE tbl_users ADD COLUMN {col} {col_type}")
+
     case_cols = {
         "flock_size": "INTEGER",
         "bird_age": "VARCHAR(80)",
