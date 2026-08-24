@@ -34,11 +34,17 @@ def migrate_schema() -> None:
         "email_verify_token_expires": "TIMESTAMP",
         "reset_token_hash": "VARCHAR(255)",
         "reset_token_expires": "TIMESTAMP",
+        "oauth_provider": "VARCHAR(50)",
+        "oauth_id": "VARCHAR(255)",
     }
     if inspector.has_table("tbl_users"):
         for col, col_type in user_new_cols.items():
             if not _column_exists(inspector, "tbl_users", col):
                 alterations.append(f"ALTER TABLE tbl_users ADD COLUMN {col} {col_type}")
+        # Make password_hash nullable for OAuth users
+        alterations.append(
+            "ALTER TABLE tbl_users ALTER COLUMN password_hash DROP NOT NULL"
+        )
 
     case_cols = {
         "flock_size": "INTEGER",

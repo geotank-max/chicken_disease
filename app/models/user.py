@@ -15,7 +15,11 @@ class UserTable(UserMixin, db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     full_name = db.Column(db.String(120), nullable=False)
     is_active = db.Column(db.Boolean, default=True, nullable=False)
-    password_hash = db.Column(db.String(255), nullable=False)
+    password_hash = db.Column(db.String(255), nullable=True)
+    
+    # OAuth fields
+    oauth_provider = db.Column(db.String(50), nullable=True)   # e.g. "google"
+    oauth_id = db.Column(db.String(255), nullable=True)        # provider's unique user ID
     
     # Email verification fields
     email_verified = db.Column(db.Boolean, default=False, nullable=False)
@@ -36,6 +40,8 @@ class UserTable(UserMixin, db.Model):
         self.password_hash = generate_password_hash(password)
         
     def check_password(self, password: str) -> bool:
+        if not self.password_hash:
+            return False
         return check_password_hash(self.password_hash, password)
     
     # ── Token helpers ─────────────────────────────────────────────

@@ -14,9 +14,22 @@ def create_app(config_class: type[Config] = Config):
     csrf.init_app(app)
     login_manager.init_app(app)
 
+    # Initialize Google OAuth
+    from app.services.oauth_service import init_oauth
+    init_oauth(app)
+
     login_manager.login_view = "auth.login"
     login_manager.login_message = "សូមចូលប្រើប្រាស់មុន។"
     login_manager.login_message_category = "warning"
+
+    @app.after_request
+    def set_no_cache(response):
+        """Prevent browser from caching authenticated pages (back-button after logout)."""
+        if request.endpoint and request.endpoint != "static":
+            response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+            response.headers["Pragma"] = "no-cache"
+            response.headers["Expires"] = "0"
+        return response
 
     @login_manager.user_loader
     def load_user(user_id: str):
@@ -35,6 +48,9 @@ def create_app(config_class: type[Config] = Config):
     app.register_blueprint(permission_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(expert_system_bp)
+
+    from app.routes.oauth_routes import oauth_bp
+    app.register_blueprint(oauth_bp)
     app.register_blueprint(audit_bp)
     app.register_blueprint(dashboard_bp)
 
