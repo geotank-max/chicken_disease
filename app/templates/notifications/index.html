@@ -3,6 +3,37 @@
 {% block page_title %}Notifications{% endblock %}
 {% block page_subtitle %}Stay updated on system activity.{% endblock %}
 
+{% block extra_styles %}
+<style>
+    /* Unread items stand out via a clean accent bar, not a full blue wash,
+       so category icons stay readable even when many items are unread. */
+    .notif-item {
+        border-left: 3px solid transparent;
+        transition: background-color .12s ease;
+    }
+    .notif-unread {
+        border-left-color: var(--bs-primary, #0d6efd);
+        background-color: #fff;
+    }
+    .notif-unread:hover {
+        background-color: #f6f9ff;
+    }
+    .notif-read {
+        background-color: #fbfbfc;
+    }
+    .notif-read .bi {
+        opacity: .55;
+    }
+    .notif-new-pill {
+        font-size: .625rem;
+        font-weight: 600;
+        letter-spacing: .02em;
+        padding: .15em .5em;
+        text-transform: uppercase;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2">
@@ -23,7 +54,7 @@
     <div class="list-group list-group-flush">
         {% for n in notifications %}
         <a href="{{ url_for('notifications.mark_read', notif_id=n.id) }}"
-           class="list-group-item list-group-item-action py-3 px-4 {% if not n.is_read %}bg-primary bg-opacity-5 border-start border-primary border-3{% endif %}">
+           class="list-group-item list-group-item-action py-3 px-4 notif-item {% if not n.is_read %}notif-unread{% else %}notif-read{% endif %}">
             <div class="d-flex justify-content-between align-items-start">
                 <div class="d-flex align-items-start">
                     <div class="me-3 mt-1">
@@ -38,17 +69,19 @@
                         {% endif %}
                     </div>
                     <div>
-                        <div class="fw-medium {% if not n.is_read %}text-dark{% else %}text-muted{% endif %}">{{ n.title }}</div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="{% if not n.is_read %}fw-semibold text-dark{% else %}fw-normal text-muted{% endif %}">{{ n.title }}</span>
+                            {% if not n.is_read %}
+                            <span class="badge rounded-pill bg-primary text-white notif-new-pill">New</span>
+                            {% endif %}
+                        </div>
                         {% if n.message %}
-                        <small class="text-muted">{{ n.message }}</small>
+                        <small class="{% if not n.is_read %}text-secondary{% else %}text-muted{% endif %}">{{ n.message }}</small>
                         {% endif %}
                     </div>
                 </div>
                 <div class="text-end ms-3">
                     <small class="text-muted text-nowrap">{{ n.created_at.strftime('%d/%m %H:%M') }}</small>
-                    {% if not n.is_read %}
-                    <div><span class="badge bg-primary rounded-pill mt-1" style="width: 8px; height: 8px;"></span></div>
-                    {% endif %}
                 </div>
             </div>
         </a>

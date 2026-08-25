@@ -3,8 +3,9 @@ from datetime import datetime
 from typing import List, Optional
 from extensions import db
 from app.models.expert_system import (
-    Category, Symptom, Disease, Rule, Case,
+    Category, Symptom, Disease, Rule, Case, CaseMessage,
     CASE_STATUS_CONFIRMED, CASE_STATUS_REJECTED, CASE_STATUS_PENDING,
+    FOLLOWUP_STATUSES,
 )
 
 
@@ -250,3 +251,28 @@ class CaseService:
         case.feedback_at = datetime.utcnow()
         db.session.commit()
         return case
+
+    @staticmethod
+    def set_follow_up_status(case: Case, status: str) -> Case:
+        """Update the recovery/outcome follow-up status of a case."""
+        if status not in FOLLOWUP_STATUSES:
+            raise ValueError(f"Invalid follow-up status: {status}")
+        case.follow_up_status = status
+        case.follow_up_updated_at = datetime.utcnow()
+        db.session.commit()
+        return case
+
+
+class CaseMessageService:
+    @staticmethod
+    def add_message(case: Case, author_id: int, body: str, is_doctor: bool = False) -> CaseMessage:
+        """Append a comment/question to a case thread."""
+        msg = CaseMessage(
+            case_id=case.id,
+            author_id=author_id,
+            body=body,
+            is_doctor=is_doctor,
+        )
+        db.session.add(msg)
+        db.session.commit()
+        return msg

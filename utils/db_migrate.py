@@ -60,6 +60,8 @@ def migrate_schema() -> None:
         "feedback_rating": "INTEGER",
         "feedback_text": "TEXT",
         "feedback_at": "TIMESTAMP",
+        "follow_up_status": "VARCHAR(30) DEFAULT 'none' NOT NULL",
+        "follow_up_updated_at": "TIMESTAMP",
     }
     if inspector.has_table("tbl_cases"):
         for col, col_type in case_cols.items():
@@ -100,5 +102,25 @@ def migrate_create_tables() -> None:
         """))
         db.session.execute(text(
             "CREATE INDEX ix_tbl_case_photos_case_id ON tbl_case_photos (case_id)"
+        ))
+        db.session.commit()
+
+    # ── tbl_case_messages ───────────────────────────────────────────────────
+    # Doctor <-> farmer follow-up comment thread, one row per message on a case.
+    if not _table_exists(inspector, "tbl_case_messages"):
+        db.session.execute(text("""
+            CREATE TABLE tbl_case_messages (
+                id          SERIAL PRIMARY KEY,
+                case_id     INTEGER NOT NULL
+                                REFERENCES tbl_cases(id) ON DELETE CASCADE,
+                author_id   INTEGER NOT NULL
+                                REFERENCES tbl_users(id),
+                body        TEXT      NOT NULL,
+                is_doctor   BOOLEAN   NOT NULL DEFAULT FALSE,
+                created_at  TIMESTAMP NOT NULL DEFAULT NOW()
+            )
+        """))
+        db.session.execute(text(
+            "CREATE INDEX ix_tbl_case_messages_case_id ON tbl_case_messages (case_id)"
         ))
         db.session.commit()

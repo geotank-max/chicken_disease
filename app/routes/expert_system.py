@@ -28,11 +28,15 @@ from app.services.expert_system_service import (
     DiseaseService,
     RuleService,
     CaseService,
+    CaseMessageService,
 )
 from app.services.audit_service import AuditService
 from app.services.pdf_service import PdfService
 from app.services.notification_service import NotificationService
-from app.models.expert_system import CASE_STATUS_PENDING, CasePhoto, PHOTO_CATEGORIES
+from app.models.expert_system import (
+    CASE_STATUS_PENDING, CasePhoto, PHOTO_CATEGORIES,
+    CASE_STATUS_REJECTED, FOLLOWUP_STATUSES, FOLLOWUP_NONE,
+)
 
 expert_system_bp = Blueprint("expert_system", __name__, url_prefix="/expert-system")
 
@@ -281,16 +285,21 @@ def cases_detail(case_id: int):
             abort(403)
 
     review_form = CaseReviewForm()
-    can_review = (
-        current_user.has_permission("review_cases")
-        and case.status == CASE_STATUS_PENDING
-    )
+    is_reviewer = current_user.has_permission("review_cases")
+    can_review = is_reviewer and case.status == CASE_STATUS_PENDING
+
+    # Follow-up (comments + outcome status) opens once the case has been reviewed
+    # (confirmed or rejected), so there is a doctor verdict to discuss.
+    follow_up_available = case.status != CASE_STATUS_PENDING
 
     return render_template(
         "expert_system/cases/detail.html",
         case=case,
         review_form=review_form,
         can_review=can_review,
+        is_reviewer=is_reviewer,
+        follow_up_available=follow_up_available,
+        follow_up_statuses=FOLLOWUP_STATUSES,
     )
 
 
@@ -360,6 +369,113 @@ def cases_feedback(case_id: int):
 
     CaseService.submit_feedback(case, rating, feedback_text)
     flash("សូមអរគុណសម្រាប់មតិប្រតិកម្មរបស់អ្នក!", "success")
+    return redirect(url_for("expert_system.cases_detail", case_id=case_id))
+
+
+@expert_system_bp.route("/cases/<int:case_id>/messages", methods=["POST"])
+@login_required
+@require_permission("view_cases")
+def cases_message(case_id: int):
+    """Post a follow-up comment/question on a case.
+
+    Allowed authors: the case owner (farmer) or any reviewer (doctor/admin).
+    When a doctor posts, the owner is notified; when the owner posts, the
+    reviewing doctor is notified (or all reviewers if none assigned yet).
+    """
+    case = CaseService.get_by_id(case_id)
+    if case is None:
+        abort(404)
+
+    is_reviewer = current_user.has_permission("review_cases")
+    is_owner = case.user_id == current_user.id
+    if not (is_reviewer or is_owner):
+        abort(403)
+
+    body = request.form.get("body", "").strip()
+    if not body:
+        flash("សូមបញ្ចូលសាររបស់អ្នក។", "warning")
+        return redirect(url_for("expert_system.cases_detail", case_id=case_id))
+    if len(body) > 2000:
+        body = body[:2000]
+
+    CaseMessageService.add_message(case, current_user.id, body, is_doctor=is_reviewer)
+    AuditService.log("COMMENT", "Case", case.id, "Follow-up message posted")
+
+    detail_link = url_for("expert_system.cases_detail", case_id=case.id)
+    if is_reviewer:
+        # Doctor replied -> notify the farmer who owns the case.
+        if case.user_id and case.user_id != current_user.id:
+            NotificationService.notify_user(
+                user_id=case.user_id,
+                title=f"វេជ្ជបណ្ឌិតបានឆ្លើយតបលើករណី #{case.id}",
+                message=body[:200],
+                category="case",
+                link=detail_link,
+            )
+    else:
+        # Farmer asked -> notify the reviewing doctor, or all reviewers if unassigned.
+        if case.reviewed_by_id:
+            NotificationService.notify_user(
+                user_id=case.reviewed_by_id,
+                title=f"សំណួរតាមដានលើករណី #{case.id}",
+                message=body[:200],
+                category="case",
+                link=detail_link,
+            )
+        else:
+            NotificationService.notify_doctors_new_case(case)
+
+    flash("សាររបស់អ្នកត្រូវបានផ្ញើ។", "success")
+    return redirect(url_for("expert_system.cases_detail", case_id=case_id))
+
+
+@expert_system_bp.route("/cases/<int:case_id>/follow-up", methods=["POST"])
+@login_required
+@require_permission("view_cases")
+def cases_follow_up(case_id: int):
+    """Update the recovery/outcome follow-up status of a case.
+
+    The case owner reports outcomes (improving/recovered/dead, etc.); doctors
+    with review_cases may also update it (e.g. to mark needs_revisit).
+    """
+    case = CaseService.get_by_id(case_id)
+    if case is None:
+        abort(404)
+
+    is_reviewer = current_user.has_permission("review_cases")
+    is_owner = case.user_id == current_user.id
+    if not (is_reviewer or is_owner):
+        abort(403)
+
+    new_status = request.form.get("follow_up_status", "").strip()
+    if new_status not in FOLLOWUP_STATUSES:
+        flash("ស្ថានភាពតាមដានមិនត្រឹមត្រូវ។", "warning")
+        return redirect(url_for("expert_system.cases_detail", case_id=case_id))
+
+    CaseService.set_follow_up_status(case, new_status)
+    AuditService.log("FOLLOW_UP", "Case", case.id, f"Follow-up status: {new_status}")
+
+    detail_link = url_for("expert_system.cases_detail", case_id=case.id)
+    # If the farmer updated the outcome, let the reviewing doctor know.
+    if is_owner and not is_reviewer and case.reviewed_by_id and new_status != FOLLOWUP_NONE:
+        NotificationService.notify_user(
+            user_id=case.reviewed_by_id,
+            title=f"ស្ថានភាពតាមដានករណី #{case.id}: {case.follow_up_label_km}",
+            message="",
+            category="case",
+            link=detail_link,
+        )
+    # If a doctor set needs_revisit (or any status), notify the owner.
+    elif is_reviewer and case.user_id and case.user_id != current_user.id:
+        NotificationService.notify_user(
+            user_id=case.user_id,
+            title=f"ស្ថានភាពតាមដានករណី #{case.id}: {case.follow_up_label_km}",
+            message="",
+            category="case",
+            link=detail_link,
+        )
+
+    flash("ស្ថានភាពតាមដានត្រូវបានធ្វើបច្ចុប្បន្នភាព។", "success")
     return redirect(url_for("expert_system.cases_detail", case_id=case_id))
 
 

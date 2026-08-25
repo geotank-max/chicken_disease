@@ -7,6 +7,23 @@ CASE_STATUS_PENDING = "pending"
 CASE_STATUS_CONFIRMED = "confirmed"
 CASE_STATUS_REJECTED = "rejected"
 
+# Follow-up outcome tracked after a case has been reviewed.
+FOLLOWUP_NONE = "none"
+FOLLOWUP_IMPROVING = "improving"
+FOLLOWUP_NOT_IMPROVED = "not_improved"
+FOLLOWUP_RECOVERED = "recovered"
+FOLLOWUP_DEAD = "dead"
+FOLLOWUP_NEEDS_REVISIT = "needs_revisit"
+
+FOLLOWUP_STATUSES = [
+    FOLLOWUP_NONE,
+    FOLLOWUP_IMPROVING,
+    FOLLOWUP_NOT_IMPROVED,
+    FOLLOWUP_RECOVERED,
+    FOLLOWUP_DEAD,
+    FOLLOWUP_NEEDS_REVISIT,
+]
+
 
 class Category(db.Model):
     __tablename__ = "tbl_categories"
@@ -111,6 +128,8 @@ class Case(db.Model):
     feedback_rating = db.Column(db.Integer)  # 1-5 stars
     feedback_text = db.Column(db.Text)
     feedback_at = db.Column(db.DateTime)
+    follow_up_status = db.Column(db.String(30), default=FOLLOWUP_NONE, nullable=False)
+    follow_up_updated_at = db.Column(db.DateTime)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
     symptoms = db.relationship(
@@ -123,6 +142,7 @@ class Case(db.Model):
     user = db.relationship("UserTable", foreign_keys=[user_id])
     reviewed_by = db.relationship("UserTable", foreign_keys=[reviewed_by_id])
     photos = db.relationship("CasePhoto", back_populates="case", cascade="all, delete-orphan", order_by="CasePhoto.uploaded_at")
+    messages = db.relationship("CaseMessage", back_populates="case", cascade="all, delete-orphan", order_by="CaseMessage.created_at")
 
     @property
     def final_disease(self):
@@ -138,6 +158,30 @@ class Case(db.Model):
             CASE_STATUS_REJECTED: "បានបដិសេធ",
         }
         return labels.get(self.status, self.status)
+
+    @property
+    def follow_up_label_km(self) -> str:
+        labels = {
+            FOLLOWUP_NONE: "មិនទាន់មាន",
+            FOLLOWUP_IMPROVING: "កំពុងធូរស្រាល",
+            FOLLOWUP_NOT_IMPROVED: "មិនធូរស្រាល",
+            FOLLOWUP_RECOVERED: "ជាសះស្បើយ",
+            FOLLOWUP_DEAD: "ស្លាប់",
+            FOLLOWUP_NEEDS_REVISIT: "ត្រូវពិនិត្យឡើងវិញ",
+        }
+        return labels.get(self.follow_up_status, self.follow_up_status)
+
+    @property
+    def follow_up_color(self) -> str:
+        colors = {
+            FOLLOWUP_NONE: "secondary",
+            FOLLOWUP_IMPROVING: "info",
+            FOLLOWUP_NOT_IMPROVED: "warning",
+            FOLLOWUP_RECOVERED: "success",
+            FOLLOWUP_DEAD: "dark",
+            FOLLOWUP_NEEDS_REVISIT: "danger",
+        }
+        return colors.get(self.follow_up_status, "secondary")
 
     def __repr__(self) -> str:
         return f"<Case {self.id}>"
@@ -177,3 +221,24 @@ class CasePhoto(db.Model):
 
     def __repr__(self) -> str:
         return f"<CasePhoto {self.id} case={self.case_id} cat={self.category}>"
+
+
+class CaseMessage(db.Model):
+    """A comment/question on a case, enabling doctor <-> farmer follow-up per case."""
+
+    __tablename__ = "tbl_case_messages"
+
+    id = db.Column(db.Integer, db.Sequence("seq_case_messages_id"), primary_key=True)
+    case_id = db.Column(db.Integer, db.ForeignKey("tbl_cases.id"), nullable=False)
+    author_id = db.Column(db.Integer, db.ForeignKey("tbl_users.id"), nullable=False)
+    body = db.Column(db.Text, nullable=False)
+    # Snapshot of whether the author posted while acting as a reviewing doctor,
+    # so the thread renders correctly even if roles change later.
+    is_doctor = db.Column(db.Boolean, default=False, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    case = db.relationship("Case", back_populates="messages")
+    author = db.relationship("UserTable", foreign_keys=[author_id])
+
+    def __repr__(self) -> str:
+        return f"<CaseMessage {self.id} case={self.case_id} author={self.author_id}>"

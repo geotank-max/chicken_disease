@@ -2,7 +2,7 @@
 from .user import UserTable
 from .role import RoleTable
 from .permission import PermissionTable
-from .expert_system import Category, Symptom, Disease, Rule, Case
+from .expert_system import Category, Symptom, Disease, Rule, Case, CasePhoto, CaseMessage
 from .doctor_application import DoctorApplication
 from .notification import Notification
 
@@ -15,6 +15,8 @@ __all__ = [
     "Disease",
     "Rule",
     "Case",
+    "CasePhoto",
+    "CaseMessage",
     "DoctorApplication",
     "Notification",
 ]
