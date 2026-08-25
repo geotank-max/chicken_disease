@@ -70,3 +70,35 @@ def migrate_schema() -> None:
         db.session.execute(text(sql))
     if alterations:
         db.session.commit()
+
+
+def _table_exists(inspector, table: str) -> bool:
+    return inspector.has_table(table)
+
+
+def migrate_create_tables() -> None:
+    """Create brand-new tables that did not exist in the original schema.
+
+    Each block is fully idempotent: it checks for the table before issuing
+    any DDL, so re-running on an already-migrated database is safe.
+    """
+    inspector = inspect(db.engine)
+
+    # ── tbl_case_photos ─────────────────────────────────────────────────────
+    # Stores symptom photos uploaded by farmers when submitting a diagnosis case.
+    if not _table_exists(inspector, "tbl_case_photos"):
+        db.session.execute(text("""
+            CREATE TABLE tbl_case_photos (
+                id               SERIAL PRIMARY KEY,
+                case_id          INTEGER NOT NULL
+                                     REFERENCES tbl_cases(id) ON DELETE CASCADE,
+                file_path        VARCHAR(255) NOT NULL,
+                original_filename VARCHAR(255),
+                category         VARCHAR(50)  NOT NULL DEFAULT 'other',
+                uploaded_at      TIMESTAMP    NOT NULL DEFAULT NOW()
+            )
+        """))
+        db.session.execute(text(
+            "CREATE INDEX ix_tbl_case_photos_case_id ON tbl_case_photos (case_id)"
+        ))
+        db.session.commit()

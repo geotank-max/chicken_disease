@@ -122,6 +122,7 @@ class Case(db.Model):
     override_disease = db.relationship("Disease", foreign_keys=[override_disease_id])
     user = db.relationship("UserTable", foreign_keys=[user_id])
     reviewed_by = db.relationship("UserTable", foreign_keys=[reviewed_by_id])
+    photos = db.relationship("CasePhoto", back_populates="case", cascade="all, delete-orphan", order_by="CasePhoto.uploaded_at")
 
     @property
     def final_disease(self):
@@ -140,3 +141,39 @@ class Case(db.Model):
 
     def __repr__(self) -> str:
         return f"<Case {self.id}>"
+
+
+# Photo category labels (Khmer)
+PHOTO_CATEGORY_LABELS = {
+    "droppings":  "លាមក",
+    "eyes":       "ភ្នែក",
+    "comb":       "មកុដ",
+    "skin":       "ស្បែក / របួស",
+    "dead_birds": "មាន់ស្លាប់",
+    "coop":       "ទ្រុង / ស្ថានទីចិញ្ចឹម",
+    "other":      "ផ្សេងៗ",
+}
+
+PHOTO_CATEGORIES = list(PHOTO_CATEGORY_LABELS.keys())
+
+
+class CasePhoto(db.Model):
+    """Stores symptom photos uploaded by farmers when submitting a diagnosis case."""
+
+    __tablename__ = "tbl_case_photos"
+
+    id = db.Column(db.Integer, db.Sequence("seq_case_photos_id"), primary_key=True)
+    case_id = db.Column(db.Integer, db.ForeignKey("tbl_cases.id"), nullable=False)
+    file_path = db.Column(db.String(255), nullable=False)       # relative path under uploads/
+    original_filename = db.Column(db.String(255))               # original name for display
+    category = db.Column(db.String(50), default="other")        # droppings, eyes, comb, etc.
+    uploaded_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    case = db.relationship("Case", back_populates="photos")
+
+    @property
+    def category_label_km(self) -> str:
+        return PHOTO_CATEGORY_LABELS.get(self.category, self.category)
+
+    def __repr__(self) -> str:
+        return f"<CasePhoto {self.id} case={self.case_id} cat={self.category}>"

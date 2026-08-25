@@ -492,6 +492,274 @@ body {
     border-color: #e5e7eb !important;
 }
 
+/* ── Diagnosis photos ────────────────────────────────────────── */
+
+.photo-uploader {
+    background: #fbfcfe;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    padding: 1rem;
+}
+
+.photo-category-scroll,
+.photo-filter-pills {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    padding-bottom: 0.125rem;
+    scrollbar-width: thin;
+}
+
+.photo-category-chip,
+.photo-filter-pill {
+    border: 1px solid var(--border-color);
+    background: #fff;
+    color: var(--text-muted);
+    border-radius: 999px;
+    padding: 0.45rem 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    white-space: nowrap;
+    font-size: 0.8rem;
+    font-weight: 600;
+    transition: all 0.15s ease;
+}
+
+.photo-category-chip:hover,
+.photo-filter-pill:hover {
+    color: var(--text-main);
+    border-color: #cbd5e1;
+    background: #f8fafc;
+}
+
+.photo-category-chip.active,
+.photo-filter-pill.active {
+    color: var(--primary);
+    border-color: #bfdbfe;
+    background: var(--primary-light);
+}
+
+.photo-chip-count {
+    min-width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--primary);
+    color: #fff;
+    font-size: 0.68rem;
+}
+
+.photo-dropzone {
+    min-height: 108px;
+    border: 1.5px dashed #cbd5e1;
+    border-radius: var(--radius);
+    background: #fff;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.photo-dropzone:hover {
+    border-color: var(--primary);
+    background: #f8fbff;
+}
+
+.photo-dropzone-icon,
+.gallery-section-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: var(--primary-light);
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.photo-preview-panel {
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    padding: 0.875rem;
+}
+
+.photo-empty-state {
+    min-height: 86px;
+    border-radius: 0.5rem;
+    background: #f8fafc;
+    color: #9ca3af;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+}
+
+.photo-preview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+    gap: 0.75rem;
+}
+
+.photo-preview-card {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border-radius: 0.5rem;
+    border: 1px solid var(--border-color);
+    background: #f8fafc;
+}
+
+.photo-preview-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.photo-preview-badge {
+    position: absolute;
+    left: 0.4rem;
+    bottom: 0.4rem;
+    max-width: calc(100% - 0.8rem);
+    padding: 0.18rem 0.45rem;
+    border-radius: 999px;
+    background: rgba(17, 24, 39, 0.72);
+    color: #fff;
+    font-size: 0.68rem;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.photo-preview-remove {
+    position: absolute;
+    top: 0.35rem;
+    right: 0.35rem;
+    width: 24px;
+    height: 24px;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(17, 24, 39, 0.75);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.case-photo-gallery {
+    background: #fff;
+}
+
+.case-photo-feature {
+    position: relative;
+    display: block;
+    height: 100%;
+    min-height: 330px;
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: #111827;
+    text-decoration: none;
+}
+
+.case-photo-feature img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.25s ease;
+}
+
+.case-photo-feature:hover img {
+    transform: scale(1.025);
+}
+
+.case-photo-feature-overlay {
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    padding: 2.25rem 1rem 1rem;
+    color: #fff;
+    background: linear-gradient(to top, rgba(0,0,0,0.72), rgba(0,0,0,0));
+}
+
+.case-photo-feature-overlay span {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    opacity: 0.82;
+}
+
+.case-photo-feature-overlay strong {
+    display: block;
+    margin-top: 0.15rem;
+    font-size: 0.9rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.case-photo-thumbs {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
+    gap: 0.65rem;
+    max-height: 330px;
+    overflow-y: auto;
+    padding-right: 0.2rem;
+    scrollbar-width: thin;
+}
+
+.case-photo-thumb {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    border: 2px solid transparent;
+    background: #f8fafc;
+}
+
+.case-photo-thumb.active {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+}
+
+.case-photo-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.18s ease;
+}
+
+.case-photo-thumb:hover img {
+    transform: scale(1.06);
+}
+
+.case-photo-thumb span {
+    position: absolute;
+    left: 0.3rem;
+    bottom: 0.3rem;
+    max-width: calc(100% - 0.6rem);
+    color: #fff;
+    border-radius: 999px;
+    padding: 0.12rem 0.4rem;
+    font-size: 0.62rem;
+    font-weight: 700;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 /* ── Mobile Sidebar ──────────────────────────────────────────── */
 
 .sidebar-overlay {
@@ -524,6 +792,24 @@ body {
 
     .app-content {
         padding: 1rem;
+    }
+
+    .photo-dropzone {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .photo-dropzone .btn {
+        width: 100%;
+    }
+
+    .case-photo-feature {
+        min-height: 230px;
+    }
+
+    .case-photo-thumbs {
+        max-height: none;
+        grid-template-columns: repeat(auto-fill, minmax(82px, 1fr));
     }
 }
 

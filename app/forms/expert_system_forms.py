@@ -1,13 +1,17 @@
 # app/forms/expert_system_forms.py
 from flask_wtf import FlaskForm
+from flask_wtf.file import FileField, FileAllowed
 from wtforms import (
     StringField, TextAreaField, SubmitField, IntegerField,
-    FloatField, SelectField, BooleanField,
+    FloatField, SelectField, BooleanField, MultipleFileField,
 )
 from wtforms.validators import DataRequired, Length, NumberRange, Optional
 from app.forms.multi_checkbox_field import MultiCheckboxField
 from app.models.expert_system import Category, Disease, Symptom, Rule
 from extensions import db
+
+# Allowed image extensions for case photos
+ALLOWED_PHOTO_EXTENSIONS = ["jpg", "jpeg", "png", "webp", "gif"]
 
 
 def _category_choices():
@@ -90,6 +94,16 @@ class FlockInfoForm(FlaskForm):
     breed = StringField("Breed", validators=[Optional(), Length(max=80)])
     location = StringField("Location", validators=[Optional(), Length(max=120)])
     notes = TextAreaField("Notes", validators=[Optional(), Length(max=500)])
+
+    # Symptom photos — one multi-file field per visual category (all optional)
+    photos_droppings  = MultipleFileField("លាមក",                   validators=[Optional(), FileAllowed(ALLOWED_PHOTO_EXTENSIONS, "Images only.")])
+    photos_eyes       = MultipleFileField("ភ្នែក",                   validators=[Optional(), FileAllowed(ALLOWED_PHOTO_EXTENSIONS, "Images only.")])
+    photos_comb       = MultipleFileField("មកុដ",                   validators=[Optional(), FileAllowed(ALLOWED_PHOTO_EXTENSIONS, "Images only.")])
+    photos_skin       = MultipleFileField("ស្បែក / របួស",            validators=[Optional(), FileAllowed(ALLOWED_PHOTO_EXTENSIONS, "Images only.")])
+    photos_dead_birds = MultipleFileField("មាន់ស្លាប់",               validators=[Optional(), FileAllowed(ALLOWED_PHOTO_EXTENSIONS, "Images only.")])
+    photos_coop       = MultipleFileField("ទ្រុង / ស្ថានទីចិញ្ចឹម",    validators=[Optional(), FileAllowed(ALLOWED_PHOTO_EXTENSIONS, "Images only.")])
+    photos_other      = MultipleFileField("រូបភាពផ្សេងៗ",             validators=[Optional(), FileAllowed(ALLOWED_PHOTO_EXTENSIONS, "Images only.")])
+
     submit = SubmitField("Continue")
 
 

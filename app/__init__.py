@@ -109,6 +109,16 @@ def create_app(config_class: type[Config] = Config):
             icon_class="server-error",
         ), 500
 
+    @app.errorhandler(413)
+    def request_too_large(e):
+        return render_template("errors/error.html",
+            error_code=413,
+            title="File Too Large",
+            message="រូបភាពដែលបានឡើងផ្ទុករបស់អ្នកធំពេក។ សូមប្រើរូបភាពដែលមានទំហំតូចជាង 50 MB សម្រាប់គ្រប់រូបភាពទាំងអស់ក្នុងការដាក់ស្នើតែមួយ។",
+            icon="bi-file-earmark-x",
+            icon_class="server-error",
+        ), 413
+
     @app.route("/")
     def home():
         return redirect(url_for("auth.login"))
@@ -126,8 +136,9 @@ def create_app(config_class: type[Config] = Config):
 
         db.create_all()
 
-        from utils.db_migrate import migrate_schema
+        from utils.db_migrate import migrate_schema, migrate_create_tables
         migrate_schema()
+        migrate_create_tables()
 
         if not UserTable.query.first():
             from app.services.seed_service import seed_all

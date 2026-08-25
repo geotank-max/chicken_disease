@@ -1,6 +1,15 @@
 # app/routes/expert_system.py
-from flask import Blueprint, render_template, request, redirect, url_for, flash, abort, send_file, session
+import os
+import uuid
+import shutil
+
+from flask import (
+    Blueprint, render_template, request, redirect, url_for, flash,
+    abort, send_file, send_from_directory, session, current_app,
+)
 from flask_login import login_required, current_user
+from werkzeug.utils import secure_filename
+
 from extensions import db
 from utils.decorators import require_permission
 from app.forms.expert_system_forms import (
@@ -10,6 +19,7 @@ from app.forms.expert_system_forms import (
     RuleForm,
     FlockInfoForm,
     CaseReviewForm,
+    ALLOWED_PHOTO_EXTENSIONS,
 )
 from app.services.diagnosis_service import DiagnosisService
 from app.services.expert_system_service import (
@@ -22,9 +32,13 @@ from app.services.expert_system_service import (
 from app.services.audit_service import AuditService
 from app.services.pdf_service import PdfService
 from app.services.notification_service import NotificationService
-from app.models.expert_system import CASE_STATUS_PENDING
+from app.models.expert_system import CASE_STATUS_PENDING, CasePhoto, PHOTO_CATEGORIES
 
 expert_system_bp = Blueprint("expert_system", __name__, url_prefix="/expert-system")
+
+# ── Photo upload constants ──────────────────────────────────────────────────
+MAX_PHOTOS_PER_CATEGORY = 5
+_ALLOWED_MIME_PREFIXES = ("image/jpeg", "image/png", "image/webp", "image/gif")
 
 
 def _parse_flock_data(form_data):
@@ -36,6 +50,78 @@ def _parse_flock_data(form_data):
         "location": form_data.get("location", "").strip(),
         "notes": form_data.get("notes", "").strip(),
     }
+
+
+def _stage_uploaded_photos(files_map: dict) -> list[dict]:
+    """
+    Save uploaded photo files to a temporary staging area.
+
+    files_map: {category: [FileStorage, ...], ...}
+    Returns a list of dicts: [{stage_path, original_filename, category}, ...]
+    The stage_path is relative to UPLOAD_FOLDER.
+    Orphaned staging dirs are cleaned up when photos are committed or the
+    wizard is abandoned (garbage-collected on next upload from the same user).
+    """
+    staged = []
+    stage_token = uuid.uuid4().hex
+    upload_root = current_app.config["UPLOAD_FOLDER"]
+
+    for category, file_list in files_map.items():
+        if not file_list:
+            continue
+        for file in file_list[:MAX_PHOTOS_PER_CATEGORY]:
+            if not file or not file.filename:
+                continue
+            # Basic content-type guard (browser may lie, but adds a layer)
+            if not any(file.mimetype.startswith(p) for p in _ALLOWED_MIME_PREFIXES):
+                continue
+            ext = os.path.splitext(secure_filename(file.filename))[1].lower()
+            if ext not in {f".{e}" for e in ALLOWED_PHOTO_EXTENSIONS}:
+                continue
+
+            stage_dir = os.path.join(upload_root, "cases", "_staging", stage_token, category)
+            os.makedirs(stage_dir, exist_ok=True)
+            filename = f"{uuid.uuid4().hex}{ext}"
+            full_path = os.path.join(stage_dir, filename)
+            file.save(full_path)
+            rel_path = os.path.join("cases", "_staging", stage_token, category, filename)
+            staged.append({
+                "stage_path": rel_path,
+                "original_filename": secure_filename(file.filename),
+                "category": category,
+            })
+
+    return staged
+
+
+def _commit_photos_to_case(case_id: int, staged: list[dict]) -> None:
+    """
+    Move staged files into cases/<case_id>/ and create CasePhoto DB records.
+    Called immediately after a Case row is committed.
+    """
+    upload_root = current_app.config["UPLOAD_FOLDER"]
+    dest_dir = os.path.join(upload_root, "cases", str(case_id))
+    os.makedirs(dest_dir, exist_ok=True)
+
+    for entry in staged:
+        src = os.path.join(upload_root, entry["stage_path"])
+        if not os.path.isfile(src):
+            continue  # already moved or deleted
+
+        filename = os.path.basename(src)
+        dest = os.path.join(dest_dir, filename)
+        shutil.move(src, dest)
+
+        rel_path = os.path.join("cases", str(case_id), filename)
+        photo = CasePhoto(
+            case_id=case_id,
+            file_path=rel_path,
+            original_filename=entry["original_filename"],
+            category=entry["category"],
+        )
+        db.session.add(photo)
+
+    db.session.commit()
 
 
 @expert_system_bp.route("/author-rules")
@@ -61,6 +147,16 @@ def diagnose():
     if request.method == "POST" and step == "1":
         flock_data = _parse_flock_data(request.form)
         session["diagnosis_wizard"] = flock_data
+
+        # Collect and stage any uploaded photos
+        files_map = {
+            cat: request.files.getlist(f"photos_{cat}")
+            for cat in PHOTO_CATEGORIES
+        }
+        staged = _stage_uploaded_photos(files_map)
+        # Overwrite previous staging on re-submission of step 1
+        session["diagnosis_photos"] = staged
+
         return redirect(url_for("expert_system.diagnose", step="2"))
 
     if request.method == "POST" and step == "2":
@@ -86,8 +182,15 @@ def diagnose():
                 diagnosis_results[0] if diagnosis_results else None,
                 flock_data=flock_data,
             )
+
+            # Commit any staged photos now that we have a case ID
+            staged_photos = session.get("diagnosis_photos", [])
+            if staged_photos:
+                _commit_photos_to_case(saved_case.id, staged_photos)
+
             session.pop("diagnosis_wizard", None)
             session.pop("diagnosis_symptoms", None)
+            session.pop("diagnosis_photos", None)
             if saved_case and saved_case.disease:
                 AuditService.log("DIAGNOSE", "Case", saved_case.id, f"Diagnosis saved: {saved_case.disease.name}")
             flash("ករណីត្រូវបានរក្សាទុកដោយជោគជ័យ។", "success")
@@ -254,6 +357,50 @@ def cases_feedback(case_id: int):
     CaseService.submit_feedback(case, rating, feedback_text)
     flash("សូមអរគុណសម្រាប់មតិប្រតិកម្មរបស់អ្នក!", "success")
     return redirect(url_for("expert_system.cases_detail", case_id=case_id))
+
+
+@expert_system_bp.route("/cases/photos/<path:filename>")
+@login_required
+@require_permission("view_cases")
+def cases_photo(filename: str):
+    """Serve a case symptom photo.
+
+    Access rules:
+      - Doctors / Admins (review_cases): can view any case photo.
+      - Farmers (run_diagnosis only): can only view photos belonging to their own cases.
+    Prevents directory traversal; only serves files under uploads/cases/.
+    """
+    safe = os.path.normpath(filename)
+    # Block absolute paths and traversal attempts
+    if os.path.isabs(safe) or safe.startswith(".."):
+        abort(404)
+
+    # The stored file_path in CasePhoto is like  "cases/42/abc.jpg"
+    # Reconstruct so the first path segment is the case_id folder
+    parts = safe.replace("\\", "/").split("/")
+    # parts[0] should be "cases", parts[1] the case_id dir
+    if len(parts) < 3 or parts[0] != "cases":
+        abort(404)
+
+    try:
+        case_id = int(parts[1])
+    except (ValueError, IndexError):
+        abort(404)
+
+    # Ownership check for non-reviewers
+    if not current_user.has_permission("review_cases"):
+        case = CaseService.get_by_id(case_id)
+        if case is None or case.user_id != current_user.id:
+            abort(403)
+
+    upload_root = current_app.config["UPLOAD_FOLDER"]
+    full_path = os.path.join(upload_root, safe)
+    if not os.path.isfile(full_path):
+        abort(404)
+
+    directory = os.path.dirname(full_path)
+    file_name = os.path.basename(full_path)
+    return send_from_directory(directory, file_name)
 
 
 @expert_system_bp.route("/cases/<int:case_id>/print")

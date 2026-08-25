@@ -7,7 +7,8 @@ class Config:
 
     # Upload config
     UPLOAD_FOLDER = os.path.join(BASE_DIR, "uploads")
-    MAX_CONTENT_LENGTH = 10 * 1024 * 1024  # 10MB max
+    MAX_CONTENT_LENGTH = 50 * 1024 * 1024   # 50 MB total request cap
+    MAX_FORM_MEMORY_SIZE = 50 * 1024 * 1024  # allow large files in multipart memory buffer
 
     # PostgreSQL Connection Details
     DB_USER = os.environ.get("DB_USER", "postgres")

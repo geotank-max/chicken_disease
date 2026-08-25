@@ -107,6 +107,94 @@
                     {% if case.doctor_notes %}<p class="mb-0">{{ case.doctor_notes }}</p>{% endif %}
                 </div>
                 {% endif %}
+
+                {# ── Symptom photos ──────────────────────────────────────── #}
+                {% if case.photos %}
+                {% set photos_by_cat = {} %}
+                {% for photo in case.photos %}
+                    {% if photo.category not in photos_by_cat %}
+                        {% set _ = photos_by_cat.update({photo.category: []}) %}
+                    {% endif %}
+                    {% set _ = photos_by_cat[photo.category].append(photo) %}
+                {% endfor %}
+
+                {# Category meta: icon, bg colour, text colour #}
+                {% set cat_meta = {
+                    'droppings':  ('bi-droplet-half',    'bg-warning bg-opacity-10',  'text-warning',  '#f0a500'),
+                    'eyes':       ('bi-eye',              'bg-info bg-opacity-10',     'text-info',     '#0dcaf0'),
+                    'comb':       ('bi-activity',         'bg-danger bg-opacity-10',   'text-danger',   '#dc3545'),
+                    'skin':       ('bi-bandaid',          'bg-danger bg-opacity-10',   'text-danger',   '#dc3545'),
+                    'dead_birds': ('bi-heartbreak',       'bg-dark bg-opacity-10',     'text-dark',     '#212529'),
+                    'coop':       ('bi-house-door',       'bg-success bg-opacity-10',  'text-success',  '#198754'),
+                    'other':      ('bi-images',           'bg-secondary bg-opacity-10','text-secondary','#6c757d')
+                } %}
+
+                {% set first_photo = case.photos[0] %}
+                <section class="case-photo-gallery border-top">
+                    <div class="px-4 pt-4 pb-3 d-flex flex-wrap align-items-center justify-content-between gap-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="gallery-section-icon">
+                                <i class="bi bi-camera2"></i>
+                            </div>
+                            <div>
+                                <div class="fw-bold text-dark">រូបភាពសញ្ញានៃជំងឺ</div>
+                                <div class="small text-muted">{{ case.photos|length }} រូបភាព · {{ photos_by_cat|length }} ប្រភេទ</div>
+                            </div>
+                        </div>
+                        <div class="photo-filter-pills">
+                            <button type="button" class="photo-filter-pill active" data-filter="all">ទាំងអស់</button>
+                            {% for cat, photos in photos_by_cat.items() %}
+                            {% set meta = cat_meta.get(cat, cat_meta['other']) %}
+                            <button type="button" class="photo-filter-pill" data-filter="{{ cat }}">
+                                <i class="bi {{ meta[0] }}"></i>
+                                {{ photos[0].category_label_km }}
+                            </button>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="px-4 pb-4">
+                        <div class="row g-3 align-items-stretch">
+                            <div class="col-lg-7">
+                                <a href="{{ url_for('expert_system.cases_photo', filename=first_photo.file_path) }}"
+                                   class="case-photo-feature"
+                                   id="featuredPhotoLink"
+                                   data-index="0"
+                                   data-category="{{ first_photo.category }}"
+                                   data-category-label="{{ first_photo.category_label_km }}"
+                                   title="{{ first_photo.original_filename }}">
+                                    <img src="{{ url_for('expert_system.cases_photo', filename=first_photo.file_path) }}"
+                                         alt="{{ first_photo.original_filename }}"
+                                         id="featuredPhotoImg"
+                                         loading="lazy">
+                                    <div class="case-photo-feature-overlay">
+                                        <span id="featuredPhotoCat">{{ first_photo.category_label_km }}</span>
+                                        <strong id="featuredPhotoName">{{ first_photo.original_filename }}</strong>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="col-lg-5">
+                                <div class="case-photo-thumbs" id="casePhotoThumbs">
+                                    {% for photo in case.photos %}
+                                    {% set meta = cat_meta.get(photo.category, cat_meta['other']) %}
+                                    <a href="{{ url_for('expert_system.cases_photo', filename=photo.file_path) }}"
+                                       class="case-photo-thumb photo-thumb-link {% if loop.first %}active{% endif %}"
+                                       data-index="{{ loop.index0 }}"
+                                       data-category="{{ photo.category }}"
+                                       data-category-label="{{ photo.category_label_km }}"
+                                       title="{{ photo.original_filename }}">
+                                        <img src="{{ url_for('expert_system.cases_photo', filename=photo.file_path) }}"
+                                             alt="{{ photo.original_filename }}"
+                                             loading="lazy">
+                                        <span style="background:{{ meta[3] }};">{{ photo.category_label_km }}</span>
+                                    </a>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                {% endif %}
             </div>
         </div>
 
@@ -207,39 +295,181 @@
 {% block extra_scripts %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const stars = document.querySelectorAll('.star-label');
+
+    // ── Star-rating ─────────────────────────────────────────────
+    const stars     = document.querySelectorAll('.star-label');
     const ratingInput = document.getElementById('ratingInput');
-    const submitBtn = document.getElementById('feedbackSubmit');
+    const submitBtn   = document.getElementById('feedbackSubmit');
 
-    if (!stars.length) return;
+    if (stars.length) {
+        stars.forEach(star => {
+            star.addEventListener('mouseenter', () => highlightStars(+star.dataset.value));
+            star.addEventListener('mouseleave', () => highlightStars(+(ratingInput?.value || 0)));
+            star.addEventListener('click', () => {
+                const v = +star.dataset.value;
+                if (ratingInput) ratingInput.value = v;
+                highlightStars(v);
+                if (submitBtn) submitBtn.disabled = false;
+            });
+        });
+    }
+    function highlightStars(n) {
+        for (let i = 1; i <= 5; i++) {
+            const ic = document.getElementById('star-' + i);
+            if (ic) ic.className = i <= n ? 'bi bi-star-fill fs-3 text-warning' : 'bi bi-star fs-3 text-muted';
+        }
+    }
 
-    stars.forEach(star => {
-        star.addEventListener('mouseenter', function() {
-            const val = parseInt(this.dataset.value);
-            highlightStars(val);
-        });
-        star.addEventListener('mouseleave', function() {
-            highlightStars(parseInt(ratingInput.value));
-        });
-        star.addEventListener('click', function() {
-            const val = parseInt(this.dataset.value);
-            ratingInput.value = val;
-            highlightStars(val);
-            if (submitBtn) submitBtn.disabled = false;
+    // ── Case photo gallery ───────────────────────────────────────
+    const thumbLinks = Array.from(document.querySelectorAll('.case-photo-thumb'));
+    const featuredLink = document.getElementById('featuredPhotoLink');
+    const featuredImg = document.getElementById('featuredPhotoImg');
+    const featuredCat = document.getElementById('featuredPhotoCat');
+    const featuredName = document.getElementById('featuredPhotoName');
+    const filterPills = Array.from(document.querySelectorAll('.photo-filter-pill'));
+    let currentIdx = 0;
+
+    function selectPhoto(idx) {
+        const link = thumbLinks[idx];
+        if (!link || !featuredLink || !featuredImg) return;
+
+        currentIdx = idx;
+        featuredLink.href = link.href;
+        featuredLink.dataset.index = idx;
+        featuredLink.dataset.category = link.dataset.category || '';
+        featuredLink.dataset.categoryLabel = link.dataset.categoryLabel || '';
+        featuredLink.title = link.title || '';
+        featuredImg.src = link.href;
+        featuredImg.alt = link.title || '';
+        if (featuredCat) featuredCat.textContent = link.dataset.categoryLabel || '';
+        if (featuredName) featuredName.textContent = link.title || '';
+
+        thumbLinks.forEach(item => item.classList.remove('active'));
+        link.classList.add('active');
+    }
+
+    filterPills.forEach(pill => {
+        pill.addEventListener('click', () => {
+            const target = pill.dataset.filter;
+            filterPills.forEach(item => item.classList.remove('active'));
+            pill.classList.add('active');
+
+            let firstVisible = null;
+            thumbLinks.forEach((link, idx) => {
+                const visible = target === 'all' || link.dataset.category === target;
+                link.classList.toggle('d-none', !visible);
+                if (visible && firstVisible === null) firstVisible = idx;
+            });
+            if (firstVisible !== null) selectPhoto(firstVisible);
         });
     });
 
-    function highlightStars(count) {
-        for (let i = 1; i <= 5; i++) {
-            const icon = document.getElementById('star-' + i);
-            if (!icon) continue;
-            if (i <= count) {
-                icon.className = 'bi bi-star-fill fs-3 text-warning';
-            } else {
-                icon.className = 'bi bi-star fs-3 text-muted';
-            }
-        }
+    // ── Lightbox ─────────────────────────────────────────────────
+    const lbModal   = document.getElementById('photoLightbox');
+    if (!lbModal) return;
+
+    const lbImg     = document.getElementById('lbImg');
+    const lbName    = document.getElementById('lbName');
+    const lbCounter = document.getElementById('lbCounter');
+    const lbCat     = document.getElementById('lbCat');
+    const lbPrev    = document.getElementById('lbPrev');
+    const lbNext    = document.getElementById('lbNext');
+
+    let bsModal = null;
+
+    function openAt(idx) {
+        const link = thumbLinks[idx];
+        if (!link) return;
+        currentIdx = idx;
+        selectPhoto(idx);
+        lbImg.style.opacity = '0';
+        lbImg.src = link.href;
+        lbImg.onload = () => { lbImg.style.opacity = '1'; };
+        lbName.textContent = link.title || '';
+        lbCat.textContent = link.dataset.categoryLabel || '';
+        lbCounter.textContent = (idx + 1) + ' / ' + thumbLinks.length;
+        lbPrev.disabled = idx === 0;
+        lbNext.disabled = idx === thumbLinks.length - 1;
     }
+
+    thumbLinks.forEach((link, i) => {
+        link.addEventListener('click', e => {
+            e.preventDefault();
+            openAt(i);
+            if (!bsModal) bsModal = new bootstrap.Modal(lbModal);
+            bsModal.show();
+        });
+    });
+    featuredLink?.addEventListener('click', e => {
+        e.preventDefault();
+        openAt(currentIdx);
+        if (!bsModal) bsModal = new bootstrap.Modal(lbModal);
+        bsModal.show();
+    });
+
+    lbPrev.addEventListener('click', () => { if (currentIdx > 0) openAt(currentIdx - 1); });
+    lbNext.addEventListener('click', () => { if (currentIdx < thumbLinks.length - 1) openAt(currentIdx + 1); });
+
+    // Keyboard navigation
+    document.addEventListener('keydown', e => {
+        if (!lbModal.classList.contains('show')) return;
+        if (e.key === 'ArrowLeft')  lbPrev.click();
+        if (e.key === 'ArrowRight') lbNext.click();
+        if (e.key === 'Escape')     bsModal?.hide();
+    });
+
+    // Swipe support (touch)
+    let touchStartX = 0;
+    lbModal.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, {passive: true});
+    lbModal.addEventListener('touchend', e => {
+        const dx = e.changedTouches[0].clientX - touchStartX;
+        if (Math.abs(dx) > 50) dx < 0 ? lbNext.click() : lbPrev.click();
+    });
 });
 </script>
+
+{# ── Lightbox modal ──────────────────────────────────────────── #}
+{% if case.photos %}
+<div class="modal fade" id="photoLightbox" tabindex="-1" aria-label="Photo viewer" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width:min(90vw,860px);">
+        <div class="modal-content border-0" style="background:rgba(10,10,15,.96);border-radius:16px;overflow:hidden;">
+
+            {# Top bar #}
+            <div class="d-flex align-items-center px-4 py-3 border-bottom border-white border-opacity-10">
+                <div class="me-auto">
+                    <div id="lbCat" class="text-white-50 small fw-semibold text-uppercase" style="letter-spacing:.05em;"></div>
+                    <div id="lbName" class="text-white small mt-1" style="word-break:break-all;max-width:60vw;"></div>
+                </div>
+                <span id="lbCounter" class="badge bg-white bg-opacity-10 text-white fw-normal me-3 px-3 py-2 rounded-pill"></span>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            {# Image area #}
+            <div class="position-relative d-flex align-items-center justify-content-center"
+                 style="min-height:min(70vh,600px);background:rgba(0,0,0,.4);">
+
+                <button id="lbPrev"
+                        class="btn position-absolute start-0 ms-3 d-flex align-items-center justify-content-center"
+                        style="width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.12);
+                               border:1px solid rgba(255,255,255,.2);color:#fff;backdrop-filter:blur(4px);">
+                    <i class="bi bi-chevron-left fs-5"></i>
+                </button>
+
+                <img id="lbImg" src="" alt="symptom photo"
+                     class="img-fluid"
+                     style="max-height:min(65vh,580px);max-width:100%;object-fit:contain;
+                            border-radius:8px;transition:opacity .2s ease;">
+
+                <button id="lbNext"
+                        class="btn position-absolute end-0 me-3 d-flex align-items-center justify-content-center"
+                        style="width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.12);
+                               border:1px solid rgba(255,255,255,.2);color:#fff;backdrop-filter:blur(4px);">
+                    <i class="bi bi-chevron-right fs-5"></i>
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endif %}
 {% endblock %}

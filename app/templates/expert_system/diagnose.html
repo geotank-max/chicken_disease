@@ -29,7 +29,7 @@
                 <h5 class="mb-0 fw-bold"><i class="bi bi-house-heart me-2 text-primary"></i>ព័ត៌មានចំការ (ស្រេចចិត្ត)</h5>
             </div>
             <div class="card-body p-4">
-                <form method="POST">
+                <form method="POST" enctype="multipart/form-data">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <input type="hidden" name="step" value="1">
                     <div class="row g-3">
@@ -54,6 +54,83 @@
                             <textarea name="notes" class="form-control" rows="3" placeholder="ព័ត៌មានបន្ថែម..."></textarea>
                         </div>
                     </div>
+
+                    {# ── Photo uploads ── #}
+                    <hr class="my-4">
+                    {% set photo_categories = [
+                        ("photos_droppings",  "droppings",  "bi-droplet-fill",   "លាមក",                  "ថតរូបលាមក ពណ៌ ឬសភាព"),
+                        ("photos_eyes",       "eyes",       "bi-eye-fill",       "ភ្នែក",                  "ភ្នែកហើម ហូរទឹក ឬបិទ"),
+                        ("photos_comb",       "comb",       "bi-lightning-fill", "មកុដ",                  "មកុដខ្មៅ ស្លេក ឬប្រែពណ៌"),
+                        ("photos_skin",       "skin",       "bi-bandaid-fill",   "ស្បែក / របួស",           "របួស ដំបៅ ឬកន្ទួលស្បែក"),
+                        ("photos_dead_birds", "dead_birds", "bi-x-circle-fill",  "មាន់ស្លាប់",              "ចំនួន ឬសភាពមាន់ស្លាប់"),
+                        ("photos_coop",       "coop",       "bi-house-fill",     "ទ្រុង / ស្ថានទីចិញ្ចឹម", "លក្ខខណ្ឌទ្រុង ឬជុំវិញ"),
+                        ("photos_other",      "other",      "bi-image-fill",     "ផ្សេងៗ",                 "រូបភាពផ្សេងពីខាងលើ")
+                    ] %}
+
+                    <section class="photo-uploader">
+                        <div class="d-flex flex-wrap align-items-start justify-content-between gap-3 mb-3">
+                            <div>
+                                <h6 class="fw-bold text-uppercase text-muted small mb-1">
+                                    <i class="bi bi-camera me-1"></i>រូបភាពសញ្ញានៃជំងឺ
+                                    <span class="fw-normal text-muted">(ស្រេចចិត្ត • JPG / PNG / WEBP)</span>
+                                </h6>
+                                <p class="small text-muted mb-0">ជ្រើសប្រភេទរូបភាព រួចបន្ថែមរូបដែលច្បាស់ ជិត និងមានពន្លឺល្អ។</p>
+                            </div>
+                            <span class="badge rounded-pill bg-primary bg-opacity-10 text-primary border border-primary border-opacity-10">
+                                អតិបរមា 5 រូប / ប្រភេទ
+                            </span>
+                        </div>
+
+                        <div class="photo-category-scroll mb-3" id="photoCategoryChips">
+                            {% for field_name, category, icon, label, hint in photo_categories %}
+                            <button type="button"
+                                    class="photo-category-chip {% if loop.first %}active{% endif %}"
+                                    data-input="{{ field_name }}"
+                                    data-label="{{ label }}"
+                                    data-hint="{{ hint }}">
+                                <i class="bi {{ icon }}"></i>
+                                <span>{{ label }}</span>
+                                <span class="photo-chip-count d-none" data-count-for="{{ field_name }}">0</span>
+                            </button>
+                            {% endfor %}
+                        </div>
+
+                        <div class="photo-dropzone" id="photoUploadTrigger">
+                            <div class="photo-dropzone-icon">
+                                <i class="bi bi-cloud-arrow-up"></i>
+                            </div>
+                            <div>
+                                <div class="fw-bold text-dark">បន្ថែមរូបភាព: <span id="activePhotoLabel">{{ photo_categories[0][3] }}</span></div>
+                                <div class="small text-muted" id="activePhotoHint">{{ photo_categories[0][4] }}</div>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-primary ms-sm-auto">
+                                <i class="bi bi-plus-lg me-1"></i>ជ្រើសរើស
+                            </button>
+                        </div>
+
+                        {% for field_name, category, icon, label, hint in photo_categories %}
+                        <input type="file"
+                               id="{{ field_name }}"
+                               name="{{ field_name }}"
+                               accept="image/*"
+                               multiple
+                               class="d-none photo-input"
+                               data-label="{{ label }}">
+                        {% endfor %}
+
+                        <div class="photo-preview-panel mt-3">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <span class="small fw-bold text-muted text-uppercase">រូបភាពដែលបានជ្រើស</span>
+                                <span id="totalSizeWarning" class="small text-muted"></span>
+                            </div>
+                            <div id="photoEmptyState" class="photo-empty-state">
+                                <i class="bi bi-images"></i>
+                                <span>មិនទាន់មានរូបភាពទេ</span>
+                            </div>
+                            <div id="photoPreviewGrid" class="photo-preview-grid d-none"></div>
+                        </div>
+                    </section>
+
                     <div class="d-flex justify-content-end mt-4">
                         <button type="submit" class="btn btn-primary px-4 py-2 fw-bold">
                             បន្ត <i class="bi bi-arrow-right ms-1"></i>
@@ -201,5 +278,139 @@
 {% block extra_scripts %}
 {% if step == '2' %}
 <script src="{{ url_for('static', filename='js/diagnose.js') }}"></script>
+{% endif %}
+{% if step == '1' %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const MAX_FILES = 5;
+    const MAX_TOTAL_MB = 45;
+    const MAX_TOTAL_BYTES = MAX_TOTAL_MB * 1024 * 1024;
+    const submitBtn = document.querySelector('form button[type="submit"]');
+    const sizeWarning = document.getElementById('totalSizeWarning');
+    const trigger = document.getElementById('photoUploadTrigger');
+    const activeLabel = document.getElementById('activePhotoLabel');
+    const activeHint = document.getElementById('activePhotoHint');
+    const emptyState = document.getElementById('photoEmptyState');
+    const previewGrid = document.getElementById('photoPreviewGrid');
+    const inputs = Array.from(document.querySelectorAll('.photo-input'));
+    const chips = Array.from(document.querySelectorAll('.photo-category-chip'));
+    const fileStore = new Map(inputs.map(input => [input.id, []]));
+    let activeInputId = chips[0]?.dataset.input || inputs[0]?.id;
+
+    function calcTotalSize() {
+        let total = 0;
+        fileStore.forEach(function (files) {
+            files.forEach(function (f) { total += f.size; });
+        });
+        return total;
+    }
+
+    function updateSizeWarning() {
+        const total = calcTotalSize();
+        const mb = (total / 1024 / 1024).toFixed(1);
+        if (total > MAX_TOTAL_BYTES) {
+            sizeWarning.textContent = 'ទំហំសរុប ' + mb + ' MB — លើសពី ' + MAX_TOTAL_MB + ' MB។ សូមដកចេញរូបភាពខ្លះ។';
+            sizeWarning.className = 'small text-danger';
+            if (submitBtn) submitBtn.disabled = true;
+        } else {
+            sizeWarning.textContent = total > 0 ? 'ទំហំសរុប: ' + mb + ' MB' : '';
+            sizeWarning.className = 'small text-muted';
+            if (submitBtn) submitBtn.disabled = false;
+        }
+    }
+
+    function syncInputFiles(input, files) {
+        const dt = new DataTransfer();
+        files.forEach(function (file) { dt.items.add(file); });
+        input.files = dt.files;
+    }
+
+    function removeFile(input, index) {
+        const files = (fileStore.get(input.id) || []).filter(function (_, i) {
+            return i !== index;
+        });
+        fileStore.set(input.id, files);
+        syncInputFiles(input, files);
+        renderPreviews();
+    }
+
+    function updateChipCounts() {
+        inputs.forEach(function (input) {
+            const counter = document.querySelector('[data-count-for="' + input.id + '"]');
+            const count = (fileStore.get(input.id) || []).length;
+            if (!counter) return;
+            counter.textContent = count;
+            counter.classList.toggle('d-none', count === 0);
+        });
+    }
+
+    function renderPreviews() {
+        previewGrid.innerHTML = '';
+        let hasFiles = false;
+
+        inputs.forEach(function (input) {
+            (fileStore.get(input.id) || []).forEach(function (file, index) {
+                if (!file.type.startsWith('image/')) return;
+                hasFiles = true;
+
+                const card = document.createElement('div');
+                card.className = 'photo-preview-card';
+
+                const img = document.createElement('img');
+                img.src = URL.createObjectURL(file);
+                img.alt = file.name;
+                img.onload = function () { URL.revokeObjectURL(img.src); };
+
+                const badge = document.createElement('span');
+                badge.className = 'photo-preview-badge';
+                badge.textContent = input.dataset.label || '';
+
+                const removeBtn = document.createElement('button');
+                removeBtn.type = 'button';
+                removeBtn.className = 'photo-preview-remove';
+                removeBtn.innerHTML = '<i class="bi bi-x"></i>';
+                removeBtn.setAttribute('aria-label', 'Remove photo');
+                removeBtn.addEventListener('click', function () {
+                    removeFile(input, index);
+                });
+
+                card.appendChild(img);
+                card.appendChild(badge);
+                card.appendChild(removeBtn);
+                previewGrid.appendChild(card);
+            });
+        });
+
+        emptyState.classList.toggle('d-none', hasFiles);
+        previewGrid.classList.toggle('d-none', !hasFiles);
+        updateChipCounts();
+        updateSizeWarning();
+    }
+
+    chips.forEach(function (chip) {
+        chip.addEventListener('click', function () {
+            activeInputId = chip.dataset.input;
+            chips.forEach(function (item) { item.classList.remove('active'); });
+            chip.classList.add('active');
+            activeLabel.textContent = chip.dataset.label || '';
+            activeHint.textContent = chip.dataset.hint || '';
+        });
+    });
+
+    trigger?.addEventListener('click', function () {
+        document.getElementById(activeInputId)?.click();
+    });
+
+    inputs.forEach(function (input) {
+        input.addEventListener('change', function () {
+            const currentFiles = fileStore.get(this.id) || [];
+            const nextFiles = currentFiles.concat(Array.from(this.files)).slice(0, MAX_FILES);
+            fileStore.set(this.id, nextFiles);
+            syncInputFiles(this, nextFiles);
+            renderPreviews();
+        });
+    });
+});
+</script>
 {% endif %}
 {% endblock %}
