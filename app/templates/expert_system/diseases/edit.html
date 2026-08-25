@@ -60,4 +60,79 @@
         </div>
     </form>
 </div>
+
+{# ── Treatment steps authoring (structured checklist / Option A) ─────────── #}
+<div class="card border-0 shadow-sm p-4 mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-1">
+        <h5 class="fw-bold mb-0"><i class="bi bi-list-check me-2 text-primary"></i>ជំហានព្យាបាល (បញ្ជីត្រួតពិនិត្យ)</h5>
+        <span class="badge bg-secondary">{{ disease.treatment_steps|length }} ជំហាន</span>
+    </div>
+    <p class="text-muted small mb-3">
+        បង្កើតជំហានព្យាបាលច្បាស់លាស់ដែលកសិករអាចធីកម្តងមួយៗ។
+        បើមិនមានជំហានទេ ប្រព័ន្ធនឹងបំបែកអត្ថបទ "ការព្យាបាល" ខាងលើដោយស្វ័យប្រវត្តិ។
+    </p>
+
+    {% set steps = disease.treatment_steps %}
+    {% if steps %}
+    <div class="list-group mb-3">
+        {% for step in steps %}
+        <div class="list-group-item">
+            <div class="d-flex align-items-start gap-2">
+                <span class="badge bg-primary rounded-pill mt-1">{{ loop.index }}</span>
+                <div class="flex-grow-1">
+                    <form method="post" action="{{ url_for('expert_system.disease_step_edit', disease_id=disease.id, step_id=step.id) }}" class="row g-2 align-items-center">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <div class="col-md-6">
+                            <input type="text" name="text" class="form-control form-control-sm" value="{{ step.text }}" maxlength="500" required>
+                        </div>
+                        <div class="col-md-4">
+                            <input type="text" name="note" class="form-control form-control-sm" value="{{ step.note or '' }}" maxlength="500" placeholder="កំណត់ចំណាំ / ដូស (ស្រេចចិត្ត)">
+                        </div>
+                        <div class="col-md-2 text-end">
+                            <button type="submit" class="btn btn-sm btn-outline-primary" title="រក្សាទុក"><i class="bi bi-check-lg"></i></button>
+                        </div>
+                    </form>
+                </div>
+                <div class="d-flex flex-column gap-1">
+                    <form method="post" action="{{ url_for('expert_system.disease_step_move', disease_id=disease.id, step_id=step.id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="direction" value="up">
+                        <button type="submit" class="btn btn-sm btn-light border p-1" {% if loop.first %}disabled{% endif %} title="ឡើងលើ"><i class="bi bi-arrow-up"></i></button>
+                    </form>
+                    <form method="post" action="{{ url_for('expert_system.disease_step_move', disease_id=disease.id, step_id=step.id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="direction" value="down">
+                        <button type="submit" class="btn btn-sm btn-light border p-1" {% if loop.last %}disabled{% endif %} title="ចុះក្រោម"><i class="bi bi-arrow-down"></i></button>
+                    </form>
+                </div>
+                <form method="post" action="{{ url_for('expert_system.disease_step_delete', disease_id=disease.id, step_id=step.id) }}"
+                      onsubmit="return confirm('លុបជំហាននេះ?');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-sm btn-outline-danger" title="លុប"><i class="bi bi-trash"></i></button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-light border text-muted small mb-3">
+        <i class="bi bi-info-circle me-1"></i> មិនទាន់មានជំហានព្យាបាលដែលបានកំណត់ទេ។
+    </div>
+    {% endif %}
+
+    <form method="post" action="{{ url_for('expert_system.disease_step_add', disease_id=disease.id) }}" class="row g-2 align-items-end border-top pt-3">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="col-md-6">
+            <label class="form-label fw-bold small">ជំហានថ្មី</label>
+            <input type="text" name="text" class="form-control" maxlength="500" placeholder="ឧ. ដាក់ឱ្យដោយឡែក..." required>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label fw-bold small">កំណត់ចំណាំ (ស្រេចចិត្ត)</label>
+            <input type="text" name="note" class="form-control" maxlength="500" placeholder="ដូស / ព័ត៌មានបន្ថែម">
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-brand w-100"><i class="bi bi-plus-lg me-1"></i>បន្ថែម</button>
+        </div>
+    </form>
+</div>
 {% endblock %}

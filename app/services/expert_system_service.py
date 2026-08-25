@@ -4,6 +4,7 @@ from typing import List, Optional
 from extensions import db
 from app.models.expert_system import (
     Category, Symptom, Disease, Rule, Case, CaseMessage,
+    TreatmentStep, CaseTreatmentProgress,
     CASE_STATUS_CONFIRMED, CASE_STATUS_REJECTED, CASE_STATUS_PENDING,
     FOLLOWUP_STATUSES,
 )
@@ -126,6 +127,76 @@ class DiseaseService:
     @staticmethod
     def delete(disease: Disease) -> None:
         db.session.delete(disease)
+        db.session.commit()
+
+
+class TreatmentStepService:
+    """CRUD + ordering for doctor/admin-authored treatment steps (Option A)."""
+
+    @staticmethod
+    def get_by_id(step_id: int) -> Optional[TreatmentStep]:
+        return TreatmentStep.query.get(step_id)
+
+    @staticmethod
+    def list_for_disease(disease_id: int) -> List[TreatmentStep]:
+        return (
+            TreatmentStep.query
+            .filter_by(disease_id=disease_id)
+            .order_by(TreatmentStep.position.asc(), TreatmentStep.id.asc())
+            .all()
+        )
+
+    @staticmethod
+    def add(disease: Disease, text: str, note: str = "", created_by_id: int | None = None) -> TreatmentStep:
+        existing = TreatmentStepService.list_for_disease(disease.id)
+        next_pos = (existing[-1].position + 1) if existing else 0
+        step = TreatmentStep(
+            disease_id=disease.id,
+            position=next_pos,
+            text=text.strip(),
+            note=(note or "").strip() or None,
+            created_by_id=created_by_id,
+        )
+        db.session.add(step)
+        db.session.commit()
+        return step
+
+    @staticmethod
+    def update(step: TreatmentStep, text: str, note: str = "") -> TreatmentStep:
+        step.text = text.strip()
+        step.note = (note or "").strip() or None
+        db.session.commit()
+        return step
+
+    @staticmethod
+    def delete(step: TreatmentStep) -> None:
+        db.session.delete(step)
+        db.session.commit()
+        TreatmentStepService._renumber(step.disease_id)
+
+    @staticmethod
+    def move(step: TreatmentStep, direction: str) -> None:
+        """Swap a step with its neighbour above ('up') or below ('down')."""
+        steps = TreatmentStepService.list_for_disease(step.disease_id)
+        idx = next((i for i, s in enumerate(steps) if s.id == step.id), None)
+        if idx is None:
+            return
+        swap_with = None
+        if direction == "up" and idx > 0:
+            swap_with = steps[idx - 1]
+        elif direction == "down" and idx < len(steps) - 1:
+            swap_with = steps[idx + 1]
+        if swap_with is None:
+            return
+        step.position, swap_with.position = swap_with.position, step.position
+        db.session.commit()
+
+    @staticmethod
+    def _renumber(disease_id: int) -> None:
+        """Re-pack positions to 0..n-1 after a delete."""
+        steps = TreatmentStepService.list_for_disease(disease_id)
+        for i, s in enumerate(steps):
+            s.position = i
         db.session.commit()
 
 
@@ -259,6 +330,45 @@ class CaseService:
             raise ValueError(f"Invalid follow-up status: {status}")
         case.follow_up_status = status
         case.follow_up_updated_at = datetime.utcnow()
+        db.session.commit()
+        return case
+
+    @staticmethod
+    def toggle_treatment_step(case: Case, step_key: int, done: bool) -> Case:
+        """Mark a treatment checklist step done/undone for this case.
+
+        When the diagnosed disease has structured steps, `step_key` is a
+        TreatmentStep id and state is stored in CaseTreatmentProgress. Otherwise
+        `step_key` is a positional index into the derived-text checklist and
+        state is stored in the Case.treatment_checked_steps JSON (Option B).
+        """
+        if case.uses_structured_steps:
+            valid_ids = {s.id for s in case.final_disease.treatment_steps}
+            if step_key not in valid_ids:
+                raise ValueError(f"Unknown treatment step id: {step_key}")
+            row = next(
+                (p for p in case.treatment_progress_rows if p.step_id == step_key),
+                None,
+            )
+            if row is None:
+                row = CaseTreatmentProgress(case_id=case.id, step_id=step_key)
+                db.session.add(row)
+            row.done = done
+            row.completed_at = datetime.utcnow() if done else None
+            db.session.commit()
+            return case
+
+        # Fallback: Option B index-based JSON state.
+        import json as _json
+        checked = set(case._checked_step_set)
+        total = len(case.treatment_steps)
+        if step_key < 0 or step_key >= total:
+            raise ValueError(f"Step index out of range: {step_key}")
+        if done:
+            checked.add(step_key)
+        else:
+            checked.discard(step_key)
+        case.treatment_checked_steps = _json.dumps(sorted(checked))
         db.session.commit()
         return case
 

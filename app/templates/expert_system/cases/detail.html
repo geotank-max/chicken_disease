@@ -74,10 +74,49 @@
                             <p class="text-secondary mb-0">{{ case.final_disease.description }}</p>
                         </div>
                         <div class="mb-4">
-                            <h6 class="fw-bold text-uppercase text-muted small mb-2">ការព្យាបាល</h6>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="fw-bold text-uppercase text-muted small mb-0">ការព្យាបាល</h6>
+                                {% set tp = case.treatment_progress %}
+                                {% if tp.total %}
+                                <span class="small fw-bold text-success" id="treatmentProgressLabel">{{ tp.done }}/{{ tp.total }}</span>
+                                {% endif %}
+                            </div>
+                            {% set steps = case.treatment_steps %}
+                            {% if steps %}
+                            {% set owner = case.user_id == current_user.id %}
+                            <div class="p-3 bg-success bg-opacity-10 rounded border border-success border-opacity-10">
+                                <div class="progress mb-3" style="height: 6px;">
+                                    <div class="progress-bar bg-success" id="treatmentProgressBar"
+                                         role="progressbar" style="width: {{ tp.percent }}%"></div>
+                                </div>
+                                <div class="treatment-checklist d-flex flex-column gap-2"
+                                     data-case-id="{{ case.id }}"
+                                     data-toggle-url="{{ url_for('expert_system.cases_treatment_step', case_id=case.id) }}"
+                                     data-can-edit="{{ '1' if owner else '0' }}">
+                                    {% for step in steps %}
+                                    <div class="form-check treatment-step d-flex align-items-start gap-2 bg-white rounded p-2 border">
+                                        <input class="form-check-input mt-1 treatment-step-check" type="checkbox"
+                                               id="tstep-{{ step.key }}"
+                                               data-step-key="{{ step.key }}"
+                                               {% if step.done %}checked{% endif %}
+                                               {% if not owner %}disabled{% endif %}>
+                                        <label class="form-check-label {% if step.done %}text-decoration-line-through text-muted{% endif %}"
+                                               for="tstep-{{ step.key }}">
+                                            {{ step.text }}
+                                            {% if step.note %}<span class="d-block small text-muted fst-italic">{{ step.note }}</span>{% endif %}
+                                        </label>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                {% if not owner %}
+                                <p class="small text-muted mb-0 mt-2"><i class="bi bi-info-circle me-1"></i>មានតែម្ចាស់ករណីទេដែលអាចធីកជំហានបាន។</p>
+                                {% endif %}
+                            </div>
+                            {% else %}
                             <div class="p-3 bg-success bg-opacity-10 rounded border border-success border-opacity-10">
                                 <p class="mb-0">{{ case.final_disease.treatment }}</p>
                             </div>
+                            {% endif %}
                         </div>
                         {% if case.final_disease.prevention %}
                         <div>
@@ -376,6 +415,48 @@
 {% block extra_scripts %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+
+    // ── Treatment checklist ─────────────────────────────────────
+    const checklist = document.querySelector('.treatment-checklist');
+    if (checklist && checklist.dataset.canEdit === '1') {
+        const toggleUrl = checklist.dataset.toggleUrl;
+        const csrf = document.querySelector('meta[name="csrf-token"]')?.content
+                     || (document.querySelector('input[name="csrf_token"]')?.value || '');
+        const bar = document.getElementById('treatmentProgressBar');
+        const label = document.getElementById('treatmentProgressLabel');
+
+        checklist.querySelectorAll('.treatment-step-check').forEach(box => {
+            box.addEventListener('change', async () => {
+                const stepKey = box.dataset.stepKey;
+                const done = box.checked;
+                box.disabled = true;
+                try {
+                    const res = await fetch(toggleUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRFToken': csrf,
+                        },
+                        body: JSON.stringify({ step_key: stepKey, done: done }),
+                    });
+                    const data = await res.json();
+                    if (!res.ok || !data.ok) throw new Error('toggle failed');
+
+                    // Update strike-through + progress UI
+                    const lbl = checklist.querySelector('label[for="tstep-' + stepKey + '"]');
+                    if (lbl) lbl.classList.toggle('text-decoration-line-through', done);
+                    if (lbl) lbl.classList.toggle('text-muted', done);
+                    if (bar && data.progress) bar.style.width = data.progress.percent + '%';
+                    if (label && data.progress) label.textContent = data.progress.done + '/' + data.progress.total;
+                } catch (err) {
+                    box.checked = !done; // revert on failure
+                } finally {
+                    box.disabled = false;
+                }
+            });
+        });
+    }
 
     // ── Star-rating ─────────────────────────────────────────────
     const stars     = document.querySelectorAll('.star-label');

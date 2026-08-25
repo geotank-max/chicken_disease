@@ -5,7 +5,7 @@ import shutil
 
 from flask import (
     Blueprint, render_template, request, redirect, url_for, flash,
-    abort, send_file, send_from_directory, session, current_app,
+    abort, send_file, send_from_directory, session, current_app, jsonify,
 )
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
@@ -29,6 +29,7 @@ from app.services.expert_system_service import (
     RuleService,
     CaseService,
     CaseMessageService,
+    TreatmentStepService,
 )
 from app.services.audit_service import AuditService
 from app.services.pdf_service import PdfService
@@ -479,6 +480,51 @@ def cases_follow_up(case_id: int):
     return redirect(url_for("expert_system.cases_detail", case_id=case_id))
 
 
+@expert_system_bp.route("/cases/<int:case_id>/treatment-step", methods=["POST"])
+@login_required
+@require_permission("view_cases")
+def cases_treatment_step(case_id: int):
+    """Toggle a single treatment checklist step for a case (owner only).
+
+    Accepts a form/JSON POST with `step_index` and `done`. Returns JSON when
+    requested via AJAX, otherwise redirects back to the case detail page.
+    """
+    case = CaseService.get_by_id(case_id)
+    if case is None:
+        abort(404)
+
+    # Only the farmer who owns the case can tick their treatment steps.
+    if case.user_id != current_user.id:
+        abort(403)
+
+    wants_json = request.accept_mimetypes.best == "application/json" or \
+        request.headers.get("X-Requested-With") == "XMLHttpRequest"
+
+    payload = request.get_json(silent=True) or request.form
+    try:
+        step_key = int(payload.get("step_key"))
+    except (TypeError, ValueError):
+        if wants_json:
+            return jsonify({"ok": False, "error": "invalid_step"}), 400
+        flash("ជំហានមិនត្រឹមត្រូវ។", "warning")
+        return redirect(url_for("expert_system.cases_detail", case_id=case_id))
+
+    done_raw = payload.get("done")
+    done = str(done_raw).lower() in ("1", "true", "yes", "on")
+
+    try:
+        CaseService.toggle_treatment_step(case, step_key, done)
+    except ValueError:
+        if wants_json:
+            return jsonify({"ok": False, "error": "out_of_range"}), 400
+        flash("ជំហានមិនត្រឹមត្រូវ។", "warning")
+        return redirect(url_for("expert_system.cases_detail", case_id=case_id))
+
+    if wants_json:
+        return jsonify({"ok": True, "progress": case.treatment_progress})
+    return redirect(url_for("expert_system.cases_detail", case_id=case_id))
+
+
 @expert_system_bp.route("/cases/photos/<path:filename>")
 @login_required
 @require_permission("view_cases")
@@ -844,6 +890,70 @@ def diseases_delete(disease_id: int):
         "expert_system/diseases/delete_confirm.html",
         disease=disease,
     )
+
+
+# ── Treatment step authoring (doctors + admins via manage_diseases) ──────────
+
+@expert_system_bp.route("/diseases/<int:disease_id>/steps/add", methods=["POST"])
+@login_required
+@require_permission("manage_diseases")
+def disease_step_add(disease_id: int):
+    disease = DiseaseService.get_by_id(disease_id)
+    if disease is None:
+        abort(404)
+    text = request.form.get("text", "").strip()
+    note = request.form.get("note", "").strip()
+    if not text:
+        flash("សូមបញ្ចូលអត្ថបទជំហាន។", "warning")
+    else:
+        step = TreatmentStepService.add(disease, text, note, created_by_id=current_user.id)
+        AuditService.log("CREATE", "TreatmentStep", step.id, f"Added step to disease {disease.id}")
+        flash("ជំហានព្យាបាលត្រូវបានបន្ថែម។", "success")
+    return redirect(url_for("expert_system.diseases_edit", disease_id=disease_id))
+
+
+@expert_system_bp.route("/diseases/<int:disease_id>/steps/<int:step_id>/edit", methods=["POST"])
+@login_required
+@require_permission("manage_diseases")
+def disease_step_edit(disease_id: int, step_id: int):
+    step = TreatmentStepService.get_by_id(step_id)
+    if step is None or step.disease_id != disease_id:
+        abort(404)
+    text = request.form.get("text", "").strip()
+    note = request.form.get("note", "").strip()
+    if not text:
+        flash("សូមបញ្ចូលអត្ថបទជំហាន។", "warning")
+    else:
+        TreatmentStepService.update(step, text, note)
+        AuditService.log("UPDATE", "TreatmentStep", step.id, f"Edited step of disease {disease_id}")
+        flash("ជំហានព្យាបាលត្រូវបានកែប្រែ។", "success")
+    return redirect(url_for("expert_system.diseases_edit", disease_id=disease_id))
+
+
+@expert_system_bp.route("/diseases/<int:disease_id>/steps/<int:step_id>/delete", methods=["POST"])
+@login_required
+@require_permission("manage_diseases")
+def disease_step_delete(disease_id: int, step_id: int):
+    step = TreatmentStepService.get_by_id(step_id)
+    if step is None or step.disease_id != disease_id:
+        abort(404)
+    TreatmentStepService.delete(step)
+    AuditService.log("DELETE", "TreatmentStep", step_id, f"Deleted step of disease {disease_id}")
+    flash("ជំហានព្យាបាលត្រូវបានលុប។", "success")
+    return redirect(url_for("expert_system.diseases_edit", disease_id=disease_id))
+
+
+@expert_system_bp.route("/diseases/<int:disease_id>/steps/<int:step_id>/move", methods=["POST"])
+@login_required
+@require_permission("manage_diseases")
+def disease_step_move(disease_id: int, step_id: int):
+    step = TreatmentStepService.get_by_id(step_id)
+    if step is None or step.disease_id != disease_id:
+        abort(404)
+    direction = request.form.get("direction", "")
+    if direction in ("up", "down"):
+        TreatmentStepService.move(step, direction)
+    return redirect(url_for("expert_system.diseases_edit", disease_id=disease_id))
 
 
 @expert_system_bp.route("/rules")

@@ -68,8 +68,28 @@
     </div>
 
     <div class="section">
-        <div class="label">Treatment</div>
+        <div class="label">Treatment Checklist</div>
+        {% set steps = case.treatment_steps %}
+        {% if steps %}
+        {% set tp = case.treatment_progress %}
+        <div class="box">
+            <div style="font-size: 11px; color: #6b7280; margin-bottom: 8px;">
+                Progress: {{ tp.done }} / {{ tp.total }} steps completed
+            </div>
+            <table style="width: 100%; border-collapse: collapse;">
+                {% for step in steps %}
+                <tr>
+                    <td style="width: 22px; vertical-align: top; padding: 3px 6px 3px 0;">
+                        <span style="display: inline-block; width: 13px; height: 13px; border: 1.5px solid #374151; border-radius: 3px; text-align: center; line-height: 13px; font-size: 11px; color: #059669;">{% if step.done %}&#10003;{% endif %}</span>
+                    </td>
+                    <td style="padding: 3px 0; {% if step.done %}color: #6b7280; text-decoration: line-through;{% endif %}">{{ step.text }}{% if step.note %} <span style="color:#9ca3af; font-style:italic;">({{ step.note }})</span>{% endif %}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+        {% else %}
         <div class="box">{{ case.final_disease.treatment }}</div>
+        {% endif %}
     </div>
 
     {% if case.final_disease.prevention %}

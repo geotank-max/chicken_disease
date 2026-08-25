@@ -1,4 +1,6 @@
 # app/models/expert_system.py
+import json
+import re
 from datetime import datetime
 from extensions import db
 from app.models.associations import tbl_cases_symptoms, tbl_rules_symptoms
@@ -81,6 +83,16 @@ class Disease(db.Model):
     category = db.relationship("Category", back_populates="diseases")
     rules = db.relationship("Rule", back_populates="disease", cascade="all, delete-orphan")
     cases = db.relationship("Case", back_populates="disease", foreign_keys="Case.disease_id")
+    treatment_steps = db.relationship(
+        "TreatmentStep",
+        back_populates="disease",
+        cascade="all, delete-orphan",
+        order_by="TreatmentStep.position",
+    )
+
+    @property
+    def has_structured_steps(self) -> bool:
+        return len(self.treatment_steps) > 0
 
     def __repr__(self) -> str:
         return f"<Disease {self.name}>"
@@ -130,6 +142,8 @@ class Case(db.Model):
     feedback_at = db.Column(db.DateTime)
     follow_up_status = db.Column(db.String(30), default=FOLLOWUP_NONE, nullable=False)
     follow_up_updated_at = db.Column(db.DateTime)
+    # JSON list of completed treatment step indexes for this case, e.g. "[0, 2]".
+    treatment_checked_steps = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
     symptoms = db.relationship(
@@ -143,6 +157,7 @@ class Case(db.Model):
     reviewed_by = db.relationship("UserTable", foreign_keys=[reviewed_by_id])
     photos = db.relationship("CasePhoto", back_populates="case", cascade="all, delete-orphan", order_by="CasePhoto.uploaded_at")
     messages = db.relationship("CaseMessage", back_populates="case", cascade="all, delete-orphan", order_by="CaseMessage.created_at")
+    treatment_progress_rows = db.relationship("CaseTreatmentProgress", back_populates="case", cascade="all, delete-orphan")
 
     @property
     def final_disease(self):
@@ -182,6 +197,85 @@ class Case(db.Model):
             FOLLOWUP_NEEDS_REVISIT: "danger",
         }
         return colors.get(self.follow_up_status, "secondary")
+
+    # ── Treatment checklist (Option B: derived from disease treatment text) ──
+
+    @staticmethod
+    def split_treatment_text(text: str) -> list[str]:
+        """Split a free-text treatment into individual actionable steps.
+
+        Splits on the Khmer sentence terminator (។), Latin periods, newlines,
+        and semicolons, then trims and drops empties. Used to turn the shared
+        disease treatment text into a per-case checklist.
+        """
+        if not text:
+            return []
+        # Normalize newlines to a delimiter, then split on ។ . ; and bullets.
+        parts = re.split(r"[។.;\n•]+", text)
+        steps = [p.strip(" \t-–—") for p in parts]
+        return [s for s in steps if s]
+
+    @property
+    def _checked_step_set(self) -> set:
+        """Completed indexes for the fallback (derived-text) checklist."""
+        if not self.treatment_checked_steps:
+            return set()
+        try:
+            data = json.loads(self.treatment_checked_steps)
+            return {int(i) for i in data}
+        except (ValueError, TypeError):
+            return set()
+
+    @property
+    def uses_structured_steps(self) -> bool:
+        """True when the diagnosed disease has doctor-authored steps (Option A)."""
+        disease = self.final_disease
+        return bool(disease and disease.has_structured_steps)
+
+    @property
+    def treatment_steps(self) -> list:
+        """Checklist steps for this case.
+
+        Prefers structured, doctor-authored TreatmentStep rows (keyed by step
+        id). Falls back to splitting the disease's free-text treatment when no
+        structured steps exist (keyed by positional index).
+
+        Each item: {mode, key, text, note, done}.
+          - mode "structured": key is the TreatmentStep.id
+          - mode "text":       key is the positional index
+        """
+        disease = self.final_disease
+        if disease is None:
+            return []
+
+        if disease.has_structured_steps:
+            done_ids = {p.step_id for p in self.treatment_progress_rows if p.done}
+            return [
+                {
+                    "mode": "structured",
+                    "key": step.id,
+                    "text": step.text,
+                    "note": step.note,
+                    "done": step.id in done_ids,
+                }
+                for step in disease.treatment_steps
+            ]
+
+        # Fallback: Option B derived checklist.
+        checked = self._checked_step_set
+        return [
+            {"mode": "text", "key": i, "text": text, "note": None, "done": i in checked}
+            for i, text in enumerate(self.split_treatment_text(disease.treatment))
+        ]
+
+    @property
+    def treatment_progress(self) -> dict:
+        """Summary counts for a progress bar: total, done, percent."""
+        steps = self.treatment_steps
+        total = len(steps)
+        done = sum(1 for s in steps if s["done"])
+        percent = round(done / total * 100) if total else 0
+        return {"total": total, "done": done, "percent": percent}
 
     def __repr__(self) -> str:
         return f"<Case {self.id}>"
@@ -242,3 +336,45 @@ class CaseMessage(db.Model):
 
     def __repr__(self) -> str:
         return f"<CaseMessage {self.id} case={self.case_id} author={self.author_id}>"
+
+
+class TreatmentStep(db.Model):
+    """A doctor/admin-authored, ordered treatment step for a disease (Option A)."""
+
+    __tablename__ = "tbl_treatment_steps"
+
+    id = db.Column(db.Integer, db.Sequence("seq_treatment_steps_id"), primary_key=True)
+    disease_id = db.Column(db.Integer, db.ForeignKey("tbl_diseases.id"), nullable=False)
+    position = db.Column(db.Integer, nullable=False, default=0)
+    text = db.Column(db.String(500), nullable=False)
+    note = db.Column(db.String(500))  # optional extra detail / dosage
+    created_by_id = db.Column(db.Integer, db.ForeignKey("tbl_users.id"))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    disease = db.relationship("Disease", back_populates="treatment_steps")
+    created_by = db.relationship("UserTable", foreign_keys=[created_by_id])
+
+    def __repr__(self) -> str:
+        return f"<TreatmentStep {self.id} disease={self.disease_id} pos={self.position}>"
+
+
+class CaseTreatmentProgress(db.Model):
+    """Per-case completion state of a structured treatment step."""
+
+    __tablename__ = "tbl_case_treatment_progress"
+
+    id = db.Column(db.Integer, db.Sequence("seq_case_treatment_progress_id"), primary_key=True)
+    case_id = db.Column(db.Integer, db.ForeignKey("tbl_cases.id"), nullable=False)
+    step_id = db.Column(db.Integer, db.ForeignKey("tbl_treatment_steps.id", ondelete="CASCADE"), nullable=False)
+    done = db.Column(db.Boolean, default=False, nullable=False)
+    completed_at = db.Column(db.DateTime)
+
+    case = db.relationship("Case", back_populates="treatment_progress_rows")
+    step = db.relationship("TreatmentStep")
+
+    __table_args__ = (
+        db.UniqueConstraint("case_id", "step_id", name="uq_case_step"),
+    )
+
+    def __repr__(self) -> str:
+        return f"<CaseTreatmentProgress case={self.case_id} step={self.step_id} done={self.done}>"

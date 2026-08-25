@@ -62,6 +62,7 @@ def migrate_schema() -> None:
         "feedback_at": "TIMESTAMP",
         "follow_up_status": "VARCHAR(30) DEFAULT 'none' NOT NULL",
         "follow_up_updated_at": "TIMESTAMP",
+        "treatment_checked_steps": "TEXT",
     }
     if inspector.has_table("tbl_cases"):
         for col, col_type in case_cols.items():
@@ -122,5 +123,45 @@ def migrate_create_tables() -> None:
         """))
         db.session.execute(text(
             "CREATE INDEX ix_tbl_case_messages_case_id ON tbl_case_messages (case_id)"
+        ))
+        db.session.commit()
+
+    # ── tbl_treatment_steps ─────────────────────────────────────────────────
+    # Doctor/admin-authored, ordered treatment steps belonging to a disease.
+    if not _table_exists(inspector, "tbl_treatment_steps"):
+        db.session.execute(text("""
+            CREATE TABLE tbl_treatment_steps (
+                id             SERIAL PRIMARY KEY,
+                disease_id     INTEGER NOT NULL
+                                   REFERENCES tbl_diseases(id) ON DELETE CASCADE,
+                position       INTEGER   NOT NULL DEFAULT 0,
+                text           VARCHAR(500) NOT NULL,
+                note           VARCHAR(500),
+                created_by_id  INTEGER REFERENCES tbl_users(id),
+                created_at     TIMESTAMP NOT NULL DEFAULT NOW()
+            )
+        """))
+        db.session.execute(text(
+            "CREATE INDEX ix_tbl_treatment_steps_disease_id ON tbl_treatment_steps (disease_id)"
+        ))
+        db.session.commit()
+
+    # ── tbl_case_treatment_progress ─────────────────────────────────────────
+    # Per-case completion state for a structured treatment step.
+    if not _table_exists(inspector, "tbl_case_treatment_progress"):
+        db.session.execute(text("""
+            CREATE TABLE tbl_case_treatment_progress (
+                id           SERIAL PRIMARY KEY,
+                case_id      INTEGER NOT NULL
+                                 REFERENCES tbl_cases(id) ON DELETE CASCADE,
+                step_id      INTEGER NOT NULL
+                                 REFERENCES tbl_treatment_steps(id) ON DELETE CASCADE,
+                done         BOOLEAN   NOT NULL DEFAULT FALSE,
+                completed_at TIMESTAMP,
+                CONSTRAINT uq_case_step UNIQUE (case_id, step_id)
+            )
+        """))
+        db.session.execute(text(
+            "CREATE INDEX ix_tbl_case_treatment_progress_case_id ON tbl_case_treatment_progress (case_id)"
         ))
         db.session.commit()
