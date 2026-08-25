@@ -193,6 +193,10 @@ def diagnose():
             session.pop("diagnosis_photos", None)
             if saved_case and saved_case.disease:
                 AuditService.log("DIAGNOSE", "Case", saved_case.id, f"Diagnosis saved: {saved_case.disease.name}")
+
+            # Notify all doctors/admins about the new pending case
+            NotificationService.notify_doctors_new_case(saved_case)
+
             flash("ករណីត្រូវបានរក្សាទុកដោយជោគជ័យ។", "success")
             return redirect(url_for("expert_system.cases_detail", case_id=saved_case.id))
 

@@ -45,6 +45,53 @@ class NotificationService:
             db.session.add(n)
         db.session.commit()
 
+    @staticmethod
+    def notify_doctors_new_case(case):
+        """Create a bell notification for every Doctor/Admin when a new case is submitted.
+
+        Finds all active users whose roles carry the 'review_cases' permission,
+        skipping the submitter themselves.
+        """
+        from app.models.user import UserTable
+        from app.models.permission import PermissionTable
+        from app.models.role import RoleTable
+
+        # Find all roles that have review_cases permission
+        reviewable_roles = (
+            RoleTable.query
+            .filter(RoleTable.permissions.any(PermissionTable.code == "review_cases"))
+            .all()
+        )
+        if not reviewable_roles:
+            return
+
+        role_ids = [r.id for r in reviewable_roles]
+
+        # Find all active users holding any of those roles, except the submitter
+        reviewers = (
+            UserTable.query
+            .filter(UserTable.is_active == True)
+            .filter(UserTable.roles.any(RoleTable.id.in_(role_ids)))
+            .filter(UserTable.id != case.user_id)
+            .all()
+        )
+
+        disease_name = case.disease.name if case.disease else "មិនស្គាល់"
+        submitter = case.user.full_name if case.user else "អ្នកប្រើ"
+        from flask import url_for
+        link = url_for("expert_system.cases_detail", case_id=case.id)
+
+        for reviewer in reviewers:
+            n = Notification(
+                user_id=reviewer.id,
+                title=f"ករណីថ្មី #{case.id} រង់ចាំពិនិត្យ",
+                message=f"{submitter} បានដាក់ស្នើករណីជំងឺ \"{disease_name}\"។ សូមពិនិត្យ។",
+                category="case",
+                link=link,
+            )
+            db.session.add(n)
+        db.session.commit()
+
     # ── Badge counts ────────────────────────────────────────────────────
 
     @staticmethod
