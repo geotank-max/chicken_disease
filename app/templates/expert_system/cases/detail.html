@@ -66,6 +66,25 @@
                 </div>
                 {% endif %}
 
+                {% if case.has_extended_context %}
+                <div class="p-4 border-bottom">
+                    <h6 class="fw-bold text-uppercase text-muted small mb-3"><i class="bi bi-clipboard-pulse me-2"></i>ព័ត៌មានសុខភាព និងហានិភ័យ</h6>
+                    <div class="row g-2 small">
+                        {% if case.sick_bird_count is not none %}<div class="col-6 col-md-4"><strong>មាន់ឈឺ:</strong> {{ case.sick_bird_count }}</div>{% endif %}
+                        {% if case.dead_bird_count is not none %}<div class="col-6 col-md-4"><strong>មាន់ស្លាប់:</strong> {{ case.dead_bird_count }}</div>{% endif %}
+                        {% if case.symptom_duration %}<div class="col-6 col-md-4"><strong>រយៈពេលរោគសញ្ញា:</strong> {{ case.symptom_duration }}</div>{% endif %}
+                        {% if case.vaccination_status %}<div class="col-6 col-md-4"><strong>វ៉ាក់សាំង:</strong> {{ case.vaccination_status_label_km }}</div>{% endif %}
+                        {% if case.egg_production_drop is not none %}<div class="col-6 col-md-4"><strong>ពងធ្លាក់ចុះ:</strong> {{ case.egg_production_drop }}%</div>{% endif %}
+                        {% if case.coop_condition %}<div class="col-6 col-md-4"><strong>លក្ខខណ្ឌទ្រុង:</strong> {{ case.coop_condition_label_km }}</div>{% endif %}
+                        {% if case.appetite_level %}<div class="col-6 col-md-4"><strong>ការស៊ី:</strong> {{ case.appetite_level_label_km }}</div>{% endif %}
+                        {% if case.water_intake_level %}<div class="col-6 col-md-4"><strong>ការផឹកទឹក:</strong> {{ case.water_intake_level_label_km }}</div>{% endif %}
+                        {% if case.feed_or_water_changed %}<div class="col-6 col-md-4"><strong>ប្តូរចំណី/ទឹក:</strong> {{ case.feed_or_water_changed_label_km }}</div>{% endif %}
+                        {% if case.new_birds_added %}<div class="col-6 col-md-4"><strong>បន្ថែមមាន់ថ្មី:</strong> {{ case.new_birds_added_label_km }}</div>{% endif %}
+                        {% if case.nearby_farms_sick %}<div class="col-6 col-md-4"><strong>ចំការជិតខាងឈឺ:</strong> {{ case.nearby_farms_sick_label_km }}</div>{% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
                 <div class="row g-0">
                     <div class="col-md-7 p-4 border-end">
                         {% if case.final_disease %}

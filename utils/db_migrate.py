@@ -63,6 +63,18 @@ def migrate_schema() -> None:
         "follow_up_status": "VARCHAR(30) DEFAULT 'none' NOT NULL",
         "follow_up_updated_at": "TIMESTAMP",
         "treatment_checked_steps": "TEXT",
+        # Extended diagnosis context (all optional)
+        "sick_bird_count": "INTEGER",
+        "dead_bird_count": "INTEGER",
+        "symptom_duration": "VARCHAR(80)",
+        "vaccination_status": "VARCHAR(20)",
+        "egg_production_drop": "INTEGER",
+        "feed_or_water_changed": "VARCHAR(10)",
+        "new_birds_added": "VARCHAR(10)",
+        "nearby_farms_sick": "VARCHAR(10)",
+        "coop_condition": "VARCHAR(20)",
+        "appetite_level": "VARCHAR(20)",
+        "water_intake_level": "VARCHAR(20)",
     }
     if inspector.has_table("tbl_cases"):
         for col, col_type in case_cols.items():

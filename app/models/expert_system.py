@@ -26,6 +26,41 @@ FOLLOWUP_STATUSES = [
     FOLLOWUP_NEEDS_REVISIT,
 ]
 
+# ── Extended diagnosis context: option values + Khmer labels ────────────────
+# Each list drives the <select> options in the diagnosis form (value order)
+# and the label maps render the Khmer text on the form and case views.
+
+YES_NO_LABELS = {
+    "yes": "បាទ/ចាស",
+    "no": "ទេ",
+    "unknown": "មិនដឹង",
+}
+YES_NO_OPTIONS = ["yes", "no", "unknown"]
+
+VACCINATION_LABELS = {
+    "unknown": "មិនដឹង",
+    "none": "មិនបានចាក់",
+    "partial": "ចាក់មិនគ្រប់",
+    "full": "ចាក់គ្រប់",
+}
+VACCINATION_OPTIONS = ["unknown", "none", "partial", "full"]
+
+COOP_CONDITION_LABELS = {
+    "clean": "ស្អាត",
+    "damp": "សើម",
+    "dirty": "កខ្វក់",
+    "crowded": "ណែនណាន់",
+}
+COOP_CONDITION_OPTIONS = ["clean", "damp", "dirty", "crowded"]
+
+INTAKE_LEVEL_LABELS = {
+    "normal": "ធម្មតា",
+    "reduced": "ថយចុះ",
+    "none": "ឈប់ស៊ី/ផឹក",
+    "increased": "កើនឡើង",
+}
+INTAKE_LEVEL_OPTIONS = ["normal", "reduced", "none", "increased"]
+
 
 class Category(db.Model):
     __tablename__ = "tbl_categories"
@@ -140,6 +175,18 @@ class Case(db.Model):
     feedback_rating = db.Column(db.Integer)  # 1-5 stars
     feedback_text = db.Column(db.Text)
     feedback_at = db.Column(db.DateTime)
+    # ── Extended diagnosis context (all optional) ──────────────────────────
+    sick_bird_count = db.Column(db.Integer)
+    dead_bird_count = db.Column(db.Integer)
+    symptom_duration = db.Column(db.String(80))       # free text, e.g. "៣ ថ្ងៃ"
+    vaccination_status = db.Column(db.String(20))     # unknown/none/partial/full
+    egg_production_drop = db.Column(db.Integer)       # percent drop, 0-100
+    feed_or_water_changed = db.Column(db.String(10))  # yes/no/unknown
+    new_birds_added = db.Column(db.String(10))        # yes/no/unknown
+    nearby_farms_sick = db.Column(db.String(10))      # yes/no/unknown
+    coop_condition = db.Column(db.String(20))         # clean/damp/dirty/crowded
+    appetite_level = db.Column(db.String(20))         # normal/reduced/none/increased
+    water_intake_level = db.Column(db.String(20))     # normal/reduced/none/increased
     follow_up_status = db.Column(db.String(30), default=FOLLOWUP_NONE, nullable=False)
     follow_up_updated_at = db.Column(db.DateTime)
     # JSON list of completed treatment step indexes for this case, e.g. "[0, 2]".
@@ -197,6 +244,53 @@ class Case(db.Model):
             FOLLOWUP_NEEDS_REVISIT: "danger",
         }
         return colors.get(self.follow_up_status, "secondary")
+
+    # ── Extended diagnosis context labels (Khmer) ──────────────────────────
+
+    @property
+    def vaccination_status_label_km(self) -> str:
+        return VACCINATION_LABELS.get(self.vaccination_status, "")
+
+    @property
+    def feed_or_water_changed_label_km(self) -> str:
+        return YES_NO_LABELS.get(self.feed_or_water_changed, "")
+
+    @property
+    def new_birds_added_label_km(self) -> str:
+        return YES_NO_LABELS.get(self.new_birds_added, "")
+
+    @property
+    def nearby_farms_sick_label_km(self) -> str:
+        return YES_NO_LABELS.get(self.nearby_farms_sick, "")
+
+    @property
+    def coop_condition_label_km(self) -> str:
+        return COOP_CONDITION_LABELS.get(self.coop_condition, "")
+
+    @property
+    def appetite_level_label_km(self) -> str:
+        return INTAKE_LEVEL_LABELS.get(self.appetite_level, "")
+
+    @property
+    def water_intake_level_label_km(self) -> str:
+        return INTAKE_LEVEL_LABELS.get(self.water_intake_level, "")
+
+    @property
+    def has_extended_context(self) -> bool:
+        """True if any extended diagnosis context field was filled."""
+        return any([
+            self.sick_bird_count is not None,
+            self.dead_bird_count is not None,
+            self.symptom_duration,
+            self.vaccination_status,
+            self.egg_production_drop is not None,
+            self.feed_or_water_changed,
+            self.new_birds_added,
+            self.nearby_farms_sick,
+            self.coop_condition,
+            self.appetite_level,
+            self.water_intake_level,
+        ])
 
     # ── Treatment checklist (Option B: derived from disease treatment text) ──
 

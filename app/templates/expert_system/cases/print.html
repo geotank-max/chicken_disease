@@ -117,6 +117,25 @@
     </div>
     {% endif %}
 
+    {% if case.has_extended_context %}
+    <div class="section">
+        <div class="label">Health &amp; Risk Context</div>
+        <table class="info">
+            {% if case.sick_bird_count is not none %}<tr><td class="lbl">Sick Birds:</td><td>{{ case.sick_bird_count }}</td></tr>{% endif %}
+            {% if case.dead_bird_count is not none %}<tr><td class="lbl">Dead Birds:</td><td>{{ case.dead_bird_count }}</td></tr>{% endif %}
+            {% if case.symptom_duration %}<tr><td class="lbl">Symptom Duration:</td><td>{{ case.symptom_duration }}</td></tr>{% endif %}
+            {% if case.vaccination_status %}<tr><td class="lbl">Vaccination:</td><td>{{ case.vaccination_status_label_km }}</td></tr>{% endif %}
+            {% if case.egg_production_drop is not none %}<tr><td class="lbl">Egg Production Drop:</td><td>{{ case.egg_production_drop }}%</td></tr>{% endif %}
+            {% if case.coop_condition %}<tr><td class="lbl">Coop Condition:</td><td>{{ case.coop_condition_label_km }}</td></tr>{% endif %}
+            {% if case.appetite_level %}<tr><td class="lbl">Appetite:</td><td>{{ case.appetite_level_label_km }}</td></tr>{% endif %}
+            {% if case.water_intake_level %}<tr><td class="lbl">Water Intake:</td><td>{{ case.water_intake_level_label_km }}</td></tr>{% endif %}
+            {% if case.feed_or_water_changed %}<tr><td class="lbl">Feed/Water Changed:</td><td>{{ case.feed_or_water_changed_label_km }}</td></tr>{% endif %}
+            {% if case.new_birds_added %}<tr><td class="lbl">New Birds Added:</td><td>{{ case.new_birds_added_label_km }}</td></tr>{% endif %}
+            {% if case.nearby_farms_sick %}<tr><td class="lbl">Nearby Farms Sick:</td><td>{{ case.nearby_farms_sick_label_km }}</td></tr>{% endif %}
+        </table>
+    </div>
+    {% endif %}
+
     <div class="section">
         <div class="label">Observed Symptoms ({{ case.symptoms|length }})</div>
         <ul>

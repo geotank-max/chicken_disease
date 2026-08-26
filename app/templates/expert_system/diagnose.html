@@ -4,6 +4,176 @@
 {% block page_title %}ការធ្វើរោគវិនិច្ឆ័យ{% endblock %}
 {% block page_subtitle %}បំពេញព័ត៌មាន ជ្រើសរើសរោគសញ្ញា ហើយមើលលទ្ធផល{% endblock %}
 
+{% block extra_styles %}
+<style>
+    .diagnosis-form-card {
+        border: 1px solid #d9e5f3;
+        border-radius: 1rem;
+        box-shadow: 0 16px 38px rgba(15, 23, 42, 0.08);
+    }
+
+    .diagnosis-form-card .card-header {
+        background: linear-gradient(180deg, #f8fbff 0%, #eef6ff 100%);
+        border-bottom: 1px solid #d9e5f3;
+    }
+
+    .diagnosis-section {
+        background: rgba(255, 255, 255, 0.96);
+        border: 1px solid #c9dced;
+        border-left: 4px solid var(--primary);
+        border-radius: 0.9rem;
+        box-shadow: 0 10px 24px rgba(37, 99, 235, 0.07);
+        margin-bottom: 1.25rem;
+        overflow: hidden;
+    }
+
+    .diagnosis-section-header {
+        align-items: center;
+        background: linear-gradient(180deg, #f5f9ff 0%, #eaf4ff 100%);
+        border-bottom: 1px solid #d8e6f4;
+        display: flex;
+        gap: 0.75rem;
+        padding: 0.95rem 1.1rem;
+    }
+
+    .diagnosis-section-icon {
+        align-items: center;
+        background: var(--primary);
+        border-radius: 0.65rem;
+        color: #fff;
+        display: inline-flex;
+        flex: 0 0 2.35rem;
+        height: 2.35rem;
+        justify-content: center;
+        width: 2.35rem;
+    }
+
+    .diagnosis-section-title {
+        color: #153b66;
+        font-size: 1rem;
+        font-weight: 800;
+        margin: 0;
+    }
+
+    .diagnosis-section-kicker {
+        color: #6b7f98;
+        font-size: 0.78rem;
+        font-weight: 600;
+    }
+
+    .diagnosis-section-body {
+        padding: 1.25rem;
+    }
+
+    .diagnosis-field label {
+        color: #26384f;
+        font-size: 0.88rem;
+        font-weight: 700;
+        margin-bottom: 0.45rem;
+    }
+
+    .diagnosis-control-shell {
+        position: relative;
+    }
+
+    .diagnosis-control-icon {
+        align-items: center;
+        color: #46709f;
+        display: inline-flex;
+        font-size: 1rem;
+        height: 100%;
+        justify-content: center;
+        left: 0.95rem;
+        pointer-events: none;
+        position: absolute;
+        top: 0;
+        width: 1.25rem;
+        z-index: 2;
+    }
+
+    .diagnosis-control {
+        background-color: #f8fbff;
+        border-color: #cfdceb;
+        border-radius: 0.7rem;
+        box-shadow: inset 0 1px 1px rgba(15, 23, 42, 0.03), 0 1px 2px rgba(15, 23, 42, 0.03);
+        min-height: 2.75rem;
+        padding-left: 2.85rem;
+    }
+
+    textarea.diagnosis-control {
+        padding-top: 0.85rem;
+    }
+
+    .diagnosis-control:focus {
+        background-color: #fff;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.12);
+    }
+
+    .diagnosis-choice-group {
+        background: #edf4fb;
+        border: 1px solid #cfdceb;
+        border-radius: 0.75rem;
+        display: grid;
+        gap: 0.25rem;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        padding: 0.25rem;
+    }
+
+    .diagnosis-choice-group .btn-check + label {
+        align-items: center;
+        border: 0;
+        border-radius: 0.55rem;
+        color: #496176;
+        cursor: pointer;
+        display: inline-flex;
+        font-size: 0.86rem;
+        font-weight: 700;
+        justify-content: center;
+        min-height: 2.25rem;
+        padding: 0.45rem 0.35rem;
+        text-align: center;
+        transition: all 0.15s ease;
+    }
+
+    .diagnosis-choice-group .btn-check:focus + label,
+    .diagnosis-choice-group .btn-check + label:hover {
+        color: var(--primary);
+    }
+
+    .diagnosis-choice-group .btn-check:checked + label {
+        background: #fff;
+        box-shadow: 0 6px 14px rgba(15, 23, 42, 0.12);
+        color: var(--primary);
+    }
+
+    .diagnosis-range {
+        accent-color: var(--primary);
+        cursor: pointer;
+    }
+
+    .diagnosis-range-scale {
+        color: #7c8da3;
+        display: flex;
+        font-size: 0.72rem;
+        font-weight: 700;
+        justify-content: space-between;
+        line-height: 1;
+    }
+
+    @media (max-width: 575.98px) {
+        .diagnosis-form-card .card-body,
+        .diagnosis-section-body {
+            padding: 1rem;
+        }
+
+        .diagnosis-section-header {
+            padding: 0.85rem 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <!-- Wizard Steps -->
 <div class="wizard-steps mb-4">
@@ -23,37 +193,205 @@
 
 {% if step == '1' %}
 <div class="row justify-content-center">
-    <div class="col-lg-8">
-        <div class="card border-0 shadow-sm">
-            <div class="card-header bg-white py-3">
-                <h5 class="mb-0 fw-bold"><i class="bi bi-house-heart me-2 text-primary"></i>ព័ត៌មានចំការ (ស្រេចចិត្ត)</h5>
+    <div class="col-12 col-xl-11">
+        <div class="card diagnosis-form-card">
+            <div class="card-header py-3 px-4">
+                <div class="d-flex align-items-center gap-3">
+                    <span class="diagnosis-section-icon">
+                        <i class="bi bi-clipboard2-pulse"></i>
+                    </span>
+                    <div>
+                        <h5 class="mb-0 fw-bold text-primary">សំណួររោគវិនិច្ឆ័យ</h5>
+                        <div class="small text-muted">ព័ត៌មានបន្ថែមទាំងនេះជួយឱ្យលទ្ធផលកាន់តែច្បាស់</div>
+                    </div>
+                </div>
             </div>
             <div class="card-body p-4">
                 <form method="POST" enctype="multipart/form-data">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <input type="hidden" name="step" value="1">
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold">ចំនួនមាន់</label>
-                            <input type="number" name="flock_size" class="form-control" min="1" placeholder="ឧ. 100">
+
+                    <section class="diagnosis-section">
+                        <div class="diagnosis-section-header">
+                            <span class="diagnosis-section-icon"><i class="bi bi-house-heart"></i></span>
+                            <div>
+                                <h6 class="diagnosis-section-title">ព័ត៌មានមូលដ្ឋាន</h6>
+                                <div class="diagnosis-section-kicker">Basic Information</div>
+                            </div>
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold">អាយុ</label>
-                            <input type="text" name="bird_age" class="form-control" placeholder="ឧ. ៨ សប្តាហ៍">
+                        <div class="diagnosis-section-body">
+                            <div class="row g-3 g-xl-4">
+                                <div class="col-md-6 col-xl-3 diagnosis-field">
+                                    <label class="form-label">ចំនួនមាន់</label>
+                                    <div class="diagnosis-control-shell">
+                                        <span class="diagnosis-control-icon"><i class="bi bi-grid-3x3-gap"></i></span>
+                                        <input type="number" name="flock_size" class="form-control diagnosis-control" min="1" placeholder="ឧ. 100" value="{{ flock_data.flock_size if flock_data.flock_size is not none else '' }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-xl-3 diagnosis-field">
+                                    <label class="form-label">អាយុ</label>
+                                    <div class="diagnosis-control-shell">
+                                        <span class="diagnosis-control-icon"><i class="bi bi-calendar-week"></i></span>
+                                        <input type="text" name="bird_age" class="form-control diagnosis-control" placeholder="ឧ. ៧-៩ សប្ដាហ៍" value="{{ flock_data.bird_age or '' }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-xl-3 diagnosis-field">
+                                    <label class="form-label">ប្រភេទមាន់</label>
+                                    <div class="diagnosis-control-shell">
+                                        <span class="diagnosis-control-icon"><i class="bi bi-tag"></i></span>
+                                        <input type="text" name="breed" class="form-control diagnosis-control" placeholder="ឧ. មាន់សាច់ ឬ មាន់ពង" value="{{ flock_data.breed or '' }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-xl-3 diagnosis-field">
+                                    <label class="form-label">ទីតាំង</label>
+                                    <div class="diagnosis-control-shell">
+                                        <span class="diagnosis-control-icon"><i class="bi bi-geo-alt"></i></span>
+                                        <input type="text" name="location" class="form-control diagnosis-control" placeholder="ឧ. ខេត្តកំពង់ចាម" value="{{ flock_data.location or '' }}">
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold">ប្រភេទមាន់</label>
-                            <input type="text" name="breed" class="form-control" placeholder="ឧ. សាច់ ឬពង">
+                    </section>
+
+                    <section class="diagnosis-section">
+                        <div class="diagnosis-section-header">
+                            <span class="diagnosis-section-icon"><i class="bi bi-heart-pulse"></i></span>
+                            <div>
+                                <h6 class="diagnosis-section-title">សុខភាព និងមរណភាព</h6>
+                                <div class="diagnosis-section-kicker">Health & Mortality</div>
+                            </div>
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold">ទីតាំង</label>
-                            <input type="text" name="location" class="form-control" placeholder="ឧ. ខេត្តកំពង់ចាម">
+                        <div class="diagnosis-section-body">
+                            <div class="row g-3 g-xl-4">
+                                <div class="col-md-6 col-xl-3 diagnosis-field">
+                                    <label class="form-label">ចំនួនមាន់ឈឺ</label>
+                                    <div class="diagnosis-control-shell">
+                                        <span class="diagnosis-control-icon"><i class="bi bi-thermometer-half"></i></span>
+                                        <input type="number" name="sick_bird_count" class="form-control diagnosis-control" min="0" placeholder="ឧ. 5" value="{{ flock_data.sick_bird_count if flock_data.sick_bird_count is not none else '' }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-xl-3 diagnosis-field">
+                                    <label class="form-label">ចំនួនមាន់ស្លាប់</label>
+                                    <div class="diagnosis-control-shell">
+                                        <span class="diagnosis-control-icon"><i class="bi bi-x-circle"></i></span>
+                                        <input type="number" name="dead_bird_count" class="form-control diagnosis-control" min="0" placeholder="ឧ. 2" value="{{ flock_data.dead_bird_count if flock_data.dead_bird_count is not none else '' }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-xl-3 diagnosis-field">
+                                    <label class="form-label">រយៈពេលមានរោគសញ្ញា</label>
+                                    <div class="diagnosis-control-shell">
+                                        <span class="diagnosis-control-icon"><i class="bi bi-clock-history"></i></span>
+                                        <input type="text" name="symptom_duration" class="form-control diagnosis-control" placeholder="ឧ. ៣ ថ្ងៃ" value="{{ flock_data.symptom_duration or '' }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-xl-3 diagnosis-field">
+                                    <label class="form-label">ស្ថានភាពចាក់វ៉ាក់សាំង</label>
+                                    <div class="diagnosis-control-shell">
+                                        <span class="diagnosis-control-icon"><i class="bi bi-shield-check"></i></span>
+                                        <select name="vaccination_status" class="form-select diagnosis-control">
+                                            <option value="">ជ្រើសរើស</option>
+                                            {% for val, label in vaccination_labels.items() %}
+                                            <option value="{{ val }}" {% if flock_data.vaccination_status == val %}selected{% endif %}>{{ label }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-xl-4 diagnosis-field">
+                                    <label class="form-label">ការធ្លាក់ចុះនៃការផលិតពង (%)</label>
+                                    <div class="diagnosis-control-shell">
+                                        <span class="diagnosis-control-icon"><i class="bi bi-percent"></i></span>
+                                        <input type="number" id="egg_production_drop" name="egg_production_drop" class="form-control diagnosis-control" min="0" max="100" placeholder="ឧ. 30" value="{{ flock_data.egg_production_drop if flock_data.egg_production_drop is not none else '' }}">
+                                    </div>
+                                    <input type="range" class="form-range diagnosis-range mt-2" min="0" max="100" step="5" value="{{ flock_data.egg_production_drop if flock_data.egg_production_drop is not none else 0 }}" data-range-target="egg_production_drop">
+                                    <div class="diagnosis-range-scale"><span>0%</span><span>50%</span><span>100%</span></div>
+                                </div>
+                                <div class="col-md-6 col-xl-4 diagnosis-field">
+                                    <label class="form-label">កម្រិតការស៊ី</label>
+                                    <div class="diagnosis-control-shell">
+                                        <span class="diagnosis-control-icon"><i class="bi bi-egg-fried"></i></span>
+                                        <select name="appetite_level" class="form-select diagnosis-control">
+                                            <option value="">ជ្រើសរើស</option>
+                                            {% for val, label in intake_level_labels.items() %}
+                                            <option value="{{ val }}" {% if flock_data.appetite_level == val %}selected{% endif %}>{{ label }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-xl-4 diagnosis-field">
+                                    <label class="form-label">កម្រិតការផឹកទឹក</label>
+                                    <div class="diagnosis-control-shell">
+                                        <span class="diagnosis-control-icon"><i class="bi bi-droplet"></i></span>
+                                        <select name="water_intake_level" class="form-select diagnosis-control">
+                                            <option value="">ជ្រើសរើស</option>
+                                            {% for val, label in intake_level_labels.items() %}
+                                            <option value="{{ val }}" {% if flock_data.water_intake_level == val %}selected{% endif %}>{{ label }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="col-12">
-                            <label class="form-label fw-bold">កំណត់ចំណាំ</label>
-                            <textarea name="notes" class="form-control" rows="3" placeholder="ព័ត៌មានបន្ថែម..."></textarea>
+                    </section>
+
+                    <section class="diagnosis-section">
+                        <div class="diagnosis-section-header">
+                            <span class="diagnosis-section-icon"><i class="bi bi-cloud-sun"></i></span>
+                            <div>
+                                <h6 class="diagnosis-section-title">កត្តាផ្សេងៗ</h6>
+                                <div class="diagnosis-section-kicker">Other Factors</div>
+                            </div>
                         </div>
-                    </div>
+                        <div class="diagnosis-section-body">
+                            <div class="row g-3 g-xl-4">
+                                <div class="col-md-6 col-xl-4 diagnosis-field">
+                                    <label class="form-label">លក្ខខណ្ឌទ្រុង</label>
+                                    <div class="diagnosis-control-shell">
+                                        <span class="diagnosis-control-icon"><i class="bi bi-house-door"></i></span>
+                                        <select name="coop_condition" class="form-select diagnosis-control">
+                                            <option value="">ជ្រើសរើស</option>
+                                            {% for val, label in coop_condition_labels.items() %}
+                                            <option value="{{ val }}" {% if flock_data.coop_condition == val %}selected{% endif %}>{{ label }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-xl-4 diagnosis-field">
+                                    <label class="form-label">ប្តូរចំណី/ទឹកថ្មីៗ</label>
+                                    <div class="diagnosis-choice-group" role="radiogroup" aria-label="ប្តូរចំណី ឬទឹកថ្មីៗ">
+                                        {% for val, label in yes_no_labels.items() %}
+                                        <input type="radio" class="btn-check" name="feed_or_water_changed" id="feed_or_water_changed_{{ val }}" value="{{ val }}" {% if flock_data.feed_or_water_changed == val %}checked{% endif %}>
+                                        <label for="feed_or_water_changed_{{ val }}">{{ label }}</label>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-xl-4 diagnosis-field">
+                                    <label class="form-label">បន្ថែមមាន់ថ្មីៗ</label>
+                                    <div class="diagnosis-choice-group" role="radiogroup" aria-label="បន្ថែមមាន់ថ្មីៗ">
+                                        {% for val, label in yes_no_labels.items() %}
+                                        <input type="radio" class="btn-check" name="new_birds_added" id="new_birds_added_{{ val }}" value="{{ val }}" {% if flock_data.new_birds_added == val %}checked{% endif %}>
+                                        <label for="new_birds_added_{{ val }}">{{ label }}</label>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-xl-4 diagnosis-field">
+                                    <label class="form-label">ចំការជិតខាងមានមាន់ឈឺ</label>
+                                    <div class="diagnosis-choice-group" role="radiogroup" aria-label="ចំការជិតខាងមានមាន់ឈឺ">
+                                        {% for val, label in yes_no_labels.items() %}
+                                        <input type="radio" class="btn-check" name="nearby_farms_sick" id="nearby_farms_sick_{{ val }}" value="{{ val }}" {% if flock_data.nearby_farms_sick == val %}checked{% endif %}>
+                                        <label for="nearby_farms_sick_{{ val }}">{{ label }}</label>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-xl-8 diagnosis-field">
+                                    <label class="form-label">កំណត់ចំណាំ</label>
+                                    <div class="diagnosis-control-shell">
+                                        <span class="diagnosis-control-icon align-items-start pt-3"><i class="bi bi-pencil-square"></i></span>
+                                        <textarea name="notes" class="form-control diagnosis-control" rows="3" placeholder="ឧ. ចាប់ផ្តើមឈឺក្រោយភ្លៀង ឬបន្ទាប់ពីប្តូរចំណី">{{ flock_data.notes or '' }}</textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
 
                     {# ── Photo uploads ── #}
                     <hr class="my-4">
@@ -296,6 +634,22 @@ document.addEventListener('DOMContentLoaded', function () {
     const chips = Array.from(document.querySelectorAll('.photo-category-chip'));
     const fileStore = new Map(inputs.map(input => [input.id, []]));
     let activeInputId = chips[0]?.dataset.input || inputs[0]?.id;
+
+    document.querySelectorAll('[data-range-target]').forEach(function (range) {
+        const target = document.getElementById(range.dataset.rangeTarget);
+        if (!target) return;
+
+        range.addEventListener('input', function () {
+            target.value = range.value;
+        });
+
+        target.addEventListener('input', function () {
+            const value = parseInt(target.value, 10);
+            if (!Number.isNaN(value)) {
+                range.value = Math.max(Number(range.min), Math.min(Number(range.max), value));
+            }
+        });
+    });
 
     function calcTotalSize() {
         let total = 0;

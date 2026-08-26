@@ -70,6 +70,18 @@ class DiagnosisService:
             breed=flock_data.get("breed") or None,
             location=flock_data.get("location") or None,
             notes=flock_data.get("notes") or None,
+            # Extended diagnosis context (all optional)
+            sick_bird_count=flock_data.get("sick_bird_count"),
+            dead_bird_count=flock_data.get("dead_bird_count"),
+            symptom_duration=flock_data.get("symptom_duration") or None,
+            vaccination_status=flock_data.get("vaccination_status") or None,
+            egg_production_drop=flock_data.get("egg_production_drop"),
+            feed_or_water_changed=flock_data.get("feed_or_water_changed") or None,
+            new_birds_added=flock_data.get("new_birds_added") or None,
+            nearby_farms_sick=flock_data.get("nearby_farms_sick") or None,
+            coop_condition=flock_data.get("coop_condition") or None,
+            appetite_level=flock_data.get("appetite_level") or None,
+            water_intake_level=flock_data.get("water_intake_level") or None,
             status=CASE_STATUS_PENDING,
         )
         if selected_symptom_ids:

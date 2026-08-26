@@ -37,6 +37,8 @@ from app.services.notification_service import NotificationService
 from app.models.expert_system import (
     CASE_STATUS_PENDING, CasePhoto, PHOTO_CATEGORIES,
     CASE_STATUS_REJECTED, FOLLOWUP_STATUSES, FOLLOWUP_NONE,
+    YES_NO_OPTIONS, VACCINATION_OPTIONS, COOP_CONDITION_OPTIONS, INTAKE_LEVEL_OPTIONS,
+    YES_NO_LABELS, VACCINATION_LABELS, COOP_CONDITION_LABELS, INTAKE_LEVEL_LABELS,
 )
 
 expert_system_bp = Blueprint("expert_system", __name__, url_prefix="/expert-system")
@@ -46,14 +48,40 @@ MAX_PHOTOS_PER_CATEGORY = 5
 _ALLOWED_MIME_PREFIXES = ("image/jpeg", "image/png", "image/webp", "image/gif")
 
 
+def _parse_int_field(form_data, key, lo=0, hi=1_000_000):
+    """Return a clamped int for a numeric field, or None if blank/invalid."""
+    raw = form_data.get(key, "").strip()
+    if not raw.isdigit():
+        return None
+    val = int(raw)
+    return max(lo, min(hi, val))
+
+
+def _parse_choice(form_data, key, allowed):
+    """Return the submitted value only if it's in `allowed`, else None."""
+    val = form_data.get(key, "").strip()
+    return val if val in allowed else None
+
+
 def _parse_flock_data(form_data):
-    flock_size = form_data.get("flock_size", "").strip()
     return {
-        "flock_size": int(flock_size) if flock_size.isdigit() else None,
+        "flock_size": _parse_int_field(form_data, "flock_size", lo=1),
         "bird_age": form_data.get("bird_age", "").strip(),
         "breed": form_data.get("breed", "").strip(),
         "location": form_data.get("location", "").strip(),
         "notes": form_data.get("notes", "").strip(),
+        # Extended diagnosis context (all optional)
+        "sick_bird_count": _parse_int_field(form_data, "sick_bird_count"),
+        "dead_bird_count": _parse_int_field(form_data, "dead_bird_count"),
+        "symptom_duration": form_data.get("symptom_duration", "").strip(),
+        "vaccination_status": _parse_choice(form_data, "vaccination_status", VACCINATION_OPTIONS),
+        "egg_production_drop": _parse_int_field(form_data, "egg_production_drop", lo=0, hi=100),
+        "feed_or_water_changed": _parse_choice(form_data, "feed_or_water_changed", YES_NO_OPTIONS),
+        "new_birds_added": _parse_choice(form_data, "new_birds_added", YES_NO_OPTIONS),
+        "nearby_farms_sick": _parse_choice(form_data, "nearby_farms_sick", YES_NO_OPTIONS),
+        "coop_condition": _parse_choice(form_data, "coop_condition", COOP_CONDITION_OPTIONS),
+        "appetite_level": _parse_choice(form_data, "appetite_level", INTAKE_LEVEL_OPTIONS),
+        "water_intake_level": _parse_choice(form_data, "water_intake_level", INTAKE_LEVEL_OPTIONS),
     }
 
 
@@ -228,6 +256,10 @@ def diagnose():
         selected_ids=set(selected_ids),
         flock_data=session.get("diagnosis_wizard", {}),
         saved_case=saved_case,
+        yes_no_labels=YES_NO_LABELS,
+        vaccination_labels=VACCINATION_LABELS,
+        coop_condition_labels=COOP_CONDITION_LABELS,
+        intake_level_labels=INTAKE_LEVEL_LABELS,
     )
 
 
