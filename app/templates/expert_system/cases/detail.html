@@ -4,6 +4,161 @@
 {% block page_title %}របាយការណ៍រោគវិនិច្ឆ័យ{% endblock %}
 {% block page_subtitle %}ករណី #{{ case.id }} • {{ case.status_label_km }}{% endblock %}
 
+{% block extra_styles %}
+<style>
+    /* ── Treatment progress: segmented numbered stepper ── */
+    .treatment-stepper {
+        align-items: flex-start;
+        display: flex;
+        gap: 0;
+        margin: 0.25rem 0 1.1rem;
+    }
+
+    .treatment-stepper .tstep-node {
+        display: flex;
+        flex: 1 1 0;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+        text-align: center;
+    }
+
+    /* connector line drawn to the LEFT of every node except the first */
+    .treatment-stepper .tstep-node::before {
+        background: #e3e8ef;
+        content: "";
+        height: 4px;
+        left: -50%;
+        position: absolute;
+        right: 50%;
+        top: 0.9rem;
+        z-index: 0;
+    }
+
+    .treatment-stepper .tstep-node:first-child::before {
+        display: none;
+    }
+
+    /* filled connector when the step is completed */
+    .treatment-stepper .tstep-node.is-done::before,
+    .treatment-stepper .tstep-node.is-current::before {
+        background: #22c55e;
+    }
+
+    .treatment-stepper .tstep-dot {
+        align-items: center;
+        background: #fff;
+        border: 2px solid #d6dde6;
+        border-radius: 50%;
+        color: #94a3b8;
+        display: inline-flex;
+        font-size: 0.85rem;
+        font-weight: 700;
+        height: 1.85rem;
+        justify-content: center;
+        position: relative;
+        transition: all 0.2s ease;
+        width: 1.85rem;
+        z-index: 1;
+    }
+
+    .treatment-stepper .tstep-node.is-current .tstep-dot {
+        border-color: #22c55e;
+        box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.15);
+        color: #16a34a;
+    }
+
+    .treatment-stepper .tstep-node.is-done .tstep-dot {
+        background: #22c55e;
+        border-color: #22c55e;
+        color: #fff;
+    }
+
+    .treatment-stepper .tstep-caption {
+        color: #94a3b8;
+        font-size: 0.72rem;
+        font-weight: 600;
+        margin-top: 0.35rem;
+        max-width: 8rem;
+    }
+
+    .treatment-stepper .tstep-node.is-done .tstep-caption,
+    .treatment-stepper .tstep-node.is-current .tstep-caption {
+        color: #475569;
+    }
+
+    /* ── Treatment checklist: convenient clickable rows ── */
+    .treatment-checklist .treatment-step {
+        align-items: center;
+        border: 1px solid #e5e9f0;
+        border-radius: 0.7rem;
+        cursor: pointer;
+        gap: 0.75rem;
+        padding: 0.7rem 0.85rem;
+        transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+        user-select: none;
+    }
+
+    .treatment-checklist .treatment-step:hover {
+        border-color: #22c55e;
+        box-shadow: 0 2px 8px rgba(34, 197, 94, 0.1);
+    }
+
+    .treatment-checklist .treatment-step.is-done {
+        background: #f0fdf4;
+        border-color: #bbf7d0;
+    }
+
+    .treatment-checklist .treatment-step-check {
+        border-color: #cbd5e1;
+        cursor: pointer;
+        flex: 0 0 auto;
+        height: 1.35rem;
+        margin-top: 0;
+        width: 1.35rem;
+    }
+
+    .treatment-checklist .treatment-step-check:checked {
+        background-color: #22c55e;
+        border-color: #22c55e;
+    }
+
+    .treatment-checklist .treatment-step-check:focus {
+        box-shadow: 0 0 0 0.2rem rgba(34, 197, 94, 0.2);
+    }
+
+    .treatment-checklist .tstep-index {
+        align-items: center;
+        background: #eef2f7;
+        border-radius: 0.5rem;
+        color: #64748b;
+        display: inline-flex;
+        flex: 0 0 auto;
+        font-size: 0.8rem;
+        font-weight: 700;
+        height: 1.6rem;
+        justify-content: center;
+        width: 1.6rem;
+    }
+
+    .treatment-checklist .treatment-step.is-done .tstep-index {
+        background: #dcfce7;
+        color: #16a34a;
+    }
+
+    .treatment-checklist .form-check-label {
+        cursor: pointer;
+        flex: 1 1 auto;
+        line-height: 1.35;
+    }
+
+    .treatment-checklist .treatment-step-check:disabled,
+    .treatment-checklist .treatment-step-check:disabled ~ * {
+        cursor: default;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-lg-10">
@@ -104,27 +259,37 @@
                             {% if steps %}
                             {% set owner = case.user_id == current_user.id %}
                             <div class="p-3 bg-success bg-opacity-10 rounded border border-success border-opacity-10">
-                                <div class="progress mb-3" style="height: 6px;">
-                                    <div class="progress-bar bg-success" id="treatmentProgressBar"
-                                         role="progressbar" style="width: {{ tp.percent }}%"></div>
+                                {# Segmented, numbered progress stepper #}
+                                <div class="treatment-stepper" id="treatmentStepper" role="progressbar"
+                                     aria-valuemin="0" aria-valuemax="{{ tp.total }}" aria-valuenow="{{ tp.done }}">
+                                    {% for step in steps %}
+                                    <div class="tstep-node {% if step.done %}is-done{% endif %}"
+                                         data-step-key="{{ step.key }}">
+                                        <span class="tstep-dot">
+                                            {% if step.done %}<i class="bi bi-check-lg"></i>{% else %}{{ loop.index }}{% endif %}
+                                        </span>
+                                        <span class="tstep-caption text-truncate">{{ step.text }}</span>
+                                    </div>
+                                    {% endfor %}
                                 </div>
+
                                 <div class="treatment-checklist d-flex flex-column gap-2"
                                      data-case-id="{{ case.id }}"
                                      data-toggle-url="{{ url_for('expert_system.cases_treatment_step', case_id=case.id) }}"
                                      data-can-edit="{{ '1' if owner else '0' }}">
                                     {% for step in steps %}
-                                    <div class="form-check treatment-step d-flex align-items-start gap-2 bg-white rounded p-2 border">
-                                        <input class="form-check-input mt-1 treatment-step-check" type="checkbox"
+                                    <label class="form-check treatment-step {% if step.done %}is-done{% endif %} m-0">
+                                        <span class="tstep-index">{{ loop.index }}</span>
+                                        <input class="form-check-input treatment-step-check" type="checkbox"
                                                id="tstep-{{ step.key }}"
                                                data-step-key="{{ step.key }}"
                                                {% if step.done %}checked{% endif %}
                                                {% if not owner %}disabled{% endif %}>
-                                        <label class="form-check-label {% if step.done %}text-decoration-line-through text-muted{% endif %}"
-                                               for="tstep-{{ step.key }}">
+                                        <span class="form-check-label {% if step.done %}text-decoration-line-through text-muted{% endif %}">
                                             {{ step.text }}
                                             {% if step.note %}<span class="d-block small text-muted fst-italic">{{ step.note }}</span>{% endif %}
-                                        </label>
-                                    </div>
+                                        </span>
+                                    </label>
                                     {% endfor %}
                                 </div>
                                 {% if not owner %}
@@ -441,7 +606,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const toggleUrl = checklist.dataset.toggleUrl;
         const csrf = document.querySelector('meta[name="csrf-token"]')?.content
                      || (document.querySelector('input[name="csrf_token"]')?.value || '');
-        const bar = document.getElementById('treatmentProgressBar');
+        const stepper = document.getElementById('treatmentStepper');
         const label = document.getElementById('treatmentProgressLabel');
 
         checklist.querySelectorAll('.treatment-step-check').forEach(box => {
@@ -462,12 +627,36 @@ document.addEventListener('DOMContentLoaded', function() {
                     const data = await res.json();
                     if (!res.ok || !data.ok) throw new Error('toggle failed');
 
-                    // Update strike-through + progress UI
-                    const lbl = checklist.querySelector('label[for="tstep-' + stepKey + '"]');
-                    if (lbl) lbl.classList.toggle('text-decoration-line-through', done);
-                    if (lbl) lbl.classList.toggle('text-muted', done);
-                    if (bar && data.progress) bar.style.width = data.progress.percent + '%';
+                    // Update the checklist row's visual done-state
+                    const row = box.closest('.treatment-step');
+                    const lbl = row ? row.querySelector('.form-check-label') : null;
+                    if (row) row.classList.toggle('is-done', done);
+                    if (lbl) {
+                        lbl.classList.toggle('text-decoration-line-through', done);
+                        lbl.classList.toggle('text-muted', done);
+                    }
+
+                    // Update the matching stepper node (dot fill + check icon)
+                    if (stepper) {
+                        const node = stepper.querySelector('.tstep-node[data-step-key="' + stepKey + '"]');
+                        if (node) {
+                            node.classList.toggle('is-done', done);
+                            const dot = node.querySelector('.tstep-dot');
+                            if (dot) {
+                                if (done) {
+                                    dot.innerHTML = '<i class="bi bi-check-lg"></i>';
+                                } else {
+                                    // restore the step's ordinal number
+                                    const nodes = Array.from(stepper.querySelectorAll('.tstep-node'));
+                                    dot.textContent = String(nodes.indexOf(node) + 1);
+                                }
+                            }
+                        }
+                    }
+
+                    // Update the "done/total" counter + ARIA
                     if (label && data.progress) label.textContent = data.progress.done + '/' + data.progress.total;
+                    if (stepper && data.progress) stepper.setAttribute('aria-valuenow', data.progress.done);
                 } catch (err) {
                     box.checked = !done; // revert on failure
                 } finally {

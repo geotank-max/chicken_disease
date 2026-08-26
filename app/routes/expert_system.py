@@ -179,6 +179,29 @@ def diagnose():
 
     if request.method == "POST" and step == "1":
         flock_data = _parse_flock_data(request.form)
+
+        # All fields are required to ensure meaningful diagnosis data
+        required_fields = {
+            "flock_size": "ចំនួនមាន់",
+            "bird_age": "អាយុ",
+            "breed": "ប្រភេទមាន់",
+            "location": "ទីតាំង",
+            "sick_bird_count": "ចំនួនមាន់ឈឺ",
+            "dead_bird_count": "ចំនួនមាន់ស្លាប់",
+            "symptom_duration": "រយៈពេលមានរោគសញ្ញា",
+            "vaccination_status": "ស្ថានភាពចាក់វ៉ាក់សាំង",
+            "appetite_level": "កម្រិតការស៊ី",
+            "water_intake_level": "កម្រិតការផឹកទឹក",
+            "coop_condition": "លក្ខខណ្ឌទ្រុង",
+            "feed_or_water_changed": "ប្តូរចំណី/ទឹកថ្មីៗ",
+            "new_birds_added": "បន្ថែមមាន់ថ្មីៗ",
+            "nearby_farms_sick": "ចំការជិតខាងមានមាន់ឈឺ",
+        }
+        missing = [label for key, label in required_fields.items() if not flock_data.get(key)]
+        if missing:
+            flash(f"សូមបំពេញវាលទាំងអស់មុនពេលបន្ត។ ខ្វះ: {', '.join(missing)}", "warning")
+            return redirect(url_for("expert_system.diagnose", step="1"))
+
         session["diagnosis_wizard"] = flock_data
 
         # Collect and stage any uploaded photos
@@ -247,11 +270,32 @@ def diagnose():
 
     symptoms_grouped = DiagnosisService.get_symptoms_grouped()
 
+    # Build the interactive symptom index used by Step 2's JS (search, tags,
+    # top-illness suggestions and per-disease grouping).
+    symptom_diagnosis_data = None
+    if step == "2":
+        diseases_map, symptom_to_diseases = DiagnosisService.build_symptom_index()
+        symptom_diagnosis_data = {
+            "diseases": {
+                name: {
+                    "symptoms": sorted(info["symptoms"]),
+                    "category": info["category"],
+                    "severity": info["severity"],
+                    "description": info["description"],
+                }
+                for name, info in diseases_map.items()
+            },
+            "symptomToDiseases": {
+                str(sid): sorted(names) for sid, names in symptom_to_diseases.items()
+            },
+        }
+
     return render_template(
         "expert_system/diagnose.html",
         step=step,
         flock_form=flock_form,
         symptoms_grouped=symptoms_grouped,
+        symptom_diagnosis_data=symptom_diagnosis_data,
         results=diagnosis_results,
         selected_ids=set(selected_ids),
         flock_data=session.get("diagnosis_wizard", {}),

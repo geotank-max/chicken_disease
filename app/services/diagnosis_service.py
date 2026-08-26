@@ -23,6 +23,40 @@ class DiagnosisService:
         return Rule.query.all()
 
     @staticmethod
+    def build_symptom_index():
+        """Return front-end metadata for the Step 2 interactive symptom picker.
+
+        Produces two structures:
+          symptoms: [{id, name, description, category}]
+          diseases: {disease_name: {"symptoms": set(...), "category": name}}
+
+        Plus a symptom -> related disease map, so the UI can (a) suggest the
+        most likely illnesses for the currently selected symptoms and (b) know
+        which category each disease belongs to.
+        """
+        rules = Rule.query.all()
+        # disease_name -> {"symptoms": {ids}, "category": name, "severity": str}
+        diseases: dict[str, dict] = {}
+        # symptom_id -> set(disease_name)
+        symptom_to_diseases: dict[int, set] = {}
+
+        for rule in rules:
+            disease = rule.disease
+            if disease is None:
+                continue
+            entry = diseases.setdefault(disease.name, {
+                "symptoms": set(),
+                "category": disease.category.name if disease.category else "",
+                "severity": disease.severity or "",
+                "description": disease.description or "",
+            })
+            for symptom in rule.symptoms:
+                entry["symptoms"].add(symptom.id)
+                symptom_to_diseases.setdefault(symptom.id, set()).add(disease.name)
+
+        return diseases, symptom_to_diseases
+
+    @staticmethod
     def run_inference(selected_symptom_ids):
         all_rules = Rule.query.all()
         results = []
