@@ -1,0 +1,48 @@
+{# Renders the treatment-steps list for a disease. Used both on initial page
+   load and as an AJAX fragment so edits/reorders/deletes stay on the page. #}
+{% set steps = disease.treatment_steps %}
+{% if steps %}
+<div class="list-group">
+    {% for step in steps %}
+    <div class="list-group-item px-3 py-2">
+        <div class="d-flex align-items-center gap-3">
+            <span class="badge bg-primary rounded-pill">{{ loop.index }}</span>
+
+            <form method="post"
+                  action="{{ url_for('expert_system.disease_step_edit', disease_id=disease.id, step_id=step.id) }}"
+                  class="step-edit-form flex-grow-1">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="row g-2 align-items-center">
+                    <div class="col-md-6">
+                        <input type="text" name="text" class="form-control form-control-sm"
+                               value="{{ step.text }}" maxlength="500" required>
+                    </div>
+                    <div class="col-md-6">
+                        <input type="text" name="note" class="form-control form-control-sm"
+                               value="{{ step.note or '' }}" maxlength="500"
+                               placeholder="កំណត់ចំណាំ / ដូស (ស្រេចចិត្ត)">
+                    </div>
+                </div>
+            </form>
+
+            <div class="btn-group btn-group-sm flex-shrink-0" role="group">
+                <button type="button" class="btn btn-outline-primary step-save-btn"
+                        data-step-id="{{ step.id }}" title="រក្សាទុក"><i class="bi bi-check-lg"></i></button>
+                <button type="button" class="btn btn-outline-secondary step-move-btn"
+                        data-step-id="{{ step.id }}" data-direction="up"
+                        {% if loop.first %}disabled{% endif %} title="ឡើងលើ"><i class="bi bi-arrow-up"></i></button>
+                <button type="button" class="btn btn-outline-secondary step-move-btn"
+                        data-step-id="{{ step.id }}" data-direction="down"
+                        {% if loop.last %}disabled{% endif %} title="ចុះក្រោម"><i class="bi bi-arrow-down"></i></button>
+                <button type="button" class="btn btn-outline-danger step-delete-btn"
+                        data-step-id="{{ step.id }}" title="លុប"><i class="bi bi-trash"></i></button>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="alert alert-light border text-muted small mb-0">
+    <i class="bi bi-info-circle me-1"></i> មិនទាន់មានជំហានព្យាបាលដែលបានកំណត់ទេ។
+</div>
+{% endif %}

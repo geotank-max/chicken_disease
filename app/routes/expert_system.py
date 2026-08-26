@@ -894,6 +894,23 @@ def diseases_delete(disease_id: int):
 
 # ── Treatment step authoring (doctors + admins via manage_diseases) ──────────
 
+def _wants_ajax() -> bool:
+    return request.headers.get("X-Requested-With") == "XMLHttpRequest"
+
+
+def _steps_response(disease, message: str = "", ok: bool = True):
+    """Return the steps-list partial for AJAX, else redirect to the edit page."""
+    if _wants_ajax():
+        html = render_template(
+            "expert_system/diseases/_steps_list.html", disease=disease
+        )
+        return jsonify({"ok": ok, "message": message,
+                        "count": len(disease.treatment_steps), "html": html})
+    if message:
+        flash(message, "success" if ok else "warning")
+    return redirect(url_for("expert_system.diseases_edit", disease_id=disease.id))
+
+
 @expert_system_bp.route("/diseases/<int:disease_id>/steps/add", methods=["POST"])
 @login_required
 @require_permission("manage_diseases")
@@ -904,12 +921,10 @@ def disease_step_add(disease_id: int):
     text = request.form.get("text", "").strip()
     note = request.form.get("note", "").strip()
     if not text:
-        flash("សូមបញ្ចូលអត្ថបទជំហាន។", "warning")
-    else:
-        step = TreatmentStepService.add(disease, text, note, created_by_id=current_user.id)
-        AuditService.log("CREATE", "TreatmentStep", step.id, f"Added step to disease {disease.id}")
-        flash("ជំហានព្យាបាលត្រូវបានបន្ថែម។", "success")
-    return redirect(url_for("expert_system.diseases_edit", disease_id=disease_id))
+        return _steps_response(disease, "សូមបញ្ចូលអត្ថបទជំហាន។", ok=False)
+    step = TreatmentStepService.add(disease, text, note, created_by_id=current_user.id)
+    AuditService.log("CREATE", "TreatmentStep", step.id, f"Added step to disease {disease.id}")
+    return _steps_response(disease, "ជំហានព្យាបាលត្រូវបានបន្ថែម។")
 
 
 @expert_system_bp.route("/diseases/<int:disease_id>/steps/<int:step_id>/edit", methods=["POST"])
@@ -922,12 +937,10 @@ def disease_step_edit(disease_id: int, step_id: int):
     text = request.form.get("text", "").strip()
     note = request.form.get("note", "").strip()
     if not text:
-        flash("សូមបញ្ចូលអត្ថបទជំហាន។", "warning")
-    else:
-        TreatmentStepService.update(step, text, note)
-        AuditService.log("UPDATE", "TreatmentStep", step.id, f"Edited step of disease {disease_id}")
-        flash("ជំហានព្យាបាលត្រូវបានកែប្រែ។", "success")
-    return redirect(url_for("expert_system.diseases_edit", disease_id=disease_id))
+        return _steps_response(step.disease, "សូមបញ្ចូលអត្ថបទជំហាន។", ok=False)
+    TreatmentStepService.update(step, text, note)
+    AuditService.log("UPDATE", "TreatmentStep", step.id, f"Edited step of disease {disease_id}")
+    return _steps_response(step.disease, "ជំហានព្យាបាលត្រូវបានកែប្រែ។")
 
 
 @expert_system_bp.route("/diseases/<int:disease_id>/steps/<int:step_id>/delete", methods=["POST"])
@@ -937,10 +950,10 @@ def disease_step_delete(disease_id: int, step_id: int):
     step = TreatmentStepService.get_by_id(step_id)
     if step is None or step.disease_id != disease_id:
         abort(404)
+    disease = step.disease
     TreatmentStepService.delete(step)
     AuditService.log("DELETE", "TreatmentStep", step_id, f"Deleted step of disease {disease_id}")
-    flash("ជំហានព្យាបាលត្រូវបានលុប។", "success")
-    return redirect(url_for("expert_system.diseases_edit", disease_id=disease_id))
+    return _steps_response(disease, "ជំហានព្យាបាលត្រូវបានលុប។")
 
 
 @expert_system_bp.route("/diseases/<int:disease_id>/steps/<int:step_id>/move", methods=["POST"])
@@ -950,10 +963,11 @@ def disease_step_move(disease_id: int, step_id: int):
     step = TreatmentStepService.get_by_id(step_id)
     if step is None or step.disease_id != disease_id:
         abort(404)
+    disease = step.disease
     direction = request.form.get("direction", "")
     if direction in ("up", "down"):
         TreatmentStepService.move(step, direction)
-    return redirect(url_for("expert_system.diseases_edit", disease_id=disease_id))
+    return _steps_response(disease)
 
 
 @expert_system_bp.route("/rules")
