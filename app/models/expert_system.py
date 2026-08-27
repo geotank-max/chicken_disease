@@ -129,6 +129,45 @@ class Disease(db.Model):
     def has_structured_steps(self) -> bool:
         return len(self.treatment_steps) > 0
 
+    @property
+    def severity_level(self) -> str:
+        """Normalize free-text severity into one of: high / medium / low / ''.
+
+        Severity is stored as free text and may be English (Low/Medium/High
+        from the form) or Khmer (ខ្ពស់/មធ្យម/ទាប), including combos such as
+        "មធ្យម-ខ្ពស់". The most dangerous token found wins.
+        """
+        raw = (self.severity or "").strip()
+        if not raw:
+            return ""
+        low = raw.lower()
+        # High / severe / critical
+        if any(t in raw for t in ("ខ្ពស់",)) or any(
+            t in low for t in ("high", "severe", "critical")
+        ):
+            return "high"
+        if any(t in raw for t in ("មធ្យម",)) or "medium" in low or "moderate" in low:
+            return "medium"
+        if any(t in raw for t in ("ទាប",)) or "low" in low or "mild" in low:
+            return "low"
+        return ""
+
+    @property
+    def severity_label_km(self) -> str:
+        """Khmer label for the diseases's severity, falling back to raw text."""
+        labels = {"high": "ធ្ងន់ធ្ងរ", "medium": "មធ្យម", "low": "ស្រាល"}
+        return labels.get(self.severity_level, (self.severity or "").strip())
+
+    @property
+    def severity_color(self) -> str:
+        """Bootstrap contextual color for the severity badge."""
+        colors = {"high": "danger", "medium": "warning", "low": "success"}
+        return colors.get(self.severity_level, "secondary")
+
+    @property
+    def contagious_label_km(self) -> str:
+        return "ឆ្លង" if self.is_contagious else "មិនឆ្លង"
+
     def __repr__(self) -> str:
         return f"<Disease {self.name}>"
 

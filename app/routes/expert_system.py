@@ -883,12 +883,72 @@ def symptoms_delete(symptom_id: int):
     )
 
 
+# ── Disease Knowledge Library (read-only, all authenticated users) ──────────
+
+@expert_system_bp.route("/library")
+@login_required
+def library_index():
+    """Educational, read-only disease library open to every logged-in user.
+
+    Doctors/admins additionally see management shortcuts (guarded in the
+    template by the ``manage_diseases`` permission). Search/filtering is done
+    client-side so the route contract stays simple.
+    """
+    diseases = DiseaseService.get_all()
+    categories = CategoryService.get_all()
+    can_manage = current_user.has_permission("manage_diseases")
+    return render_template(
+        "expert_system/diseases/library_index.html",
+        diseases=diseases,
+        categories=categories,
+        can_manage=can_manage,
+    )
+
+
+@expert_system_bp.route("/library/<int:disease_id>")
+@login_required
+def library_detail(disease_id: int):
+    """Full read-only profile for a single disease."""
+    disease = DiseaseService.get_by_id(disease_id)
+    if disease is None:
+        abort(404)
+
+    # Rules that diagnose this disease, most confident first, with their symptoms.
+    related_rules = sorted(
+        disease.rules,
+        key=lambda r: (-(r.confidence or 0), r.priority),
+    )
+    # Distinct symptoms across all related rules (the disease's "signs").
+    symptom_map = {}
+    for rule in disease.rules:
+        for symptom in rule.symptoms:
+            symptom_map.setdefault(symptom.id, symptom)
+    related_symptoms = sorted(symptom_map.values(), key=lambda s: s.name)
+
+    can_manage = current_user.has_permission("manage_diseases")
+    can_manage_rules = current_user.has_permission("manage_rules")
+
+    return render_template(
+        "expert_system/diseases/library_detail.html",
+        disease=disease,
+        related_rules=related_rules,
+        related_symptoms=related_symptoms,
+        can_manage=can_manage,
+        can_manage_rules=can_manage_rules,
+    )
+
+
 @expert_system_bp.route("/diseases")
 @login_required
 @require_permission("manage_diseases")
 def diseases_index():
     diseases = DiseaseService.get_all()
-    return render_template("expert_system/diseases/index.html", diseases=diseases)
+    categories = CategoryService.get_all()
+    return render_template(
+        "expert_system/diseases/index.html",
+        diseases=diseases,
+        categories=categories,
+    )
 
 
 @expert_system_bp.route("/diseases/create", methods=["GET", "POST"])

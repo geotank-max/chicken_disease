@@ -74,6 +74,12 @@
                                 {% endif %}
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if 'expert_system.library' in request.endpoint %}active{% endif %}" href="{{ url_for('expert_system.library_index') }}">
+                                <i class="bi bi-book"></i>
+                                <span>Disease Library</span>
+                            </a>
+                        </li>
                     </ul>
 
                     {% if current_user.has_permission('manage_rules') or current_user.has_permission('manage_symptoms') %}

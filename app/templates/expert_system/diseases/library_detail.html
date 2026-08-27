@@ -1,0 +1,222 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}{{ disease.name }}{% endblock %}
+{% block page_title %}{{ disease.name }}{% endblock %}
+{% block page_subtitle %}ព័ត៌មានលម្អិតអំពីជំងឺ / Disease details{% endblock %}
+
+{% block content %}
+<!-- Back + management actions -->
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <a href="{{ url_for('expert_system.library_index') }}" class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i>ត្រឡប់ទៅបណ្ណាល័យ
+    </a>
+    {% if can_manage %}
+    <div class="btn-group btn-group-sm">
+        <a href="{{ url_for('expert_system.diseases_edit', disease_id=disease.id) }}" class="btn btn-outline-primary">
+            <i class="bi bi-pencil me-1"></i>កែប្រែ
+        </a>
+        <a href="{{ url_for('expert_system.diseases_edit', disease_id=disease.id) }}#stepsContainer" class="btn btn-outline-primary">
+            <i class="bi bi-list-check me-1"></i>ជំហានព្យាបាល
+        </a>
+        <a href="{{ url_for('expert_system.diseases_delete', disease_id=disease.id) }}" class="btn btn-outline-danger">
+            <i class="bi bi-trash me-1"></i>លុប
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Header card -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body p-4">
+        <div class="d-flex flex-wrap align-items-start gap-3">
+            <div class="stat-icon bg-primary bg-opacity-10 text-primary flex-shrink-0">
+                <i class="bi bi-virus"></i>
+            </div>
+            <div class="flex-grow-1">
+                <h3 class="fw-bold mb-2">{{ disease.name }}</h3>
+                <div class="d-flex flex-wrap gap-2">
+                    {% if disease.category %}
+                    <span class="badge rounded-pill bg-secondary bg-opacity-10 text-secondary border">
+                        <i class="bi bi-tag me-1"></i>{{ disease.category.name }}
+                    </span>
+                    {% endif %}
+                    {% if disease.severity_level %}
+                    <span class="badge rounded-pill bg-{{ disease.severity_color }} bg-opacity-10 text-{{ disease.severity_color }} border">
+                        <i class="bi bi-activity me-1"></i>កម្រិត: {{ disease.severity_label_km }}
+                    </span>
+                    {% endif %}
+                    <span class="badge rounded-pill bg-{{ 'danger' if disease.is_contagious else 'success' }} bg-opacity-10 text-{{ 'danger' if disease.is_contagious else 'success' }} border">
+                        <i class="bi {{ 'bi-arrow-repeat' if disease.is_contagious else 'bi-shield-check' }} me-1"></i>{{ disease.contagious_label_km }}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Main column -->
+    <div class="col-lg-8">
+        <!-- Description -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white border-0 py-3">
+                <h6 class="fw-bold mb-0"><i class="bi bi-info-circle text-primary me-2"></i>ការពិពណ៌នា / Description</h6>
+            </div>
+            <div class="card-body pt-0">
+                <p class="mb-0" style="white-space: pre-line;">{{ disease.description }}</p>
+            </div>
+        </div>
+
+        <!-- Causes (derived from category, when available) -->
+        {% if disease.category and disease.category.description %}
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white border-0 py-3">
+                <h6 class="fw-bold mb-0"><i class="bi bi-diagram-3 text-info me-2"></i>មូលហេតុ / Cause &amp; Type</h6>
+            </div>
+            <div class="card-body pt-0">
+                <p class="mb-1"><span class="fw-medium">ក្រុមជំងឺ:</span> {{ disease.category.name }}</p>
+                <p class="text-muted mb-0" style="white-space: pre-line;">{{ disease.category.description }}</p>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Symptoms / signs -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
+                <h6 class="fw-bold mb-0"><i class="bi bi-thermometer-half text-warning me-2"></i>រោគសញ្ញា / Symptoms</h6>
+                <span class="badge bg-warning bg-opacity-10 text-warning">{{ related_symptoms|length }}</span>
+            </div>
+            <div class="card-body pt-0">
+                {% if related_symptoms %}
+                <div class="d-flex flex-wrap gap-2">
+                    {% for symptom in related_symptoms %}
+                    <span class="badge rounded-pill bg-light text-dark border py-2 px-3" title="{{ symptom.description or '' }}">
+                        <i class="bi bi-dot"></i>{{ symptom.name }}
+                    </span>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted small mb-0"><i class="bi bi-info-circle me-1"></i>មិនទាន់មានរោគសញ្ញាភ្ជាប់ / No linked symptoms yet.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Treatment -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white border-0 py-3">
+                <h6 class="fw-bold mb-0"><i class="bi bi-capsule text-success me-2"></i>ការព្យាបាល / Treatment</h6>
+            </div>
+            <div class="card-body pt-0">
+                {% if disease.has_structured_steps %}
+                <!-- Structured, doctor-authored checklist (read-only view) -->
+                <ol class="list-group list-group-numbered">
+                    {% for step in disease.treatment_steps %}
+                    <li class="list-group-item border-0 border-bottom px-0 d-flex align-items-start">
+                        <div class="ms-2">
+                            <div class="fw-medium">{{ step.text }}</div>
+                            {% if step.note %}
+                            <small class="text-muted"><i class="bi bi-info-circle me-1"></i>{{ step.note }}</small>
+                            {% endif %}
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ol>
+                <p class="text-muted small mb-0 mt-3">
+                    <i class="bi bi-lightbulb me-1"></i>នៅពេលអ្នកបង្កើតករណី អ្នកអាចធីកជំហានទាំងនេះម្តងមួយៗ។
+                </p>
+                {% else %}
+                <p class="mb-0" style="white-space: pre-line;">{{ disease.treatment }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Prevention -->
+        {% if disease.prevention %}
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white border-0 py-3">
+                <h6 class="fw-bold mb-0"><i class="bi bi-shield-plus text-primary me-2"></i>ការការពារ / Prevention</h6>
+            </div>
+            <div class="card-body pt-0">
+                <p class="mb-0" style="white-space: pre-line;">{{ disease.prevention }}</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Sidebar column -->
+    <div class="col-lg-4">
+        <!-- Quick facts -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white border-0 py-3">
+                <h6 class="fw-bold mb-0"><i class="bi bi-clipboard-data text-primary me-2"></i>ព័ត៌មានសង្ខេប</h6>
+            </div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span class="text-muted small">ប្រភេទ / Category</span>
+                    <span class="fw-medium small">{{ disease.category.name if disease.category else 'គ្មាន' }}</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span class="text-muted small">កម្រិត / Severity</span>
+                    {% if disease.severity_level %}
+                    <span class="badge bg-{{ disease.severity_color }} bg-opacity-10 text-{{ disease.severity_color }} border">{{ disease.severity_label_km }}</span>
+                    {% else %}
+                    <span class="fw-medium small">—</span>
+                    {% endif %}
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span class="text-muted small">ការឆ្លង / Contagious</span>
+                    <span class="badge bg-{{ 'danger' if disease.is_contagious else 'success' }} bg-opacity-10 text-{{ 'danger' if disease.is_contagious else 'success' }} border">{{ disease.contagious_label_km }}</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span class="text-muted small">វិធានវិនិច្ឆ័យ / Rules</span>
+                    <span class="fw-medium small">{{ related_rules|length }}</span>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Related diagnostic rules -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white border-0 py-3">
+                <h6 class="fw-bold mb-0"><i class="bi bi-diagram-2 text-primary me-2"></i>វិធានវិនិច្ឆ័យ / Related Rules</h6>
+            </div>
+            <div class="card-body pt-0">
+                {% if related_rules %}
+                <div class="list-group list-group-flush">
+                    {% for rule in related_rules %}
+                    <div class="list-group-item px-0">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="pe-2">
+                                <div class="fw-medium small">{{ rule.title }}</div>
+                                <small class="text-muted">{{ rule.symptoms|length }} រោគសញ្ញា · អាទិភាព {{ rule.priority }}</small>
+                            </div>
+                            <span class="badge rounded-pill bg-primary bg-opacity-10 text-primary border flex-shrink-0">
+                                {{ rule.confidence|round|int }}%
+                            </span>
+                        </div>
+                        {% if can_manage_rules %}
+                        <a href="{{ url_for('expert_system.rules_edit', rule_id=rule.id) }}" class="small text-decoration-none">
+                            <i class="bi bi-pencil me-1"></i>កែប្រែវិធាន
+                        </a>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted small mb-0"><i class="bi bi-info-circle me-1"></i>មិនទាន់មានវិធានវិនិច្ឆ័យ / No diagnostic rules yet.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Educational CTA -->
+        <div class="card border-0 shadow-sm bg-light">
+            <div class="card-body text-center p-4">
+                <i class="bi bi-activity text-primary display-6 d-block mb-2"></i>
+                <p class="small text-muted mb-3">សង្ស័យថាមាន់របស់អ្នកមានជំងឺនេះមែនទេ?</p>
+                <a href="{{ url_for('expert_system.diagnose') }}" class="btn btn-sm btn-primary">
+                    <i class="bi bi-search-heart me-1"></i>ចាប់ផ្តើមវិភាគ
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
