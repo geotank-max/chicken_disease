@@ -20,9 +20,61 @@
     </div>
 </div>
 
-<!-- Stat Cards -->
+<!-- Filter Bar -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body p-3">
+        <form method="get" action="{{ url_for('dashboard.index') }}" class="row g-2 align-items-end">
+            <div class="col-6 col-md-3 col-lg-3">
+                <label class="form-label small text-muted mb-1">
+                    <i class="bi bi-calendar-event me-1"></i>ចាប់ពី / From
+                </label>
+                <input type="date" name="date_from" value="{{ filters.date_from }}" class="form-control form-control-sm">
+            </div>
+            <div class="col-6 col-md-3 col-lg-3">
+                <label class="form-label small text-muted mb-1">
+                    <i class="bi bi-calendar-check me-1"></i>ដល់ / To
+                </label>
+                <input type="date" name="date_to" value="{{ filters.date_to }}" class="form-control form-control-sm">
+            </div>
+            <div class="col-6 col-md-3 col-lg-3">
+                <label class="form-label small text-muted mb-1">
+                    <i class="bi bi-virus me-1"></i>ជំងឺ / Disease
+                </label>
+                <select name="disease_id" class="form-select form-select-sm">
+                    <option value="0">ទាំងអស់ / All diseases</option>
+                    {% for d in diseases %}
+                    <option value="{{ d.id }}" {% if filters.disease_id == d.id %}selected{% endif %}>{{ d.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-6 col-md-3 col-lg-2">
+                <label class="form-label small text-muted mb-1">
+                    <i class="bi bi-flag me-1"></i>ស្ថានភាព / Status
+                </label>
+                <select name="status" class="form-select form-select-sm">
+                    <option value="">ទាំងអស់ / All</option>
+                    <option value="pending" {% if filters.status == 'pending' %}selected{% endif %}>រង់ចាំពិនិត្យ / Pending</option>
+                    <option value="confirmed" {% if filters.status == 'confirmed' %}selected{% endif %}>បានបញ្ជាក់ / Confirmed</option>
+                    <option value="rejected" {% if filters.status == 'rejected' %}selected{% endif %}>បានបដិសេធ / Rejected</option>
+                </select>
+            </div>
+            <div class="col-12 col-lg-1 d-grid d-lg-flex gap-2">
+                <button type="submit" class="btn btn-sm btn-primary w-100">
+                    <i class="bi bi-funnel"></i>
+                </button>
+                {% if has_filters %}
+                <a href="{{ url_for('dashboard.index') }}" class="btn btn-sm btn-outline-secondary w-100" title="Clear filters">
+                    <i class="bi bi-x-lg"></i>
+                </a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Summary Stat Cards -->
 <div class="row g-3 mb-4">
-    <div class="col-6 col-xl-3">
+    <div class="col-6 col-lg">
         <div class="card border-0 shadow-sm h-100">
             <div class="card-body p-3">
                 <div class="d-flex align-items-center">
@@ -32,31 +84,14 @@
                         </div>
                     </div>
                     <div>
-                        <p class="text-muted small mb-0">Total Cases</p>
+                        <p class="text-muted small mb-0">ករណីសរុប / Total Cases</p>
                         <h3 class="fw-bold mb-0">{{ summary.total_cases }}</h3>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-6 col-xl-3">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-body p-3">
-                <div class="d-flex align-items-center">
-                    <div class="flex-shrink-0 me-3">
-                        <div class="stat-icon bg-success bg-opacity-10 text-success">
-                            <i class="bi bi-graph-up-arrow"></i>
-                        </div>
-                    </div>
-                    <div>
-                        <p class="text-muted small mb-0">This Week</p>
-                        <h3 class="fw-bold mb-0">{{ summary.cases_this_week }}</h3>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-6 col-xl-3">
+    <div class="col-6 col-lg">
         <div class="card border-0 shadow-sm h-100">
             <div class="card-body p-3">
                 <div class="d-flex align-items-center">
@@ -66,26 +101,59 @@
                         </div>
                     </div>
                     <div>
-                        <p class="text-muted small mb-0">Pending Review</p>
+                        <p class="text-muted small mb-0">រង់ចាំពិនិត្យ / Pending</p>
                         <h3 class="fw-bold mb-0">{{ summary.pending_reviews }}</h3>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-6 col-xl-3">
+    <div class="col-6 col-lg">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body p-3">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0 me-3">
+                        <div class="stat-icon bg-success bg-opacity-10 text-success">
+                            <i class="bi bi-check2-circle"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="text-muted small mb-0">បានបញ្ជាក់ / Confirmed</p>
+                        <h3 class="fw-bold mb-0">{{ summary.confirmed_cases }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body p-3">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0 me-3">
+                        <div class="stat-icon bg-danger bg-opacity-10 text-danger">
+                            <i class="bi bi-x-circle"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="text-muted small mb-0">បានបដិសេធ / Rejected</p>
+                        <h3 class="fw-bold mb-0">{{ summary.rejected_cases }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg">
         <div class="card border-0 shadow-sm h-100">
             <div class="card-body p-3">
                 <div class="d-flex align-items-center">
                     <div class="flex-shrink-0 me-3">
                         <div class="stat-icon bg-info bg-opacity-10 text-info">
-                            <i class="bi bi-journal-medical"></i>
+                            <i class="bi bi-calendar-month"></i>
                         </div>
                     </div>
                     <div>
-                        <p class="text-muted small mb-0">Knowledge Base</p>
-                        <h3 class="fw-bold mb-0">{{ summary.total_diseases }}<small class="text-muted fw-normal fs-6">/{{ summary.total_symptoms }}</small></h3>
-                        <small class="text-muted">diseases / symptoms</small>
+                        <p class="text-muted small mb-0">ខែនេះ / This Month</p>
+                        <h3 class="fw-bold mb-0">{{ summary.cases_this_month }}</h3>
                     </div>
                 </div>
             </div>
@@ -93,54 +161,17 @@
     </div>
 </div>
 
-<!-- Quick Stats Row -->
-<div class="row g-3 mb-4">
-    <div class="col-md-4">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-body p-3 d-flex align-items-center justify-content-between">
-                <div>
-                    <small class="text-muted text-uppercase fw-bold">Rules</small>
-                    <h4 class="fw-bold mb-0">{{ summary.total_rules }}</h4>
-                </div>
-                <i class="bi bi-diagram-3 fs-2 text-muted opacity-50"></i>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-body p-3 d-flex align-items-center justify-content-between">
-                <div>
-                    <small class="text-muted text-uppercase fw-bold">Users</small>
-                    <h4 class="fw-bold mb-0">{{ summary.total_users }}</h4>
-                </div>
-                <i class="bi bi-people fs-2 text-muted opacity-50"></i>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-body p-3 d-flex align-items-center justify-content-between">
-                <div>
-                    <small class="text-muted text-uppercase fw-bold">Diseases</small>
-                    <h4 class="fw-bold mb-0">{{ summary.total_diseases }}</h4>
-                </div>
-                <i class="bi bi-virus fs-2 text-muted opacity-50"></i>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Charts Row -->
+<!-- Charts Row: Trend + Status Breakdown -->
 <div class="row g-4 mb-4">
     <div class="col-lg-8">
         <div class="card border-0 shadow-sm h-100">
             <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
                 <div>
-                    <h6 class="fw-bold mb-0">Cases - Last 7 Days</h6>
-                    <small class="text-muted">Daily diagnosis activity</small>
+                    <h6 class="fw-bold mb-0">និន្នាការជំងឺ / Disease Trend</h6>
+                    <small class="text-muted">Diagnosis cases over time</small>
                 </div>
                 <span class="badge bg-primary bg-opacity-10 text-primary">
-                    <i class="bi bi-calendar3 me-1"></i>7 days
+                    <i class="bi bi-graph-up me-1"></i>{{ cases_by_day|length }} days
                 </span>
             </div>
             <div class="card-body pt-0">
@@ -151,41 +182,182 @@
     <div class="col-lg-4">
         <div class="card border-0 shadow-sm h-100">
             <div class="card-header bg-white border-0 py-3">
-                <h6 class="fw-bold mb-0">Case Status</h6>
-                <small class="text-muted">Distribution overview</small>
+                <h6 class="fw-bold mb-0">ស្ថានភាពករណី / Case Status</h6>
+                <small class="text-muted">Pending / Confirmed / Rejected</small>
             </div>
             <div class="card-body d-flex align-items-center justify-content-center">
-                <canvas id="statusChart" style="max-height: 220px;"></canvas>
+                <canvas id="statusChart" style="max-height: 240px;"></canvas>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Bottom Row -->
-<div class="row g-4">
-    <div class="col-lg-5">
+<!-- Top Diseases + Status Legend Row -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-7">
         <div class="card border-0 shadow-sm h-100">
             <div class="card-header bg-white border-0 py-3">
-                <h6 class="fw-bold mb-0">Top Diseases</h6>
-                <small class="text-muted">Most frequently diagnosed</small>
+                <h6 class="fw-bold mb-0">ជំងឺញឹកញាប់ / Top Diseases</h6>
+                <small class="text-muted">Most frequently diagnosed with share of cases</small>
             </div>
             <div class="card-body">
                 {% if top_diseases %}
-                <canvas id="diseaseChart" height="200"></canvas>
+                {% for d in top_diseases %}
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="small fw-medium">
+                            {{ d.name }}
+                            {% if d.is_dangerous %}
+                            <i class="bi bi-exclamation-triangle-fill text-danger ms-1" title="Severe disease"></i>
+                            {% endif %}
+                        </span>
+                        <span class="small text-muted">
+                            <span class="fw-bold text-dark">{{ d.count }}</span> · {{ d.percent }}%
+                        </span>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar {% if d.is_dangerous %}bg-danger{% else %}bg-primary{% endif %}"
+                             role="progressbar" style="width: {{ d.percent }}%;"
+                             aria-valuenow="{{ d.percent }}" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                </div>
+                {% endfor %}
                 {% else %}
                 <div class="text-center py-4">
                     <i class="bi bi-bar-chart text-muted display-6 d-block mb-2"></i>
-                    <p class="text-muted small mb-0">No diagnosis data yet</p>
+                    <p class="text-muted small mb-0">មិនទាន់មានទិន្នន័យ / No diagnosis data yet</p>
                 </div>
                 {% endif %}
             </div>
         </div>
     </div>
-    <div class="col-lg-7">
+    <div class="col-lg-5">
         <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-0 py-3">
+                <h6 class="fw-bold mb-0">ចំណែកតាមស្ថានភាព / Status Breakdown</h6>
+                <small class="text-muted">Counts by review status</small>
+            </div>
+            <div class="card-body d-flex flex-column justify-content-center">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <span class="d-flex align-items-center">
+                        <span class="badge status-badge status-pending me-2">&nbsp;</span>
+                        <span class="small">រង់ចាំពិនិត្យ / Pending</span>
+                    </span>
+                    <span class="fw-bold">{{ status_breakdown.pending }}</span>
+                </div>
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <span class="d-flex align-items-center">
+                        <span class="badge status-badge status-confirmed me-2">&nbsp;</span>
+                        <span class="small">បានបញ្ជាក់ / Confirmed</span>
+                    </span>
+                    <span class="fw-bold">{{ status_breakdown.confirmed }}</span>
+                </div>
+                <div class="d-flex align-items-center justify-content-between">
+                    <span class="d-flex align-items-center">
+                        <span class="badge status-badge status-rejected me-2">&nbsp;</span>
+                        <span class="small">បានបដិសេធ / Rejected</span>
+                    </span>
+                    <span class="fw-bold">{{ status_breakdown.rejected }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- High-Risk Cases Table -->
+<div class="row g-4 mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
             <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
                 <div>
-                    <h6 class="fw-bold mb-0">Recent Cases</h6>
+                    <h6 class="fw-bold mb-0 text-danger">
+                        <i class="bi bi-shield-exclamation me-1"></i>ករណីប្រថុយខ្ពស់ / High-Risk Cases
+                    </h6>
+                    <small class="text-muted">Many sick/dead birds, severe disease, or low confidence</small>
+                </div>
+                <a href="{{ url_for('expert_system.cases_index') }}" class="btn btn-sm btn-outline-danger">
+                    View All <i class="bi bi-arrow-right ms-1"></i>
+                </a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr class="bg-light">
+                            <th class="ps-4 py-3 small fw-bold text-muted">Date</th>
+                            <th class="py-3 small fw-bold text-muted">User</th>
+                            <th class="py-3 small fw-bold text-muted">Disease</th>
+                            <th class="py-3 small fw-bold text-muted">Confidence</th>
+                            <th class="py-3 small fw-bold text-muted">Risk Factors</th>
+                            <th class="py-3 small fw-bold text-muted">Status</th>
+                            <th class="pe-4 py-3 small fw-bold text-muted text-end"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in high_risk_cases %}
+                        {% set case = item.case %}
+                        <tr>
+                            <td class="ps-4">
+                                <div class="small fw-medium">{{ case.created_at.strftime('%d/%m/%Y') }}</div>
+                                <small class="text-muted">{{ case.created_at.strftime('%H:%M') }}</small>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 28px; height: 28px;">
+                                        <span class="small fw-bold text-muted">{{ case.user.username[0]|upper if case.user else '?' }}</span>
+                                    </div>
+                                    <span class="small">{{ case.user.username if case.user else 'Unknown' }}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="small fw-medium">{{ case.final_disease.name if case.final_disease else '---' }}</span>
+                            </td>
+                            <td>
+                                {% if case.confidence is not none %}
+                                <span class="badge rounded-pill {% if case.confidence > 80 %}bg-success{% elif case.confidence > 50 %}bg-warning{% else %}bg-danger{% endif %} bg-opacity-10 {% if case.confidence > 80 %}text-success{% elif case.confidence > 50 %}text-warning{% else %}text-danger{% endif %} border">
+                                    {{ case.confidence }}%
+                                </span>
+                                {% else %}
+                                <span class="text-muted small">---</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% for reason in item.reasons %}
+                                <span class="badge rounded-pill bg-{{ reason.color }} bg-opacity-10 text-{{ reason.color }} border mb-1" title="{{ reason.label_en }}">
+                                    <i class="bi {{ reason.icon }} me-1"></i>{{ reason.label_km }}
+                                </span>
+                                {% endfor %}
+                            </td>
+                            <td>
+                                <span class="badge rounded-pill status-badge status-{{ case.status }}">{{ case.status_label_km }}</span>
+                            </td>
+                            <td class="pe-4 text-end">
+                                <a href="{{ url_for('expert_system.cases_detail', case_id=case.id) }}" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-5">
+                                <i class="bi bi-shield-check display-6 d-block mb-2 text-success opacity-50"></i>
+                                <p class="mb-0">គ្មានករណីប្រថុយខ្ពស់ / No high-risk cases</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Cases -->
+<div class="row g-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="fw-bold mb-0">ករណីថ្មីៗ / Recent Cases</h6>
                     <small class="text-muted">Latest diagnosis activity</small>
                 </div>
                 <a href="{{ url_for('expert_system.cases_index') }}" class="btn btn-sm btn-outline-primary">
@@ -238,7 +410,7 @@
                         <tr>
                             <td colspan="5" class="text-center text-muted py-5">
                                 <i class="bi bi-inbox display-6 d-block mb-2 opacity-50"></i>
-                                <p class="mb-0">No cases yet</p>
+                                <p class="mb-0">មិនទាន់មានករណី / No cases yet</p>
                             </td>
                         </tr>
                         {% endfor %}
@@ -255,63 +427,66 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const casesData = {{ cases_by_day | tojson }};
-    const topDiseases = {{ top_diseases | tojson }};
     const statusData = {{ status_breakdown | tojson }};
 
-    // Cases Line Chart
-    new Chart(document.getElementById('casesChart'), {
-        type: 'line',
-        data: {
-            labels: casesData.map(d => d.date),
-            datasets: [{
-                label: 'Cases',
-                data: casesData.map(d => d.count),
-                borderColor: '#2563eb',
-                backgroundColor: 'rgba(37,99,235,0.08)',
-                fill: true,
-                tension: 0.4,
-                borderWidth: 2.5,
-                pointBackgroundColor: '#2563eb',
-                pointBorderColor: '#fff',
-                pointBorderWidth: 2,
-                pointRadius: 4,
-                pointHoverRadius: 6,
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    backgroundColor: '#1f2937',
-                    titleFont: { size: 12 },
-                    bodyFont: { size: 13 },
-                    padding: 10,
-                    cornerRadius: 8,
-                }
+    // Disease Trend Line Chart
+    const casesCanvas = document.getElementById('casesChart');
+    if (casesCanvas) {
+        new Chart(casesCanvas, {
+            type: 'line',
+            data: {
+                labels: casesData.map(d => d.date),
+                datasets: [{
+                    label: 'Cases',
+                    data: casesData.map(d => d.count),
+                    borderColor: '#2563eb',
+                    backgroundColor: 'rgba(37,99,235,0.08)',
+                    fill: true,
+                    tension: 0.4,
+                    borderWidth: 2.5,
+                    pointBackgroundColor: '#2563eb',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: casesData.length > 31 ? 0 : 3,
+                    pointHoverRadius: 6,
+                }]
             },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: { stepSize: 1, font: { size: 11 } },
-                    grid: { color: 'rgba(0,0,0,0.04)' }
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#1f2937',
+                        titleFont: { size: 12 },
+                        bodyFont: { size: 13 },
+                        padding: 10,
+                        cornerRadius: 8,
+                    }
                 },
-                x: {
-                    ticks: { font: { size: 11 } },
-                    grid: { display: false }
-                }
-            },
-            interaction: { intersect: false, mode: 'index' }
-        }
-    });
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 1, font: { size: 11 } },
+                        grid: { color: 'rgba(0,0,0,0.04)' }
+                    },
+                    x: {
+                        ticks: { font: { size: 11 }, maxTicksLimit: 15 },
+                        grid: { display: false }
+                    }
+                },
+                interaction: { intersect: false, mode: 'index' }
+            }
+        });
+    }
 
-    // Status Doughnut
+    // Status Doughnut Chart
     const statusLabels = { pending: 'Pending', confirmed: 'Confirmed', rejected: 'Rejected' };
     const statusColors = { pending: '#f59e0b', confirmed: '#10b981', rejected: '#ef4444' };
-    const sKeys = Object.keys(statusData);
+    const sKeys = Object.keys(statusData).filter(k => statusData[k] > 0);
+    const statusCanvas = document.getElementById('statusChart');
 
-    if (sKeys.length) {
-        new Chart(document.getElementById('statusChart'), {
+    if (statusCanvas && sKeys.length) {
+        new Chart(statusCanvas, {
             type: 'doughnut',
             data: {
                 labels: sKeys.map(k => statusLabels[k] || k),
@@ -330,34 +505,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         });
-    }
-
-    // Top Diseases Bar Chart
-    if (topDiseases.length && document.getElementById('diseaseChart')) {
-        const colors = ['#2563eb', '#7c3aed', '#059669', '#d97706', '#dc2626'];
-        new Chart(document.getElementById('diseaseChart'), {
-            type: 'bar',
-            data: {
-                labels: topDiseases.map(d => d.name),
-                datasets: [{
-                    label: 'Count',
-                    data: topDiseases.map(d => d.count),
-                    backgroundColor: topDiseases.map((_, i) => colors[i % colors.length] + '20'),
-                    borderColor: topDiseases.map((_, i) => colors[i % colors.length]),
-                    borderWidth: 1.5,
-                    borderRadius: 6,
-                }]
-            },
-            options: {
-                indexAxis: 'y',
-                responsive: true,
-                plugins: { legend: { display: false } },
-                scales: {
-                    x: { beginAtZero: true, ticks: { stepSize: 1, font: { size: 11 } }, grid: { color: 'rgba(0,0,0,0.04)' } },
-                    y: { ticks: { font: { size: 11 } }, grid: { display: false } }
-                }
-            }
-        });
+    } else if (statusCanvas) {
+        statusCanvas.parentElement.innerHTML =
+            '<div class="text-center py-4"><i class="bi bi-pie-chart text-muted display-6 d-block mb-2"></i>' +
+            '<p class="text-muted small mb-0">មិនទាន់មានទិន្នន័យ / No data yet</p></div>';
     }
 });
 </script>
