@@ -23,16 +23,27 @@ def create_app(config_class: type[Config] = Config):
     login_manager.login_message_category = "warning"
 
     @app.after_request
-    def set_no_cache(response):
+    def set_cache_headers(response):
         """
-        Only prevent caching on OAuth endpoints (so Google always shows
-        a fresh account picker). All other pages are allowed to be cached
-        normally by the browser for faster navigation.
+        Cache policy per endpoint:
+        - OAuth endpoints: never cache, so Google always runs a fresh
+          login flow and shows the account picker.
+        - Home page: allow a short *private* cache so that when the user
+          closes and reopens the browser on the same account, the page
+          loads instantly from cache instead of a full server round-trip.
+        - Everything else: left to the browser's default behaviour.
         """
-        if request.endpoint and request.endpoint.startswith("oauth."):
+        endpoint = request.endpoint or ""
+
+        if endpoint.startswith("oauth."):
             response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
             response.headers["Pragma"] = "no-cache"
             response.headers["Expires"] = "0"
+        elif endpoint == "user_home.index":
+            # private = only this user's browser may cache it (never a
+            # shared proxy). 5-minute freshness window.
+            response.headers["Cache-Control"] = "private, max-age=300"
+
         return response
 
     @login_manager.user_loader
