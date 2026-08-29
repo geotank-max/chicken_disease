@@ -24,8 +24,12 @@ def create_app(config_class: type[Config] = Config):
 
     @app.after_request
     def set_no_cache(response):
-        """Prevent browser from caching authenticated pages (back-button after logout)."""
-        if request.endpoint and request.endpoint != "static":
+        """
+        Only prevent caching on OAuth endpoints (so Google always shows
+        a fresh account picker). All other pages are allowed to be cached
+        normally by the browser for faster navigation.
+        """
+        if request.endpoint and request.endpoint.startswith("oauth."):
             response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
             response.headers["Pragma"] = "no-cache"
             response.headers["Expires"] = "0"

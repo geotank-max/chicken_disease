@@ -5,6 +5,18 @@ BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 class Config:
     SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret-key-change-me")
 
+    # ── Session cookie settings ──────────────────────────────────
+    # SameSite=Lax lets the session cookie (which carries the OAuth
+    # "state" value) survive the top-level redirect coming back from
+    # Google. Without this the cookie can be dropped on the first
+    # attempt, causing a state mismatch that only succeeds on retry
+    # once the cookie has been established.
+    SESSION_COOKIE_SAMESITE = "Lax"
+    SESSION_COOKIE_HTTPONLY = True
+    # Set to True in production (HTTPS). Kept False so it also works
+    # over plain http://localhost during development.
+    SESSION_COOKIE_SECURE = os.environ.get("SESSION_COOKIE_SECURE", "false").lower() in ("true", "1", "yes")
+
     # Upload config
     UPLOAD_FOLDER = os.path.join(BASE_DIR, "uploads")
     MAX_CONTENT_LENGTH = 50 * 1024 * 1024   # 50 MB total request cap

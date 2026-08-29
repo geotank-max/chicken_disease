@@ -18,8 +18,17 @@ def google_login():
     if current_user.is_authenticated:
         return redirect(url_for("user_home.index"))
 
+    # Ensure the session is persisted so the OAuth "state" Authlib
+    # stores below is written to the cookie before we redirect to
+    # Google. Otherwise the state can be lost on the first attempt
+    # and only succeed on the retry.
+    session.permanent = True
+
     redirect_uri = current_app.config["GOOGLE_REDIRECT_URI"]
-    return oauth.google.authorize_redirect(redirect_uri)
+    # prompt="select_account" forces Google to show the account
+    # chooser every time instead of silently reusing the currently
+    # signed-in account.
+    return oauth.google.authorize_redirect(redirect_uri, prompt="select_account")
 
 
 @oauth_bp.route("/callback")
@@ -28,8 +37,12 @@ def google_callback():
     try:
         token = oauth.google.authorize_access_token()
     except Exception as e:
-        current_app.logger.error(f"OAuth token error: {e}")
-        flash("Google authentication failed. Please try again.", "danger")
+        current_app.logger.error(
+            "OAuth token error [%s]: %s", type(e).__name__, e, exc_info=True
+        )
+        # Surface the specific reason so we can distinguish a state
+        # mismatch (cookie problem) from a token/clock/config problem.
+        flash(f"Google authentication failed: {e}", "danger")
         return redirect(url_for("auth.login"))
 
     # Extract user info from the ID token (OIDC)
