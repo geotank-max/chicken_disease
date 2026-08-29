@@ -5,11 +5,55 @@
 {% block page_subtitle %}ពិនិត្យមើលរបាយការណ៍រោគវិនិច្ឆ័យកន្លងមក និងលទ្ធផល។{% endblock %}
 
 {% block content %}
+<!-- Filters -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body py-3">
+        <form method="GET" class="row g-2 align-items-end">
+            <div class="col-md-2">
+                <label class="form-label small fw-bold text-muted mb-1">ស្ថានភាព</label>
+                <select name="status" class="form-select form-select-sm">
+                    <option value="">ទាំងអស់</option>
+                    <option value="pending" {% if filters.status == 'pending' %}selected{% endif %}>រង់ចាំពិនិត្យ</option>
+                    <option value="confirmed" {% if filters.status == 'confirmed' %}selected{% endif %}>បានបញ្ជាក់</option>
+                    <option value="rejected" {% if filters.status == 'rejected' %}selected{% endif %}>បានបដិសេធ</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small fw-bold text-muted mb-1">ជំងឺ</label>
+                <select name="disease_id" class="form-select form-select-sm">
+                    <option value="">ទាំងអស់</option>
+                    {% for disease in diseases %}
+                    <option value="{{ disease.id }}" {% if filters.disease_id == disease.id %}selected{% endif %}>{{ disease.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small fw-bold text-muted mb-1">ពី</label>
+                <input type="date" name="date_from" class="form-control form-control-sm" value="{{ filters.date_from }}">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small fw-bold text-muted mb-1">ដល់</label>
+                <input type="date" name="date_to" class="form-control form-control-sm" value="{{ filters.date_to }}">
+            </div>
+            <div class="col-md-3 d-flex gap-2">
+                <button type="submit" class="btn btn-sm btn-primary"><i class="bi bi-funnel me-1"></i>ត្រង</button>
+                <a href="{{ url_for('expert_system.cases_index') }}" class="btn btn-sm btn-outline-secondary">សម្អាត</a>
+                {% if current_user.has_role('Admin') or current_user.has_role('Doctor') %}
+                <a href="{{ url_for('expert_system.cases_export_csv', status=filters.status, disease_id=filters.disease_id, date_from=filters.date_from, date_to=filters.date_to) }}" class="btn btn-sm btn-outline-success ms-auto">
+                    <i class="bi bi-download me-1"></i>CSV
+                </a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+</div>
+
 <div class="card border-0 shadow-sm">
     <div class="card-header bg-white py-3 border-bottom">
         <div class="d-flex justify-content-between align-items-center">
             <h5 class="mb-0 fw-bold text-muted">
                 <i class="bi bi-clock-history me-2"></i>ការធ្វើរោគវិនិច្ឆ័យថ្មីៗ
+                <span class="badge bg-primary bg-opacity-10 text-primary ms-2">{{ pagination.total }}</span>
             </h5>
         </div>
     </div>
@@ -24,6 +68,7 @@
                     {% endif %}
                     <th class="py-3 text-uppercase small fw-bold text-muted">ជំងឺដែលបានកំណត់អត្តសញ្ញាណ</th>
                     <th class="py-3 text-uppercase small fw-bold text-muted">ទំនុកចិត្ត</th>
+                    <th class="py-3 text-uppercase small fw-bold text-muted">ស្ថានភាព</th>
                     <th class="py-3 text-uppercase small fw-bold text-muted">រោគសញ្ញា</th>
                     <th class="pe-4 py-3 text-end text-uppercase small fw-bold text-muted">សកម្មភាព</th>
                 </tr>
@@ -46,7 +91,9 @@
                     </td>
                     {% endif %}
                     <td>
-                        {% if case.disease %}
+                        {% if case.final_disease %}
+                            <span class="fw-medium text-dark">{{ case.final_disease.name }}</span>
+                        {% elif case.disease %}
                             <span class="fw-medium text-dark">{{ case.disease.name }}</span>
                         {% else %}
                             <span class="text-muted fst-italic">មិនស្គាល់</span>
@@ -60,6 +107,9 @@
                         {% else %}
                             <span class="text-muted">-</span>
                         {% endif %}
+                    </td>
+                    <td>
+                        <span class="badge rounded-pill status-badge status-{{ case.status }}">{{ case.status_label_km }}</span>
                     </td>
                     <td>
                         <div class="d-flex flex-wrap gap-1" style="max-width: 300px;">
@@ -79,7 +129,7 @@
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="6" class="text-center py-5">
+                    <td colspan="7" class="text-center py-5">
                         <div class="text-muted mb-2"><i class="bi bi-clipboard-x display-4"></i></div>
                         <p class="text-muted mb-0">រកមិនឃើញប្រវត្តិរោគវិនិច្ឆ័យទេ។</p>
                     </td>
@@ -88,5 +138,37 @@
             </tbody>
         </table>
     </div>
+
+    {% if pagination.pages > 1 %}
+    <div class="card-footer bg-white border-top py-3">
+        <nav aria-label="Pagination">
+            <ul class="pagination pagination-sm justify-content-center mb-0">
+                <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('expert_system.cases_index', page=pagination.prev_num, status=filters.status, disease_id=filters.disease_id, date_from=filters.date_from, date_to=filters.date_to) }}">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                </li>
+                {% for p in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                    {% if p %}
+                    <li class="page-item {% if p == pagination.page %}active{% endif %}">
+                        <a class="page-link" href="{{ url_for('expert_system.cases_index', page=p, status=filters.status, disease_id=filters.disease_id, date_from=filters.date_from, date_to=filters.date_to) }}">{{ p }}</a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                    {% endif %}
+                {% endfor %}
+                <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('expert_system.cases_index', page=pagination.next_num, status=filters.status, disease_id=filters.disease_id, date_from=filters.date_from, date_to=filters.date_to) }}">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        <p class="text-center text-muted small mt-2 mb-0">
+            បង្ហាញ {{ ((pagination.page - 1) * pagination.per_page) + 1 }}–{{ [pagination.page * pagination.per_page, pagination.total] | min }}
+            ពី {{ pagination.total }}
+        </p>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

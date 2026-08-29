@@ -1,68 +1,77 @@
 {% extends "layouts/base.html" %}
-{% block title %}ព័ត៌មានលម្អិតតួនាទី{% endblock %}
+{% block title %}Role: {{ role.name }}{% endblock %}
+{% block page_title %}{{ role.name }}{% endblock %}
+{% block page_subtitle %}Role details and assigned permissions{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <div>
-        <h1 class="h3 mb-0">តួនាទី៖ {{ role.name }}</h1>
-        <p class="text-muted mb-0">
-            បង្កើត៖ {{ role.create_at }} ▪ ធ្វើបច្ចុប្បន្នភាព៖ {{ role.updated_at }}
-        </p>
-    </div>
-    <div class="text-end">
-        <a href="{{ url_for('tbl_roles.edit', role_id=role.id) }}" 
-        class="btn btn-danger">កែប្រែ</a>
-        <a href="{{ url_for('tbl_roles.delete_confirm', role_id=role.id) }}"
-        class="btn btn-danger">លុប</a>
-        <a href="{{ url_for('tbl_roles.index') }}" class="btn btn-secondary">ត្រឡប់ក្រោយ</a>
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+    <a href="{{ url_for('tbl_roles.index') }}" class="text-decoration-none text-muted">
+        <i class="bi bi-arrow-left me-1"></i> Back to Roles
+    </a>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('tbl_roles.edit', role_id=role.id) }}" class="btn btn-sm btn-primary">
+            <i class="bi bi-pencil me-1"></i> Edit Role
+        </a>
+        <a href="{{ url_for('tbl_roles.delete_confirm', role_id=role.id) }}" class="btn btn-sm btn-outline-danger">
+            <i class="bi bi-trash me-1"></i> Delete
+        </a>
     </div>
 </div>
 
-<div class="row">
-    <!-- Basic info -->
-    <div class="col-lg-6 mb-3">
-        <div class="card">
-            <div class="card-header">
-                ព័ត៌មានតួនាទី
-            </div>
-            <div class="card-body">
-                <p><strong>ឈ្មោះ៖</strong>{{ role.name }}</p>
-                <p><strong>ការពិពណ៌នា៖</strong>{{ role.description or "-" }}</p>
+<div class="row g-4">
+    <!-- Role Info -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center py-4">
+                <div class="mx-auto mb-3 d-flex align-items-center justify-content-center rounded-circle bg-primary bg-opacity-10" style="width: 72px; height: 72px;">
+                    <i class="bi bi-shield-check text-primary fs-2"></i>
+                </div>
+                <h4 class="fw-bold mb-1">{{ role.name }}</h4>
+                <p class="text-muted mb-3">{{ role.description or 'No description provided' }}</p>
+                <div class="d-flex justify-content-center gap-3">
+                    <div class="text-center">
+                        <div class="fs-4 fw-bold text-primary">{{ role.permissions|length }}</div>
+                        <small class="text-muted">Permissions</small>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Permissions -->
-    <div class="col-lg-6 mb-3">
-        <div class="card">
-            <div class="card-header">
-                សិទ្ធិ ({{ role.permissions|length }})
+    <!-- Permissions List -->
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold"><i class="bi bi-key me-2 text-primary"></i>Assigned Permissions</h5>
+                <span class="badge bg-primary rounded-pill">{{ role.permissions|length }}</span>
             </div>
-            <div class="card-body">
+            <div class="card-body p-0">
                 {% if role.permissions %}
-                    <ul class="list-group list-group-flush">
-                        {% for perm in role.permissions %}
-                        <li class="list-group-item">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <span class="badge bg-secondary me-2">{{ perm.module }}</span>
-                                    <strong>{{ perm.code }}</strong> - {{ perm.name }}
-                                </div>
-                                <a href="{{ url_for('tbl_permissions.detail', permission_id=perm.id) }}" 
-                                    class="btn btn-sm btn-outline-primary">
-                                    មើល
-                                </a>
+                {% set ns = namespace(current_module='') %}
+                <div class="list-group list-group-flush">
+                    {% for perm in role.permissions|sort(attribute='module') %}
+                    {% if perm.module != ns.current_module %}
+                    {% set ns.current_module = perm.module %}
+                    <div class="list-group-item bg-light py-2 px-4">
+                        <small class="fw-bold text-uppercase text-muted">{{ perm.module or 'General' }}</small>
+                    </div>
+                    {% endif %}
+                    <div class="list-group-item px-4 py-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="fw-medium">{{ perm.name }}</span>
+                                <small class="text-muted ms-2">({{ perm.code }})</small>
                             </div>
-                            {% if perm.description %}
-                            <div class="small text-muted mt-1">
-                                {{ perm.description }}
-                            </div>
-                            {% endif %}
-                        </li>
-                        {% endfor %}
-                    </ul>
+                            <i class="bi bi-check-circle-fill text-success"></i>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
                 {% else %}
-                    <p class="text-muted mb-0">តួនាទីនេះមិនទាន់មានសិទ្ធិនៅឡើយទេ។</p>
+                <div class="text-center py-5">
+                    <i class="bi bi-key text-muted display-4 d-block mb-3"></i>
+                    <p class="text-muted mb-0">No permissions assigned to this role yet.</p>
+                </div>
                 {% endif %}
             </div>
         </div>

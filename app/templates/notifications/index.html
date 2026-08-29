@@ -1,0 +1,100 @@
+{% extends "layouts/base.html" %}
+{% block title %}Notifications{% endblock %}
+{% block page_title %}Notifications{% endblock %}
+{% block page_subtitle %}Stay updated on system activity.{% endblock %}
+
+{% block extra_styles %}
+<style>
+    /* Unread items stand out via a clean accent bar, not a full blue wash,
+       so category icons stay readable even when many items are unread. */
+    .notif-item {
+        border-left: 3px solid transparent;
+        transition: background-color .12s ease;
+    }
+    .notif-unread {
+        border-left-color: var(--bs-primary, #0d6efd);
+        background-color: #fff;
+    }
+    .notif-unread:hover {
+        background-color: #f6f9ff;
+    }
+    .notif-read {
+        background-color: #fbfbfc;
+    }
+    .notif-read .bi {
+        opacity: .55;
+    }
+    .notif-new-pill {
+        font-size: .625rem;
+        font-weight: 600;
+        letter-spacing: .02em;
+        padding: .15em .5em;
+        text-transform: uppercase;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2">
+        {{ notifications|selectattr('is_read', 'false')|list|length }} unread
+    </span>
+    {% if notifications %}
+    <form method="post" action="{{ url_for('notifications.mark_all_read') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-check-all me-1"></i> Mark all as read
+        </button>
+    </form>
+    {% endif %}
+</div>
+
+{% if notifications %}
+<div class="card border-0 shadow-sm">
+    <div class="list-group list-group-flush">
+        {% for n in notifications %}
+        <a href="{{ url_for('notifications.mark_read', notif_id=n.id) }}"
+           class="list-group-item list-group-item-action py-3 px-4 notif-item {% if not n.is_read %}notif-unread{% else %}notif-read{% endif %}">
+            <div class="d-flex justify-content-between align-items-start">
+                <div class="d-flex align-items-start">
+                    <div class="me-3 mt-1">
+                        {% if n.category == 'disease' %}
+                        <i class="bi bi-virus text-danger fs-5"></i>
+                        {% elif n.category == 'application' %}
+                        <i class="bi bi-file-earmark-medical text-primary fs-5"></i>
+                        {% elif n.category == 'case' %}
+                        <i class="bi bi-clipboard-check text-success fs-5"></i>
+                        {% else %}
+                        <i class="bi bi-bell text-warning fs-5"></i>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="{% if not n.is_read %}fw-semibold text-dark{% else %}fw-normal text-muted{% endif %}">{{ n.title }}</span>
+                            {% if not n.is_read %}
+                            <span class="badge rounded-pill bg-primary text-white notif-new-pill">New</span>
+                            {% endif %}
+                        </div>
+                        {% if n.message %}
+                        <small class="{% if not n.is_read %}text-secondary{% else %}text-muted{% endif %}">{{ n.message }}</small>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="text-end ms-3">
+                    <small class="text-muted text-nowrap">{{ n.created_at.strftime('%d/%m %H:%M') }}</small>
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+{% else %}
+<div class="card border-0 shadow-sm text-center py-5">
+    <div class="card-body">
+        <i class="bi bi-bell-slash text-muted display-4 d-block mb-3"></i>
+        <h5 class="fw-bold">No notifications</h5>
+        <p class="text-muted mb-0">You're all caught up!</p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

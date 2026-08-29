@@ -3,155 +3,229 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}ផ្ទាំងគ្រប់គ្រង{% endblock %} - ប្រព័ន្ធជំនាញមាន់</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>{% block title %}Dashboard{% endblock %} - IDNS</title>
 
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <!-- Google Fonts: Inter for UI, Merriweather for headings, Noto Sans Khmer for Khmer text -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Merriweather:wght@400;700&family=Noto+Sans+Khmer:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+Khmer:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_styles %}{% endblock %}
 </head>
-<body class="d-flex flex-column min-vh-100">
-    <div class="container-fluid flex-grow-1">
-        <div class="row h-100">
-            {% block sidebar %}
-            <!-- Sidebar -->
-            <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse" id="sidebarMenu">
-                <div class="brand-section">
-                    <a href="{{ url_for('expert_system.diagnose') }}" class="text-decoration-none text-dark">
-                        <img src="{{ url_for('static', filename='images/logo1.png') }}" alt="VetAssist Logo" class="brand-logo">
-                        <h5 class="brand-font fw-bold mb-0">IDNS</h5>
-                        <small class="text-muted">ការធ្វើរោគវិនិច្ឆ័យមាន់</small>
-                    </a>
-                </div>
-
-                <div class="position-sticky pt-2">
-                    {% if current_user.is_authenticated %}
-                        <div class="nav-section-label">មេ</div>
-                        <ul class="nav flex-column">
-                            <li class="nav-item">
-                                <a class="nav-link {% if 'expert_system.diagnose' in request.endpoint %}active{% endif %}" href="{{ url_for('expert_system.diagnose') }}">
-                                    <i class="bi bi-activity"></i>
-                                    ធ្វើរោគវិនិច្ឆ័យ
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link {% if 'expert_system.cases' in request.endpoint %}active{% endif %}" href="{{ url_for('expert_system.cases_index') }}">
-                                    <i class="bi bi-clock-history"></i> ប្រវត្តិ
-                                </a>
-                            </li>
-                        </ul>
-
-                        {% if current_user.has_role('Admin') or current_user.has_role('Doctor') %}
-                        <div class="nav-section-label">មូលដ្ឋានចំណេះដឹង</div>
-                        <ul class="nav flex-column">
-                            <li class="nav-item">
-                                <a class="nav-link {% if 'expert_system.rules' in request.endpoint %}active{% endif %}" href="{{ url_for('expert_system.rules_index') }}">
-                                    <i class="bi bi-diagram-3"></i> វិធាន
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link {% if 'expert_system.symptoms' in request.endpoint %}active{% endif %}" href="{{ url_for('expert_system.symptoms_index') }}">
-                                    <i class="bi bi-thermometer-half"></i> រោគសញ្ញា
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link {% if 'expert_system.diseases' in request.endpoint %}active{% endif %}" href="{{ url_for('expert_system.diseases_index') }}">
-                                    <i class="bi bi-virus"></i> ជំងឺ
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link {% if 'expert_system.categories' in request.endpoint %}active{% endif %}" href="{{ url_for('expert_system.categories_index') }}">
-                                    <i class="bi bi-tags"></i> ប្រភេទ
-                                </a>
-                            </li>
-                        </ul>
-                        {% endif %}
-
-                        {% if current_user.has_role('Admin') %}
-                        <div class="nav-section-label">ប្រព័ន្ធ</div>
-                        <ul class="nav flex-column">
-                            <li class="nav-item">
-                                <a class="nav-link {% if 'tbl_users' in request.endpoint %}active{% endif %}" href="{{ url_for('tbl_users.index') }}">
-                                    <i class="bi bi-people"></i> អ្នកប្រើប្រាស់
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link {% if 'tbl_roles' in request.endpoint %}active{% endif %}" href="{{ url_for('tbl_roles.index') }}">
-                                    <i class="bi bi-shield-lock"></i> តួនាទី
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link {% if 'tbl_permissions' in request.endpoint %}active{% endif %}" href="{{ url_for('tbl_permissions.index') }}">
-                                    <i class="bi bi-key"></i> សិទ្ធិ
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link {% if 'audit.index' in request.endpoint %}active{% endif %}" href="{{ url_for('audit.index') }}">
-                                    <i class="bi bi-journal-text"></i> កំណត់ហេតុសវនកម្ម
-                                </a>
-                            </li>
-                        </ul>
-                        {% endif %}
-
-                        <div class="nav-section-label">គណនី</div>
-                        <ul class="nav flex-column mb-4">
-                            <li class="nav-item">
-                                <a class="nav-link {% if 'tbl_users.profile' in request.endpoint %}active{% endif %}" href="{{ url_for('tbl_users.profile') }}">
-                                    <i class="bi bi-person-circle"></i> ប្រវត្តិរូប
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-danger" href="{{ url_for('auth.logout') }}">
-                                    <i class="bi bi-box-arrow-right text-danger"></i> ចាកចេញ
-                                </a>
-                            </li>
-                        </ul>
-                    {% else %}
-                        <div class="nav-section-label">ការចូលប្រើ</div>
-                        <ul class="nav flex-column">
-                            <li class="nav-item">
-                                <a class="nav-link {% if 'auth.login' in request.endpoint %}active{% endif %}" href="{{ url_for('auth.login') }}">
-                                    <i class="bi bi-box-arrow-in-right"></i> ចូល
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link {% if 'auth.register' in request.endpoint %}active{% endif %}" href="{{ url_for('auth.register') }}">
-                                    <i class="bi bi-person-plus"></i> ចុះឈ្មោះ
-                                </a>
-                            </li>
-                        </ul>
-                    {% endif %}
-                </div>
-            </nav>
-            {% endblock %}
-
-            <!-- Main Content -->
-            <main class="{% block main_class %}col-md-9 ms-sm-auto col-lg-10{% endblock %} content-wrapper">
-                <div class="page-header">
-                    <div>
-                        <h2 class="h3 fw-bold mb-1">{% block page_title %}{% endblock %}</h2>
-                        <p class="text-muted mb-0">{% block page_subtitle %}{% endblock %}</p>
+<body>
+    <div class="app-layout">
+        {% block sidebar %}
+        <!-- Sidebar: fixed, independent scroll -->
+        <aside class="app-sidebar" id="sidebarMenu">
+            <!-- Brand -->
+            <div class="sidebar-brand">
+                <a href="{{ url_for('dashboard.index') if current_user.is_authenticated and current_user.has_permission('view_dashboard') else url_for('user_home.index') if current_user.is_authenticated else url_for('auth.login') }}" class="text-decoration-none">
+                    <img src="{{ url_for('static', filename='images/logo1.png') }}" alt="IDNS" class="sidebar-logo">
+                    <div class="sidebar-brand-text">
+                        <span class="fw-bold">IDNS</span>
+                        <small>Chicken Diagnosis</small>
                     </div>
+                </a>
+            </div>
 
-                    {% block page_header_content %}
-                    {% if current_user.is_authenticated %}
-                    <a href="{{ url_for('tbl_users.profile') }}" class="user-profile">
-                        <div class="user-avatar">
-                            {{ current_user.username[0] | upper }}
-                        </div>
-                        <div class="d-none d-sm-block">
-                            <div class="fw-bold small">{{ current_user.full_name }}</div>
-                            <div class="text-muted" style="font-size: 0.7rem;">{{ current_user.roles[0].name if current_user.roles else 'User' }}</div>
-                        </div>
-                    </a>
+            <!-- Navigation -->
+            <nav class="sidebar-nav">
+                {% if current_user.is_authenticated %}
+                    {% if current_user.has_permission('view_dashboard') %}
+                    <div class="nav-section-label">Overview</div>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link {% if 'dashboard.index' in request.endpoint %}active{% endif %}" href="{{ url_for('dashboard.index') }}">
+                                <i class="bi bi-grid-1x2"></i>
+                                <span>Dashboard</span>
+                            </a>
+                        </li>
+                    </ul>
+                    {% else %}
+                    <div class="nav-section-label">ទំព័រដើម</div>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link {% if 'user_home.index' in request.endpoint %}active{% endif %}" href="{{ url_for('user_home.index') }}">
+                                <i class="bi bi-house-door"></i>
+                                <span>ទំព័រដើម</span>
+                            </a>
+                        </li>
+                    </ul>
                     {% endif %}
-                    {% endblock %}
+
+                    <div class="nav-section-label">Diagnosis</div>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link {% if 'expert_system.diagnose' in request.endpoint %}active{% endif %}" href="{{ url_for('expert_system.diagnose') }}">
+                                <i class="bi bi-activity"></i>
+                                <span>Run Diagnosis</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if 'expert_system.cases' in request.endpoint %}active{% endif %}" href="{{ url_for('expert_system.cases_index') }}">
+                                <i class="bi bi-clock-history"></i>
+                                <span>Case History</span>
+                                {% if pending_cases is defined and pending_cases > 0 %}
+                                <span class="nav-badge bg-warning">{{ pending_cases }}</span>
+                                {% endif %}
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if 'expert_system.library' in request.endpoint %}active{% endif %}" href="{{ url_for('expert_system.library_index') }}">
+                                <i class="bi bi-book"></i>
+                                <span>Disease Library</span>
+                            </a>
+                        </li>
+                    </ul>
+
+                    {% if current_user.has_permission('manage_rules') or current_user.has_permission('manage_symptoms') %}
+                    <div class="nav-section-label">Knowledge Base</div>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link {% if 'expert_system.rules' in request.endpoint %}active{% endif %}" href="{{ url_for('expert_system.rules_index') }}">
+                                <i class="bi bi-diagram-3"></i>
+                                <span>Rules</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if 'expert_system.symptoms' in request.endpoint %}active{% endif %}" href="{{ url_for('expert_system.symptoms_index') }}">
+                                <i class="bi bi-thermometer-half"></i>
+                                <span>Symptoms</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if 'expert_system.diseases' in request.endpoint %}active{% endif %}" href="{{ url_for('expert_system.diseases_index') }}">
+                                <i class="bi bi-virus"></i>
+                                <span>Diseases</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if 'expert_system.categories' in request.endpoint %}active{% endif %}" href="{{ url_for('expert_system.categories_index') }}">
+                                <i class="bi bi-tags"></i>
+                                <span>Categories</span>
+                            </a>
+                        </li>
+                    </ul>
+                    {% endif %}
+
+                    {% if current_user.has_permission('USER_CREATE') or current_user.has_permission('ROLE_MANAGE') %}
+                    <div class="nav-section-label">System</div>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link {% if 'tbl_users' in request.endpoint %}active{% endif %}" href="{{ url_for('tbl_users.index') }}">
+                                <i class="bi bi-people"></i>
+                                <span>Users</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if 'tbl_roles' in request.endpoint %}active{% endif %}" href="{{ url_for('tbl_roles.index') }}">
+                                <i class="bi bi-shield-lock"></i>
+                                <span>Roles</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if 'tbl_permissions' in request.endpoint %}active{% endif %}" href="{{ url_for('tbl_permissions.index') }}">
+                                <i class="bi bi-key"></i>
+                                <span>Permissions</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if 'audit.index' in request.endpoint %}active{% endif %}" href="{{ url_for('audit.index') }}">
+                                <i class="bi bi-journal-text"></i>
+                                <span>Audit Logs</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if 'doctor_app.admin' in request.endpoint %}active{% endif %}" href="{{ url_for('doctor_app.admin_list') }}">
+                                <i class="bi bi-file-earmark-medical"></i>
+                                <span>Applications</span>
+                                {% if pending_applications is defined and pending_applications > 0 %}
+                                <span class="nav-badge bg-danger">{{ pending_applications }}</span>
+                                {% endif %}
+                            </a>
+                        </li>
+                    </ul>
+                    {% endif %}
+
+                    {% if not current_user.has_permission('review_cases') and not current_user.has_permission('USER_CREATE') %}
+                    <div class="nav-section-label">Account</div>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link {% if 'doctor_app' in request.endpoint %}active{% endif %}" href="{{ url_for('doctor_app.apply') }}">
+                                <i class="bi bi-mortarboard"></i>
+                                <span>Apply as Doctor</span>
+                            </a>
+                        </li>
+                    </ul>
+                    {% endif %}
+
+                {% else %}
+                    <div class="nav-section-label">Access</div>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link {% if 'auth.login' in request.endpoint %}active{% endif %}" href="{{ url_for('auth.login') }}">
+                                <i class="bi bi-box-arrow-in-right"></i>
+                                <span>Login</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if 'auth.register' in request.endpoint %}active{% endif %}" href="{{ url_for('auth.register') }}">
+                                <i class="bi bi-person-plus"></i>
+                                <span>Register</span>
+                            </a>
+                        </li>
+                    </ul>
+                {% endif %}
+            </nav>
+        </aside>
+        {% endblock %}
+
+        <!-- Main wrapper (navbar + content) -->
+        <div class="app-main">
+            <!-- Top Navbar: fixed -->
+            <header class="app-navbar">
+                <div class="navbar-left">
+                    <button class="sidebar-toggle d-md-none" id="sidebarToggle">
+                        <i class="bi bi-list"></i>
+                    </button>
+                    <div class="page-info">
+                        <h1 class="page-title">{% block page_title %}{% endblock %}</h1>
+                        <p class="page-subtitle">{% block page_subtitle %}{% endblock %}</p>
+                    </div>
                 </div>
 
+                {% block page_header_content %}
+                {% if current_user.is_authenticated %}
+                <div class="navbar-right">
+                    <a href="{{ url_for('notifications.index') }}" class="navbar-icon {% if 'notifications' in request.endpoint %}active{% endif %}" title="Notifications">
+                        <i class="bi bi-bell"></i>
+                        {% if notif_count is defined and notif_count > 0 %}
+                        <span class="icon-badge">{{ notif_count }}</span>
+                        {% endif %}
+                    </a>
+                    <div class="navbar-divider"></div>
+                    <a href="{{ url_for('tbl_users.profile') }}" class="navbar-user">
+                        <div class="user-avatar">{{ current_user.username[0] | upper }}</div>
+                        <div class="user-info d-none d-sm-block">
+                            <span class="user-name">{{ current_user.full_name }}</span>
+                            <span class="user-role">{{ current_user.roles[0].name if current_user.roles else 'User' }}</span>
+                        </div>
+                    </a>
+                    <a href="#" class="navbar-icon text-danger" title="Logout"
+                       data-bs-toggle="modal" data-bs-target="#logoutConfirmModal">
+                        <i class="bi bi-box-arrow-right"></i>
+                    </a>
+                </div>
+                {% endif %}
+                {% endblock %}
+            </header>
+
+            <!-- Page Content: scrollable -->
+            <div class="app-content">
                 {% with messages = get_flashed_messages(with_categories=true) %}
                   {% if messages %}
                     {% for category, message in messages %}
@@ -175,29 +249,60 @@
                 {% endwith %}
 
                 {% block content %}{% endblock %}
-            </main>
+            </div>
         </div>
     </div>
 
-    <!-- Footer -->
-    {% block footer %}
-    <!-- Footer removed as requested -->
-    {% endblock %}
+    <!-- Sidebar overlay for mobile -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-    <!-- Mobile Menu Toggle Button (Visible only on small screens) -->
-    {% block mobile_nav_toggle %}
-    <button class="btn btn-primary d-md-none position-fixed bottom-0 end-0 m-3 rounded-circle shadow-lg"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#sidebarMenu"
-            aria-controls="sidebarMenu"
-            aria-expanded="false"
-            aria-label="Toggle navigation"
-            style="width: 56px; height: 56px; z-index: 1060;">
-        <i class="bi bi-list fs-4"></i>
-    </button>
-    {% endblock %}
+    <!-- Logout confirmation modal -->
+    {% if current_user.is_authenticated %}
+    <div class="modal fade" id="logoutConfirmModal" tabindex="-1" aria-labelledby="logoutConfirmLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="logoutConfirmLabel">
+                        <i class="bi bi-box-arrow-right text-danger me-2"></i>Log out
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to log out?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        Cancel
+                    </button>
+                    <a href="{{ url_for('auth.logout') }}" class="btn btn-danger">
+                        <i class="bi bi-box-arrow-right me-1"></i>Log out
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+        // Sidebar toggle for mobile
+        const toggle = document.getElementById('sidebarToggle');
+        const sidebar = document.getElementById('sidebarMenu');
+        const overlay = document.getElementById('sidebarOverlay');
+        if (toggle) {
+            toggle.addEventListener('click', () => {
+                sidebar.classList.toggle('open');
+                overlay.classList.toggle('active');
+            });
+        }
+        if (overlay) {
+            overlay.addEventListener('click', () => {
+                sidebar.classList.remove('open');
+                overlay.classList.remove('active');
+            });
+        }
+    </script>
+    {% block extra_scripts %}{% endblock %}
 </body>
 </html>

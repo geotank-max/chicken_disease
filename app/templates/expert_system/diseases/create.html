@@ -1,45 +1,64 @@
 {% extends "layouts/base.html" %}
-{% block title %}បង្កើតជំងឺ{% endblock %}
+{% block title %}Create Disease{% endblock %}
+{% block page_title %}Create Disease{% endblock %}
 
 {% block content %}
-<div class="card p-4">
-    <h4 class="mb-3">បង្កើតជំងឺ</h4>
+<div class="card border-0 shadow-sm p-4">
     <form method="post">
         {{ form.hidden_tag() }}
-        <div class="mb-3">
-            {{ form.name.label(class="form-label") }}
-            {{ form.name(class="form-control") }}
-            {% if form.name.errors %}
-            <div class="text-danger small">
-                {% for error in form.name.errors %}<div>{{ error }}</div>{% endfor %}
+
+        {% if form.errors %}
+        <div class="alert alert-danger alert-dismissible fade show mb-4">
+            <strong>Validation errors:</strong>
+            <ul class="mb-0 mt-1">
+            {% for field, errors in form.errors.items() %}
+                {% for error in errors %}
+                <li>{{ form[field].label.text }}: {{ error }}</li>
+                {% endfor %}
+            {% endfor %}
+            </ul>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endif %}
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                {{ form.name.label(class="form-label fw-bold") }}
+                {{ form.name(class="form-control" + (" is-invalid" if form.name.errors else "")) }}
+                {% if form.name.errors %}<div class="invalid-feedback">{{ form.name.errors[0] }}</div>{% endif %}
             </div>
-            {% endif %}
-        </div>
-        <div class="mb-3">
-            {{ form.category_id.label(class="form-label") }}
-            {{ form.category_id(class="form-select") }}
-        </div>
-        <div class="mb-3">
-            {{ form.description.label(class="form-label") }}
-            {{ form.description(class="form-control", rows=3) }}
-            {% if form.description.errors %}
-            <div class="text-danger small">
-                {% for error in form.description.errors %}<div>{{ error }}</div>{% endfor %}
+            <div class="col-md-6">
+                {{ form.category_id.label(class="form-label fw-bold") }}
+                {{ form.category_id(class="form-select") }}
             </div>
-            {% endif %}
-        </div>
-        <div class="mb-3">
-            {{ form.treatment.label(class="form-label") }}
-            {{ form.treatment(class="form-control", rows=3) }}
-            {% if form.treatment.errors %}
-            <div class="text-danger small">
-                {% for error in form.treatment.errors %}<div>{{ error }}</div>{% endfor %}
+            <div class="col-12">
+                {{ form.description.label(class="form-label fw-bold") }}
+                {{ form.description(class="form-control" + (" is-invalid" if form.description.errors else ""), rows=3) }}
+                {% if form.description.errors %}<div class="invalid-feedback">{{ form.description.errors[0] }}</div>{% endif %}
             </div>
-            {% endif %}
+            <div class="col-md-6">
+                {{ form.treatment.label(class="form-label fw-bold") }}
+                {{ form.treatment(class="form-control" + (" is-invalid" if form.treatment.errors else ""), rows=3) }}
+                {% if form.treatment.errors %}<div class="invalid-feedback">{{ form.treatment.errors[0] }}</div>{% endif %}
+            </div>
+            <div class="col-md-6">
+                {{ form.prevention.label(class="form-label fw-bold") }}
+                {{ form.prevention(class="form-control", rows=3) }}
+            </div>
+            <div class="col-md-4">
+                {{ form.severity.label(class="form-label fw-bold") }}
+                {{ form.severity(class="form-select") }}
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+                <div class="form-check mb-2">
+                    {{ form.is_contagious(class="form-check-input") }}
+                    {{ form.is_contagious.label(class="form-check-label fw-bold") }}
+                </div>
+            </div>
         </div>
-        <div class="d-flex gap-2">
+        <div class="d-flex gap-2 mt-4">
             {{ form.submit(class="btn btn-brand") }}
-            <a href="{{ url_for('expert_system.diseases_index') }}" class="btn btn-secondary">បោះបង់</a>
+            <a href="{{ url_for('expert_system.diseases_index') }}" class="btn btn-secondary">Cancel</a>
         </div>
     </form>
 </div>

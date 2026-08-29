@@ -1,98 +1,845 @@
 {% extends "layouts/base.html" %}
 
-{% block title %}ព័ត៌មានលម្អិតនៃការធ្វើរោគវិនិច្ឆ័យ{% endblock %}
+{% block title %}ព័ត៌មានលម្អិត{% endblock %}
 {% block page_title %}របាយការណ៍រោគវិនិច្ឆ័យ{% endblock %}
-{% block page_subtitle %}ទិដ្ឋភាពលម្អិតនៃករណី #{{ case.id }}{% endblock %}
+{% block page_subtitle %}ករណី #{{ case.id }} • {{ case.status_label_km }}{% endblock %}
+
+{% block extra_styles %}
+<style>
+    /* ── Treatment progress: segmented numbered stepper ── */
+    .treatment-stepper {
+        align-items: flex-start;
+        display: flex;
+        gap: 0;
+        margin: 0.25rem 0 1.1rem;
+    }
+
+    .treatment-stepper .tstep-node {
+        display: flex;
+        flex: 1 1 0;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+        text-align: center;
+    }
+
+    /* connector line drawn to the LEFT of every node except the first */
+    .treatment-stepper .tstep-node::before {
+        background: #e3e8ef;
+        content: "";
+        height: 4px;
+        left: -50%;
+        position: absolute;
+        right: 50%;
+        top: 0.9rem;
+        z-index: 0;
+    }
+
+    .treatment-stepper .tstep-node:first-child::before {
+        display: none;
+    }
+
+    /* filled connector when the step is completed */
+    .treatment-stepper .tstep-node.is-done::before,
+    .treatment-stepper .tstep-node.is-current::before {
+        background: #22c55e;
+    }
+
+    .treatment-stepper .tstep-dot {
+        align-items: center;
+        background: #fff;
+        border: 2px solid #d6dde6;
+        border-radius: 50%;
+        color: #94a3b8;
+        display: inline-flex;
+        font-size: 0.85rem;
+        font-weight: 700;
+        height: 1.85rem;
+        justify-content: center;
+        position: relative;
+        transition: all 0.2s ease;
+        width: 1.85rem;
+        z-index: 1;
+    }
+
+    .treatment-stepper .tstep-node.is-current .tstep-dot {
+        border-color: #22c55e;
+        box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.15);
+        color: #16a34a;
+    }
+
+    .treatment-stepper .tstep-node.is-done .tstep-dot {
+        background: #22c55e;
+        border-color: #22c55e;
+        color: #fff;
+    }
+
+    .treatment-stepper .tstep-caption {
+        color: #94a3b8;
+        font-size: 0.72rem;
+        font-weight: 600;
+        margin-top: 0.35rem;
+        max-width: 8rem;
+    }
+
+    .treatment-stepper .tstep-node.is-done .tstep-caption,
+    .treatment-stepper .tstep-node.is-current .tstep-caption {
+        color: #475569;
+    }
+
+    /* ── Treatment checklist: convenient clickable rows ── */
+    .treatment-checklist .treatment-step {
+        align-items: center;
+        border: 1px solid #e5e9f0;
+        border-radius: 0.7rem;
+        cursor: pointer;
+        gap: 0.75rem;
+        padding: 0.7rem 0.85rem;
+        transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+        user-select: none;
+    }
+
+    .treatment-checklist .treatment-step:hover {
+        border-color: #22c55e;
+        box-shadow: 0 2px 8px rgba(34, 197, 94, 0.1);
+    }
+
+    .treatment-checklist .treatment-step.is-done {
+        background: #f0fdf4;
+        border-color: #bbf7d0;
+    }
+
+    .treatment-checklist .treatment-step-check {
+        border-color: #cbd5e1;
+        cursor: pointer;
+        flex: 0 0 auto;
+        height: 1.35rem;
+        margin-top: 0;
+        width: 1.35rem;
+    }
+
+    .treatment-checklist .treatment-step-check:checked {
+        background-color: #22c55e;
+        border-color: #22c55e;
+    }
+
+    .treatment-checklist .treatment-step-check:focus {
+        box-shadow: 0 0 0 0.2rem rgba(34, 197, 94, 0.2);
+    }
+
+    .treatment-checklist .tstep-index {
+        align-items: center;
+        background: #eef2f7;
+        border-radius: 0.5rem;
+        color: #64748b;
+        display: inline-flex;
+        flex: 0 0 auto;
+        font-size: 0.8rem;
+        font-weight: 700;
+        height: 1.6rem;
+        justify-content: center;
+        width: 1.6rem;
+    }
+
+    .treatment-checklist .treatment-step.is-done .tstep-index {
+        background: #dcfce7;
+        color: #16a34a;
+    }
+
+    .treatment-checklist .form-check-label {
+        cursor: pointer;
+        flex: 1 1 auto;
+        line-height: 1.35;
+    }
+
+    .treatment-checklist .treatment-step-check:disabled,
+    .treatment-checklist .treatment-step-check:disabled ~ * {
+        cursor: default;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-lg-10">
-        <div class="mb-3">
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
             <a href="{{ url_for('expert_system.cases_index') }}" class="text-decoration-none text-muted">
                 <i class="bi bi-arrow-left me-1"></i> ត្រឡប់ទៅប្រវត្តិ
             </a>
+            <div class="d-flex gap-2">
+                <a href="{{ url_for('expert_system.cases_print', case_id=case.id) }}" target="_blank" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-printer me-1"></i> បោះពុម្ព
+                </a>
+                <a href="{{ url_for('expert_system.cases_pdf', case_id=case.id) }}" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-file-pdf me-1"></i> PDF
+                </a>
+            </div>
         </div>
 
-        <div class="card border-0 shadow-sm overflow-hidden">
-            <!-- Header Section -->
+        <div class="card border-0 shadow-sm overflow-hidden mb-4">
             <div class="card-header bg-white border-bottom p-4">
-                <div class="d-flex justify-content-between align-items-start">
+                <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
                     <div>
+                        <span class="badge rounded-pill status-badge status-{{ case.status }} mb-2">{{ case.status_label_km }}</span>
                         <h5 class="text-uppercase text-muted small fw-bold mb-1">ការធ្វើរោគវិនិច្ឆ័យសម្រាប់</h5>
-                        <h3 class="fw-bold text-dark mb-0">{{ case.disease.name }}</h3>
-                        <span class="badge bg-primary bg-opacity-10 text-primary mt-2">{{ case.disease.category.name }}</span>
+                        <h3 class="fw-bold text-dark mb-0">{{ case.final_disease.name if case.final_disease else 'មិនស្គាល់' }}</h3>
+                        {% if case.final_disease and case.final_disease.category %}
+                        <span class="badge bg-primary bg-opacity-10 text-primary mt-2">{{ case.final_disease.category.name }}</span>
+                        {% endif %}
                     </div>
                     <div class="text-end">
                         <div class="text-uppercase text-muted small fw-bold mb-1">កាលបរិច្ឆេទ</div>
-                        <div class="fw-semibold">{{ case.created_at.strftime('%B %d, %Y') }}</div>
-                        <div class="small text-muted">{{ case.created_at.strftime('%I:%M %p') }}</div>
+                        <div class="fw-semibold">{{ case.created_at.strftime('%d/%m/%Y') }}</div>
+                        <div class="small text-muted">{{ case.created_at.strftime('%H:%M') }}</div>
                     </div>
                 </div>
             </div>
 
             <div class="card-body p-0">
-                <!-- Confidence Meter -->
+                {% if case.confidence is not none %}
                 <div class="bg-light p-4 border-bottom">
                     <div class="d-flex justify-content-between align-items-end mb-2">
                         <span class="fw-bold text-muted text-uppercase small">កម្រិតទំនុកចិត្ត</span>
-                        <span class="fw-bold fs-4 {% if case.confidence > 80 %}text-success{% elif case.confidence > 50 %}text-warning{% else %}text-danger{% endif %}">
-                            {{ case.confidence }}%
-                        </span>
+                        <span class="fw-bold fs-4 {% if case.confidence > 80 %}text-success{% elif case.confidence > 50 %}text-warning{% else %}text-danger{% endif %}">{{ case.confidence }}%</span>
                     </div>
                     <div class="progress" style="height: 8px;">
-                        <div class="progress-bar {% if case.confidence > 80 %}bg-success{% elif case.confidence > 50 %}bg-warning{% else %}bg-danger{% endif %}"
-                             role="progressbar"
-                             style="width: {{ case.confidence }}%"
-                             aria-valuenow="{{ case.confidence }}"
-                             aria-valuemin="0"
-                             aria-valuemax="100"></div>
+                        <div class="progress-bar {% if case.confidence > 80 %}bg-success{% elif case.confidence > 50 %}bg-warning{% else %}bg-danger{% endif %}" style="width: {{ case.confidence }}%"></div>
                     </div>
                 </div>
+                {% endif %}
+
+                {% if case.flock_size or case.bird_age or case.breed or case.location %}
+                <div class="p-4 border-bottom">
+                    <h6 class="fw-bold text-uppercase text-muted small mb-3"><i class="bi bi-house-heart me-2"></i>ព័ត៌មានចំការ</h6>
+                    <div class="row g-2 small">
+                        {% if case.flock_size %}<div class="col-md-3"><strong>ចំនួន:</strong> {{ case.flock_size }}</div>{% endif %}
+                        {% if case.bird_age %}<div class="col-md-3"><strong>អាយុ:</strong> {{ case.bird_age }}</div>{% endif %}
+                        {% if case.breed %}<div class="col-md-3"><strong>ប្រភេទ:</strong> {{ case.breed }}</div>{% endif %}
+                        {% if case.location %}<div class="col-md-3"><strong>ទីតាំង:</strong> {{ case.location }}</div>{% endif %}
+                    </div>
+                    {% if case.notes %}<p class="small text-muted mt-2 mb-0">{{ case.notes }}</p>{% endif %}
+                </div>
+                {% endif %}
+
+                {% if case.has_extended_context %}
+                <div class="p-4 border-bottom">
+                    <h6 class="fw-bold text-uppercase text-muted small mb-3"><i class="bi bi-clipboard-pulse me-2"></i>ព័ត៌មានសុខភាព និងហានិភ័យ</h6>
+                    <div class="row g-2 small">
+                        {% if case.sick_bird_count is not none %}<div class="col-6 col-md-4"><strong>មាន់ឈឺ:</strong> {{ case.sick_bird_count }}</div>{% endif %}
+                        {% if case.dead_bird_count is not none %}<div class="col-6 col-md-4"><strong>មាន់ស្លាប់:</strong> {{ case.dead_bird_count }}</div>{% endif %}
+                        {% if case.symptom_duration %}<div class="col-6 col-md-4"><strong>រយៈពេលរោគសញ្ញា:</strong> {{ case.symptom_duration }}</div>{% endif %}
+                        {% if case.vaccination_status %}<div class="col-6 col-md-4"><strong>វ៉ាក់សាំង:</strong> {{ case.vaccination_status_label_km }}</div>{% endif %}
+                        {% if case.egg_production_drop is not none %}<div class="col-6 col-md-4"><strong>ពងធ្លាក់ចុះ:</strong> {{ case.egg_production_drop }}%</div>{% endif %}
+                        {% if case.coop_condition %}<div class="col-6 col-md-4"><strong>លក្ខខណ្ឌទ្រុង:</strong> {{ case.coop_condition_label_km }}</div>{% endif %}
+                        {% if case.appetite_level %}<div class="col-6 col-md-4"><strong>ការស៊ី:</strong> {{ case.appetite_level_label_km }}</div>{% endif %}
+                        {% if case.water_intake_level %}<div class="col-6 col-md-4"><strong>ការផឹកទឹក:</strong> {{ case.water_intake_level_label_km }}</div>{% endif %}
+                        {% if case.feed_or_water_changed %}<div class="col-6 col-md-4"><strong>ប្តូរចំណី/ទឹក:</strong> {{ case.feed_or_water_changed_label_km }}</div>{% endif %}
+                        {% if case.new_birds_added %}<div class="col-6 col-md-4"><strong>បន្ថែមមាន់ថ្មី:</strong> {{ case.new_birds_added_label_km }}</div>{% endif %}
+                        {% if case.nearby_farms_sick %}<div class="col-6 col-md-4"><strong>ចំការជិតខាងឈឺ:</strong> {{ case.nearby_farms_sick_label_km }}</div>{% endif %}
+                    </div>
+                </div>
+                {% endif %}
 
                 <div class="row g-0">
-                    <!-- Left Column: Disease Info -->
                     <div class="col-md-7 p-4 border-end">
+                        {% if case.final_disease %}
                         <div class="mb-4">
-                            <h6 class="fw-bold text-uppercase text-muted small mb-3">
-                                <i class="bi bi-info-circle me-2"></i>ការពិពណ៌នា
-                            </h6>
-                            <p class="text-secondary">{{ case.disease.description }}</p>
+                            <h6 class="fw-bold text-uppercase text-muted small mb-2">ការពិពណ៌នា</h6>
+                            <p class="text-secondary mb-0">{{ case.final_disease.description }}</p>
                         </div>
-
-                        <div>
-                            <h6 class="fw-bold text-uppercase text-muted small mb-3">
-                                <i class="bi bi-bandaid me-2"></i>ការព្យាបាលដែលបានណែនាំ
-                            </h6>
-                            <div class="p-3 bg-success bg-opacity-10 rounded border border-success border-opacity-10">
-                                <p class="mb-0 text-dark">{{ case.disease.treatment }}</p>
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="fw-bold text-uppercase text-muted small mb-0">ការព្យាបាល</h6>
+                                {% set tp = case.treatment_progress %}
+                                {% if tp.total %}
+                                <span class="small fw-bold text-success" id="treatmentProgressLabel">{{ tp.done }}/{{ tp.total }}</span>
+                                {% endif %}
                             </div>
-                        </div>
-                    </div>
+                            {% set steps = case.treatment_steps %}
+                            {% if steps %}
+                            {% set owner = case.user_id == current_user.id %}
+                            <div class="p-3 bg-success bg-opacity-10 rounded border border-success border-opacity-10">
+                                {# Segmented, numbered progress stepper #}
+                                <div class="treatment-stepper" id="treatmentStepper" role="progressbar"
+                                     aria-valuemin="0" aria-valuemax="{{ tp.total }}" aria-valuenow="{{ tp.done }}">
+                                    {% for step in steps %}
+                                    <div class="tstep-node {% if step.done %}is-done{% endif %}"
+                                         data-step-key="{{ step.key }}">
+                                        <span class="tstep-dot">
+                                            {% if step.done %}<i class="bi bi-check-lg"></i>{% else %}{{ loop.index }}{% endif %}
+                                        </span>
+                                        <span class="tstep-caption text-truncate">{{ step.text }}</span>
+                                    </div>
+                                    {% endfor %}
+                                </div>
 
-                    <!-- Right Column: Symptoms Observed -->
+                                <div class="treatment-checklist d-flex flex-column gap-2"
+                                     data-case-id="{{ case.id }}"
+                                     data-toggle-url="{{ url_for('expert_system.cases_treatment_step', case_id=case.id) }}"
+                                     data-can-edit="{{ '1' if owner else '0' }}">
+                                    {% for step in steps %}
+                                    <label class="form-check treatment-step {% if step.done %}is-done{% endif %} m-0">
+                                        <span class="tstep-index">{{ loop.index }}</span>
+                                        <input class="form-check-input treatment-step-check" type="checkbox"
+                                               id="tstep-{{ step.key }}"
+                                               data-step-key="{{ step.key }}"
+                                               {% if step.done %}checked{% endif %}
+                                               {% if not owner %}disabled{% endif %}>
+                                        <span class="form-check-label {% if step.done %}text-decoration-line-through text-muted{% endif %}">
+                                            {{ step.text }}
+                                            {% if step.note %}<span class="d-block small text-muted fst-italic">{{ step.note }}</span>{% endif %}
+                                        </span>
+                                    </label>
+                                    {% endfor %}
+                                </div>
+                                {% if not owner %}
+                                <p class="small text-muted mb-0 mt-2"><i class="bi bi-info-circle me-1"></i>មានតែម្ចាស់ករណីទេដែលអាចធីកជំហានបាន។</p>
+                                {% endif %}
+                            </div>
+                            {% else %}
+                            <div class="p-3 bg-success bg-opacity-10 rounded border border-success border-opacity-10">
+                                <p class="mb-0">{{ case.final_disease.treatment }}</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% if case.final_disease.prevention %}
+                        <div>
+                            <h6 class="fw-bold text-uppercase text-muted small mb-2">ការការពារ</h6>
+                            <p class="text-secondary mb-0">{{ case.final_disease.prevention }}</p>
+                        </div>
+                        {% endif %}
+                        {% endif %}
+                    </div>
                     <div class="col-md-5 p-4 bg-light">
-                        <h6 class="fw-bold text-uppercase text-muted small mb-3">
-                            <i class="bi bi-clipboard-check me-2"></i>រោគសញ្ញាដែលបានសង្កេត
-                        </h6>
+                        <h6 class="fw-bold text-uppercase text-muted small mb-3">រោគសញ្ញាដែលបានសង្កេត</h6>
                         <div class="d-flex flex-column gap-2">
                             {% for symptom in case.symptoms %}
                             <div class="d-flex align-items-center bg-white p-2 rounded border shadow-sm">
-                                <i class="bi bi-check-circle-fill text-primary me-2 ms-1"></i>
+                                <i class="bi bi-check-circle-fill text-primary me-2"></i>
                                 <span class="fw-medium">{{ symptom.name }}</span>
                             </div>
                             {% endfor %}
                         </div>
                     </div>
                 </div>
+
+                {% if case.reviewed_by %}
+                <div class="p-4 border-top bg-light">
+                    <h6 class="fw-bold text-uppercase text-muted small mb-2">ការពិនិត្យដោយវេជ្ជបណ្ឌិត</h6>
+                    <p class="small mb-1"><strong>{{ case.reviewed_by.full_name }}</strong> • {{ case.reviewed_at.strftime('%d/%m/%Y %H:%M') if case.reviewed_at else '' }}</p>
+                    {% if case.doctor_notes %}<p class="mb-0">{{ case.doctor_notes }}</p>{% endif %}
+                </div>
+                {% endif %}
+
+                {# ── Symptom photos ──────────────────────────────────────── #}
+                {% if case.photos %}
+                {% set photos_by_cat = {} %}
+                {% for photo in case.photos %}
+                    {% if photo.category not in photos_by_cat %}
+                        {% set _ = photos_by_cat.update({photo.category: []}) %}
+                    {% endif %}
+                    {% set _ = photos_by_cat[photo.category].append(photo) %}
+                {% endfor %}
+
+                {# Category meta: icon, bg colour, text colour #}
+                {% set cat_meta = {
+                    'droppings':  ('bi-droplet-half',    'bg-warning bg-opacity-10',  'text-warning',  '#f0a500'),
+                    'eyes':       ('bi-eye',              'bg-info bg-opacity-10',     'text-info',     '#0dcaf0'),
+                    'comb':       ('bi-activity',         'bg-danger bg-opacity-10',   'text-danger',   '#dc3545'),
+                    'skin':       ('bi-bandaid',          'bg-danger bg-opacity-10',   'text-danger',   '#dc3545'),
+                    'dead_birds': ('bi-heartbreak',       'bg-dark bg-opacity-10',     'text-dark',     '#212529'),
+                    'coop':       ('bi-house-door',       'bg-success bg-opacity-10',  'text-success',  '#198754'),
+                    'other':      ('bi-images',           'bg-secondary bg-opacity-10','text-secondary','#6c757d')
+                } %}
+
+                {% set first_photo = case.photos[0] %}
+                <section class="case-photo-gallery border-top">
+                    <div class="px-4 pt-4 pb-3 d-flex flex-wrap align-items-center justify-content-between gap-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="gallery-section-icon">
+                                <i class="bi bi-camera2"></i>
+                            </div>
+                            <div>
+                                <div class="fw-bold text-dark">រូបភាពសញ្ញានៃជំងឺ</div>
+                                <div class="small text-muted">{{ case.photos|length }} រូបភាព · {{ photos_by_cat|length }} ប្រភេទ</div>
+                            </div>
+                        </div>
+                        <div class="photo-filter-pills">
+                            <button type="button" class="photo-filter-pill active" data-filter="all">ទាំងអស់</button>
+                            {% for cat, photos in photos_by_cat.items() %}
+                            {% set meta = cat_meta.get(cat, cat_meta['other']) %}
+                            <button type="button" class="photo-filter-pill" data-filter="{{ cat }}">
+                                <i class="bi {{ meta[0] }}"></i>
+                                {{ photos[0].category_label_km }}
+                            </button>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="px-4 pb-4">
+                        <div class="row g-3 align-items-stretch">
+                            <div class="col-lg-7">
+                                <a href="{{ url_for('expert_system.cases_photo', filename=first_photo.file_path) }}"
+                                   class="case-photo-feature"
+                                   id="featuredPhotoLink"
+                                   data-index="0"
+                                   data-category="{{ first_photo.category }}"
+                                   data-category-label="{{ first_photo.category_label_km }}"
+                                   title="{{ first_photo.original_filename }}">
+                                    <img src="{{ url_for('expert_system.cases_photo', filename=first_photo.file_path) }}"
+                                         alt="{{ first_photo.original_filename }}"
+                                         id="featuredPhotoImg"
+                                         loading="lazy">
+                                    <div class="case-photo-feature-overlay">
+                                        <span id="featuredPhotoCat">{{ first_photo.category_label_km }}</span>
+                                        <strong id="featuredPhotoName">{{ first_photo.original_filename }}</strong>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="col-lg-5">
+                                <div class="case-photo-thumbs" id="casePhotoThumbs">
+                                    {% for photo in case.photos %}
+                                    {% set meta = cat_meta.get(photo.category, cat_meta['other']) %}
+                                    <a href="{{ url_for('expert_system.cases_photo', filename=photo.file_path) }}"
+                                       class="case-photo-thumb photo-thumb-link {% if loop.first %}active{% endif %}"
+                                       data-index="{{ loop.index0 }}"
+                                       data-category="{{ photo.category }}"
+                                       data-category-label="{{ photo.category_label_km }}"
+                                       title="{{ photo.original_filename }}">
+                                        <img src="{{ url_for('expert_system.cases_photo', filename=photo.file_path) }}"
+                                             alt="{{ photo.original_filename }}"
+                                             loading="lazy">
+                                        <span style="background:{{ meta[3] }};">{{ photo.category_label_km }}</span>
+                                    </a>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if can_review %}
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white py-3">
+                <h5 class="mb-0 fw-bold"><i class="bi bi-patch-check me-2 text-primary"></i>ពិនិត្យករណី</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('expert_system.cases_review', case_id=case.id) }}">
+                    {{ review_form.hidden_tag() }}
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            {{ review_form.action.label(class="form-label fw-bold") }}
+                            {{ review_form.action(class="form-select") }}
+                        </div>
+                        <div class="col-md-8">
+                            {{ review_form.override_disease_id.label(class="form-label fw-bold") }}
+                            {{ review_form.override_disease_id(class="form-select") }}
+                        </div>
+                        <div class="col-12">
+                            {{ review_form.doctor_notes.label(class="form-label fw-bold") }}
+                            {{ review_form.doctor_notes(class="form-control", rows=3) }}
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary mt-3">{{ review_form.submit.label.text }}</button>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+
+        {# ── Follow-up status ──────────────────────────────────────── #}
+        {% if follow_up_available and (case.user_id == current_user.id or is_reviewer) %}
+        {% set fu_labels = {
+            'none': 'មិនទាន់មាន', 'improving': 'កំពុងធូរស្រាល', 'not_improved': 'មិនធូរស្រាល',
+            'recovered': 'ជាសះស្បើយ', 'dead': 'ស្លាប់', 'needs_revisit': 'ត្រូវពិនិត្យឡើងវិញ'
+        } %}
+        <div class="card border-0 shadow-sm mt-4">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold"><i class="bi bi-clipboard-pulse me-2 text-primary"></i>ស្ថានភាពតាមដាន</h5>
+                <span class="badge rounded-pill bg-{{ case.follow_up_color }}">{{ case.follow_up_label_km }}</span>
+            </div>
+            <div class="card-body">
+                {% if case.follow_up_updated_at %}
+                <p class="small text-muted mb-3">ធ្វើបច្ចុប្បន្នភាពចុងក្រោយ៖ {{ case.follow_up_updated_at.strftime('%d/%m/%Y %H:%M') }}</p>
+                {% endif %}
+                <form method="POST" action="{{ url_for('expert_system.cases_follow_up', case_id=case.id) }}" class="row g-2 align-items-end">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="col-sm-8">
+                        <label class="form-label fw-bold small text-muted">តើសុខភាពមាន់ប្រែប្រួលយ៉ាងណា?</label>
+                        <select name="follow_up_status" class="form-select">
+                            {% for st in follow_up_statuses %}
+                            <option value="{{ st }}" {% if st == case.follow_up_status %}selected{% endif %}>{{ fu_labels.get(st, st) }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-sm-4">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-check2-circle me-1"></i> រក្សាទុក
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        {# ── Follow-up conversation ────────────────────────────────── #}
+        <div class="card border-0 shadow-sm mt-4">
+            <div class="card-header bg-white py-3">
+                <h5 class="mb-0 fw-bold"><i class="bi bi-chat-dots me-2 text-primary"></i>ការសន្ទនាតាមដាន</h5>
+            </div>
+            <div class="card-body">
+                {% if case.messages %}
+                <div class="d-flex flex-column gap-3 mb-4">
+                    {% for msg in case.messages %}
+                    {% set mine = msg.author_id == current_user.id %}
+                    <div class="d-flex {% if mine %}justify-content-end{% endif %}">
+                        <div class="p-3 rounded-3 {% if msg.is_doctor %}bg-primary bg-opacity-10 border border-primary border-opacity-10{% else %}bg-light border{% endif %}" style="max-width: 80%;">
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <span class="fw-bold small">
+                                    {% if msg.is_doctor %}<i class="bi bi-patch-check-fill text-primary"></i> {% endif %}
+                                    {{ msg.author.full_name if msg.author else 'អ្នកប្រើ' }}
+                                </span>
+                                {% if msg.is_doctor %}<span class="badge bg-primary">វេជ្ជបណ្ឌិត</span>{% endif %}
+                                <span class="text-muted small ms-auto">{{ msg.created_at.strftime('%d/%m/%Y %H:%M') }}</span>
+                            </div>
+                            <div class="mb-0" style="white-space: pre-wrap;">{{ msg.body }}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted text-center py-3 mb-3"><i class="bi bi-chat-square-text me-1"></i> មិនទាន់មានសារនៅឡើយទេ។ ចាប់ផ្តើមការសន្ទនា។</p>
+                {% endif %}
+
+                {% if case.user_id == current_user.id or is_reviewer %}
+                <form method="POST" action="{{ url_for('expert_system.cases_message', case_id=case.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="mb-2">
+                        <textarea name="body" class="form-control" rows="2" maxlength="2000"
+                                  placeholder="{% if is_reviewer %}សរសេរមតិ ឬសំណួរបន្ថែម...{% else %}សួរសំណួរបន្ថែមទៅវេជ្ជបណ្ឌិត...{% endif %}" required></textarea>
+                    </div>
+                    <div class="text-end">
+                        <button type="submit" class="btn btn-primary btn-sm px-4">
+                            <i class="bi bi-send me-1"></i> ផ្ញើ
+                        </button>
+                    </div>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Feedback Section -->
+        {% if case.user_id == current_user.id %}
+        <div class="card border-0 shadow-sm mt-4">
+            <div class="card-header bg-white py-3">
+                <h5 class="mb-0 fw-bold"><i class="bi bi-chat-heart me-2 text-success"></i>មតិប្រតិកម្ម</h5>
+            </div>
+            <div class="card-body">
+                {% if case.feedback_rating %}
+                <div class="text-center py-3">
+                    <div class="mb-2">
+                        {% for i in range(1, 6) %}
+                        <i class="bi bi-star-fill fs-4 {% if i <= case.feedback_rating %}text-warning{% else %}text-muted opacity-25{% endif %}"></i>
+                        {% endfor %}
+                    </div>
+                    <p class="fw-bold text-muted mb-1">អ្នកបានវាយតម្លៃ: {{ case.feedback_rating }}/5</p>
+                    {% if case.feedback_text %}
+                    <p class="text-secondary mb-0">"{{ case.feedback_text }}"</p>
+                    {% endif %}
+                    <small class="text-muted">{{ case.feedback_at.strftime('%d/%m/%Y %H:%M') if case.feedback_at else '' }}</small>
+                </div>
+                {% else %}
+                <form method="POST" action="{{ url_for('expert_system.cases_feedback', case_id=case.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <p class="text-muted mb-3">តើការវិនិច្ឆ័យនេះមានប្រយោជន៍សម្រាប់អ្នកដែរឬទេ?</p>
+                    <div class="mb-3">
+                        <div class="star-rating d-flex gap-1 justify-content-center mb-2" id="starRating">
+                            {% for i in range(1, 6) %}
+                            <label class="star-label" data-value="{{ i }}" style="cursor: pointer;">
+                                <i class="bi bi-star fs-3 text-muted" id="star-{{ i }}"></i>
+                            </label>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" name="rating" id="ratingInput" value="0">
+                    </div>
+                    <div class="mb-3">
+                        <textarea name="feedback_text" class="form-control" rows="2" placeholder="មតិបន្ថែម (ស្រេចចិត្ត)..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-success btn-sm px-4" id="feedbackSubmit" disabled>
+                        <i class="bi bi-send me-1"></i> ផ្ញើមតិប្រតិកម្ម
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+        {% elif (current_user.has_role('Admin') or current_user.has_role('Doctor')) and case.feedback_rating %}
+        <div class="card border-0 shadow-sm mt-4">
+            <div class="card-header bg-white py-3">
+                <h5 class="mb-0 fw-bold"><i class="bi bi-chat-heart me-2 text-success"></i>មតិប្រតិកម្មអ្នកប្រើ</h5>
+            </div>
+            <div class="card-body text-center py-3">
+                <div class="mb-2">
+                    {% for i in range(1, 6) %}
+                    <i class="bi bi-star-fill fs-4 {% if i <= case.feedback_rating %}text-warning{% else %}text-muted opacity-25{% endif %}"></i>
+                    {% endfor %}
+                </div>
+                <p class="fw-bold text-muted mb-1">{{ case.feedback_rating }}/5</p>
+                {% if case.feedback_text %}
+                <p class="text-secondary mb-0">"{{ case.feedback_text }}"</p>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+
+    // ── Treatment checklist ─────────────────────────────────────
+    const checklist = document.querySelector('.treatment-checklist');
+    if (checklist && checklist.dataset.canEdit === '1') {
+        const toggleUrl = checklist.dataset.toggleUrl;
+        const csrf = document.querySelector('meta[name="csrf-token"]')?.content
+                     || (document.querySelector('input[name="csrf_token"]')?.value || '');
+        const stepper = document.getElementById('treatmentStepper');
+        const label = document.getElementById('treatmentProgressLabel');
+
+        checklist.querySelectorAll('.treatment-step-check').forEach(box => {
+            box.addEventListener('change', async () => {
+                const stepKey = box.dataset.stepKey;
+                const done = box.checked;
+                box.disabled = true;
+                try {
+                    const res = await fetch(toggleUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRFToken': csrf,
+                        },
+                        body: JSON.stringify({ step_key: stepKey, done: done }),
+                    });
+                    const data = await res.json();
+                    if (!res.ok || !data.ok) throw new Error('toggle failed');
+
+                    // Update the checklist row's visual done-state
+                    const row = box.closest('.treatment-step');
+                    const lbl = row ? row.querySelector('.form-check-label') : null;
+                    if (row) row.classList.toggle('is-done', done);
+                    if (lbl) {
+                        lbl.classList.toggle('text-decoration-line-through', done);
+                        lbl.classList.toggle('text-muted', done);
+                    }
+
+                    // Update the matching stepper node (dot fill + check icon)
+                    if (stepper) {
+                        const node = stepper.querySelector('.tstep-node[data-step-key="' + stepKey + '"]');
+                        if (node) {
+                            node.classList.toggle('is-done', done);
+                            const dot = node.querySelector('.tstep-dot');
+                            if (dot) {
+                                if (done) {
+                                    dot.innerHTML = '<i class="bi bi-check-lg"></i>';
+                                } else {
+                                    // restore the step's ordinal number
+                                    const nodes = Array.from(stepper.querySelectorAll('.tstep-node'));
+                                    dot.textContent = String(nodes.indexOf(node) + 1);
+                                }
+                            }
+                        }
+                    }
+
+                    // Update the "done/total" counter + ARIA
+                    if (label && data.progress) label.textContent = data.progress.done + '/' + data.progress.total;
+                    if (stepper && data.progress) stepper.setAttribute('aria-valuenow', data.progress.done);
+                } catch (err) {
+                    box.checked = !done; // revert on failure
+                } finally {
+                    box.disabled = false;
+                }
+            });
+        });
+    }
+
+    // ── Star-rating ─────────────────────────────────────────────
+    const stars     = document.querySelectorAll('.star-label');
+    const ratingInput = document.getElementById('ratingInput');
+    const submitBtn   = document.getElementById('feedbackSubmit');
+
+    if (stars.length) {
+        stars.forEach(star => {
+            star.addEventListener('mouseenter', () => highlightStars(+star.dataset.value));
+            star.addEventListener('mouseleave', () => highlightStars(+(ratingInput?.value || 0)));
+            star.addEventListener('click', () => {
+                const v = +star.dataset.value;
+                if (ratingInput) ratingInput.value = v;
+                highlightStars(v);
+                if (submitBtn) submitBtn.disabled = false;
+            });
+        });
+    }
+    function highlightStars(n) {
+        for (let i = 1; i <= 5; i++) {
+            const ic = document.getElementById('star-' + i);
+            if (ic) ic.className = i <= n ? 'bi bi-star-fill fs-3 text-warning' : 'bi bi-star fs-3 text-muted';
+        }
+    }
+
+    // ── Case photo gallery ───────────────────────────────────────
+    const thumbLinks = Array.from(document.querySelectorAll('.case-photo-thumb'));
+    const featuredLink = document.getElementById('featuredPhotoLink');
+    const featuredImg = document.getElementById('featuredPhotoImg');
+    const featuredCat = document.getElementById('featuredPhotoCat');
+    const featuredName = document.getElementById('featuredPhotoName');
+    const filterPills = Array.from(document.querySelectorAll('.photo-filter-pill'));
+    let currentIdx = 0;
+
+    function selectPhoto(idx) {
+        const link = thumbLinks[idx];
+        if (!link || !featuredLink || !featuredImg) return;
+
+        currentIdx = idx;
+        featuredLink.href = link.href;
+        featuredLink.dataset.index = idx;
+        featuredLink.dataset.category = link.dataset.category || '';
+        featuredLink.dataset.categoryLabel = link.dataset.categoryLabel || '';
+        featuredLink.title = link.title || '';
+        featuredImg.src = link.href;
+        featuredImg.alt = link.title || '';
+        if (featuredCat) featuredCat.textContent = link.dataset.categoryLabel || '';
+        if (featuredName) featuredName.textContent = link.title || '';
+
+        thumbLinks.forEach(item => item.classList.remove('active'));
+        link.classList.add('active');
+    }
+
+    filterPills.forEach(pill => {
+        pill.addEventListener('click', () => {
+            const target = pill.dataset.filter;
+            filterPills.forEach(item => item.classList.remove('active'));
+            pill.classList.add('active');
+
+            let firstVisible = null;
+            thumbLinks.forEach((link, idx) => {
+                const visible = target === 'all' || link.dataset.category === target;
+                link.classList.toggle('d-none', !visible);
+                if (visible && firstVisible === null) firstVisible = idx;
+            });
+            if (firstVisible !== null) selectPhoto(firstVisible);
+        });
+    });
+
+    // ── Lightbox ─────────────────────────────────────────────────
+    const lbModal   = document.getElementById('photoLightbox');
+    if (!lbModal) return;
+
+    const lbImg     = document.getElementById('lbImg');
+    const lbName    = document.getElementById('lbName');
+    const lbCounter = document.getElementById('lbCounter');
+    const lbCat     = document.getElementById('lbCat');
+    const lbPrev    = document.getElementById('lbPrev');
+    const lbNext    = document.getElementById('lbNext');
+
+    let bsModal = null;
+
+    function openAt(idx) {
+        const link = thumbLinks[idx];
+        if (!link) return;
+        currentIdx = idx;
+        selectPhoto(idx);
+        lbImg.style.opacity = '0';
+        lbImg.src = link.href;
+        lbImg.onload = () => { lbImg.style.opacity = '1'; };
+        lbName.textContent = link.title || '';
+        lbCat.textContent = link.dataset.categoryLabel || '';
+        lbCounter.textContent = (idx + 1) + ' / ' + thumbLinks.length;
+        lbPrev.disabled = idx === 0;
+        lbNext.disabled = idx === thumbLinks.length - 1;
+    }
+
+    thumbLinks.forEach((link, i) => {
+        link.addEventListener('click', e => {
+            e.preventDefault();
+            openAt(i);
+            if (!bsModal) bsModal = new bootstrap.Modal(lbModal);
+            bsModal.show();
+        });
+    });
+    featuredLink?.addEventListener('click', e => {
+        e.preventDefault();
+        openAt(currentIdx);
+        if (!bsModal) bsModal = new bootstrap.Modal(lbModal);
+        bsModal.show();
+    });
+
+    lbPrev.addEventListener('click', () => { if (currentIdx > 0) openAt(currentIdx - 1); });
+    lbNext.addEventListener('click', () => { if (currentIdx < thumbLinks.length - 1) openAt(currentIdx + 1); });
+
+    // Keyboard navigation
+    document.addEventListener('keydown', e => {
+        if (!lbModal.classList.contains('show')) return;
+        if (e.key === 'ArrowLeft')  lbPrev.click();
+        if (e.key === 'ArrowRight') lbNext.click();
+        if (e.key === 'Escape')     bsModal?.hide();
+    });
+
+    // Swipe support (touch)
+    let touchStartX = 0;
+    lbModal.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, {passive: true});
+    lbModal.addEventListener('touchend', e => {
+        const dx = e.changedTouches[0].clientX - touchStartX;
+        if (Math.abs(dx) > 50) dx < 0 ? lbNext.click() : lbPrev.click();
+    });
+});
+</script>
+
+{# ── Lightbox modal ──────────────────────────────────────────── #}
+{% if case.photos %}
+<div class="modal fade" id="photoLightbox" tabindex="-1" aria-label="Photo viewer" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width:min(90vw,860px);">
+        <div class="modal-content border-0" style="background:rgba(10,10,15,.96);border-radius:16px;overflow:hidden;">
+
+            {# Top bar #}
+            <div class="d-flex align-items-center px-4 py-3 border-bottom border-white border-opacity-10">
+                <div class="me-auto">
+                    <div id="lbCat" class="text-white-50 small fw-semibold text-uppercase" style="letter-spacing:.05em;"></div>
+                    <div id="lbName" class="text-white small mt-1" style="word-break:break-all;max-width:60vw;"></div>
+                </div>
+                <span id="lbCounter" class="badge bg-white bg-opacity-10 text-white fw-normal me-3 px-3 py-2 rounded-pill"></span>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
 
-            <!-- Footer -->
-            <div class="card-footer bg-white p-3 text-center border-top">
-                <small class="text-muted">
-                    របាយការណ៍បង្កើតដោយប្រព័ន្ធជំនាញ IDNS • លេខសម្គាល់ករណី៖ #{{ case.id }}
-                </small>
+            {# Image area #}
+            <div class="position-relative d-flex align-items-center justify-content-center"
+                 style="min-height:min(70vh,600px);background:rgba(0,0,0,.4);">
+
+                <button id="lbPrev"
+                        class="btn position-absolute start-0 ms-3 d-flex align-items-center justify-content-center"
+                        style="width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.12);
+                               border:1px solid rgba(255,255,255,.2);color:#fff;backdrop-filter:blur(4px);">
+                    <i class="bi bi-chevron-left fs-5"></i>
+                </button>
+
+                <img id="lbImg" src="" alt="symptom photo"
+                     class="img-fluid"
+                     style="max-height:min(65vh,580px);max-width:100%;object-fit:contain;
+                            border-radius:8px;transition:opacity .2s ease;">
+
+                <button id="lbNext"
+                        class="btn position-absolute end-0 me-3 d-flex align-items-center justify-content-center"
+                        style="width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.12);
+                               border:1px solid rgba(255,255,255,.2);color:#fff;backdrop-filter:blur(4px);">
+                    <i class="bi bi-chevron-right fs-5"></i>
+                </button>
             </div>
+
         </div>
     </div>
 </div>
+{% endif %}
 {% endblock %}
