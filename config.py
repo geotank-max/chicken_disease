@@ -16,6 +16,23 @@ class Config:
     # Set to True in production (HTTPS). Kept False so it also works
     # over plain http://localhost during development.
     SESSION_COOKIE_SECURE = os.environ.get("SESSION_COOKIE_SECURE", "false").lower() in ("true", "1", "yes")
+    # Keep the user signed in after closing/reopening the browser so
+    # they return to the same account. Applies when session.permanent
+    # is set on login. Default: 7 days.
+    from datetime import timedelta as _timedelta
+    PERMANENT_SESSION_LIFETIME = _timedelta(
+        days=int(os.environ.get("SESSION_LIFETIME_DAYS", "7"))
+    )
+
+    # Flask-Login "remember me" cookie: keeps the user on the same
+    # account after closing/reopening the browser. Mirror the session
+    # cookie security settings.
+    REMEMBER_COOKIE_DURATION = _timedelta(
+        days=int(os.environ.get("SESSION_LIFETIME_DAYS", "7"))
+    )
+    REMEMBER_COOKIE_HTTPONLY = True
+    REMEMBER_COOKIE_SAMESITE = "Lax"
+    REMEMBER_COOKIE_SECURE = os.environ.get("SESSION_COOKIE_SECURE", "false").lower() in ("true", "1", "yes")
 
     # Upload config
     UPLOAD_FOLDER = os.path.join(BASE_DIR, "uploads")

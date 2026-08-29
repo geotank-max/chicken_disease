@@ -2,7 +2,7 @@
 """OAuth routes for Google social login."""
 
 from flask import Blueprint, redirect, url_for, flash, current_app, session
-from flask_login import login_user, current_user
+from flask_login import login_user
 from app.models.user import UserTable
 from app.models.role import RoleTable
 from app.services.oauth_service import oauth
@@ -14,10 +14,14 @@ oauth_bp = Blueprint("oauth", __name__, url_prefix="/auth/google")
 
 @oauth_bp.route("/login")
 def google_login():
-    """Redirect user to Google's OAuth 2.0 consent screen."""
-    if current_user.is_authenticated:
-        return redirect(url_for("user_home.index"))
+    """Redirect user to Google's OAuth 2.0 consent screen.
 
+    We always start the OAuth flow when the user clicks "Continue with
+    Google" - even if they already have a session - so Google can show
+    the account picker and let them choose or switch accounts. Skipping
+    this when already authenticated would redirect straight to the home
+    page and never show the picker.
+    """
     # Ensure the session is persisted so the OAuth "state" Authlib
     # stores below is written to the cookie before we redirect to
     # Google. Otherwise the state can be lost on the first attempt
@@ -110,7 +114,9 @@ def google_callback():
         flash("Your account is inactive. Please contact administrator.", "warning")
         return redirect(url_for("auth.login"))
 
-    login_user(user)
+    # remember=True keeps the user signed in after the browser is
+    # closed and reopened (returns to the same account).
+    login_user(user, remember=True)
     AuditService.log("LOGIN", "User", user.id, "User logged in via Google OAuth")
     flash("Logged in successfully with Google.", "success")
 

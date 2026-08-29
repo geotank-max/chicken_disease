@@ -24,7 +24,9 @@ def login():
                 flash("Your account is inactive. Please contact administrator.", "warning")
                 return render_template("auth/login.html", username=username)
             
-            login_user(user)
+            # remember=True keeps the user signed in after the browser
+            # is closed and reopened (returns to the same account).
+            login_user(user, remember=True)
             AuditService.log("LOGIN", "User", user.id, "User logged in")
             flash("Logged in successfully.", "success")
             
