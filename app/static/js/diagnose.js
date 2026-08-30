@@ -1,6 +1,6 @@
 // Interactive symptom picker for Step 2 of the diagnosis wizard.
-// Handles: live search with suggestions, removable tags, collapsible category
-// groups, category quick-filter, and a live "Top Possible Illnesses" widget.
+// Handles: live search, tag management, category tab switching, Next/Prev category cycling,
+// and real-time live AI candidate illness matches.
 document.addEventListener('DOMContentLoaded', function () {
     const searchInput = document.getElementById('symptomSearch');
     if (!searchInput) return;
@@ -10,14 +10,14 @@ document.addEventListener('DOMContentLoaded', function () {
     const noResults = document.getElementById('symptomNoResults');
     const topIllnessesBox = document.getElementById('topIllnesses');
     const clearBtn = document.getElementById('clearSymptoms');
-    const tabs = Array.from(document.querySelectorAll('.category-tab'));
-    const groups = Array.from(document.querySelectorAll('.symptom-group'));
+    const tabs = Array.from(document.querySelectorAll('.category-substep-tab'));
+    const panes = Array.from(document.querySelectorAll('.symptom-category-pane'));
     const items = Array.from(document.querySelectorAll('.symptom-item'));
+    const prevCatBtn = document.getElementById('prevCatBtn');
+    const nextCatBtn = document.getElementById('nextCatBtn');
+    const submitStep2Btn = document.getElementById('submitStep2Btn');
 
-    let activeCategory = 'all';
-    let activeSuggestion = -1;
-
-    // ── Parse the symptom index passed from the server ──
+    // Parse diagnosis knowledge base for live prediction
     let diseaseData = { diseases: {}, symptomToDiseases: {} };
     try {
         const raw = document.getElementById('symptomDiagnosisData')?.textContent || '{}';
@@ -27,10 +27,10 @@ document.addEventListener('DOMContentLoaded', function () {
             symptomToDiseases: parsed.symptomToDiseases || {},
         };
     } catch (e) {
-        // fall back to empty index; picker still works without suggestions
+        console.warn('Could not parse symptomDiagnosisData', e);
     }
 
-    // Build a quick lookup of every symptom item: {id, name, desc, category, input, el}
+    // Build symptom item registry
     const symptomIndex = items.map(function (el) {
         const input = el.querySelector('input[type="checkbox"]');
         const nameEl = el.querySelector('.fw-semibold');
@@ -40,98 +40,119 @@ document.addEventListener('DOMContentLoaded', function () {
             name: (nameEl ? nameEl.textContent : '').trim(),
             search: (el.dataset.name || '').toLowerCase(),
             desc: (descEl ? descEl.textContent : '').trim(),
-            category: el.dataset.category,
+            category: (el.dataset.category || '').trim(),
             input: input,
             el: el,
         };
     });
 
-    function checkedInfos() {
+    function getSelectedSymptoms() {
         return symptomIndex.filter(function (s) { return s.input && s.input.checked; });
     }
 
-    // ── Tags ──────────────────────────────────────────────────────────────
-    function renderTags() {
-        const selected = checkedInfos();
-        tagsBox.innerHTML = '';
-        if (selected.length === 0) {
-            tagsBox.classList.add('d-none');
-            return;
-        }
-        tagsBox.classList.remove('d-none');
-        selected.forEach(function (s) {
-            const tag = document.createElement('span');
-            tag.className = 'symptom-tag';
-            const label = document.createElement('span');
-            label.textContent = s.name;
-            const btn = document.createElement('button');
-            btn.type = 'button';
-            btn.setAttribute('aria-label', 'Remove ' + s.name);
-            btn.innerHTML = '<i class="bi bi-x"></i>';
-            btn.addEventListener('click', function () {
-                s.input.checked = false;
-                onSelectionChanged();
-            });
-            tag.appendChild(label);
-            tag.appendChild(btn);
-            tagsBox.appendChild(tag);
+    // ── Category Switching ──
+    let activeCatName = tabs[0]?.dataset.catName || 'all';
+
+    function switchCategory(catName) {
+        activeCatName = (catName || 'all').trim();
+
+        // Update tab styling
+        tabs.forEach(function (tab) {
+            const isMatch = (tab.dataset.catName || '').trim() === activeCatName;
+            tab.classList.toggle('active', isMatch);
         });
+
+        // Show/hide category panes
+        panes.forEach(function (pane) {
+            const paneCat = (pane.dataset.paneCategory || '').trim();
+            if (activeCatName === 'all') {
+                pane.classList.add('active');
+                pane.style.display = 'block';
+            } else {
+                const isMatch = paneCat === activeCatName;
+                pane.classList.toggle('active', isMatch);
+                pane.style.display = isMatch ? 'block' : 'none';
+            }
+        });
+
+        filterSymptoms();
     }
 
-    // ── Group counts + collapse state ───────────────────────────────────────
-    function updateGroupCounts() {
-        groups.forEach(function (group) {
-            const groupItems = group.querySelectorAll('.symptom-item input[type="checkbox"]');
-            let count = 0;
-            groupItems.forEach(function (cb) { if (cb.checked) count += 1; });
-            const badge = group.querySelector('.symptom-group-count');
-            if (badge) {
-                badge.textContent = count;
-                badge.classList.toggle('d-none', count === 0);
+    // Tab button click handlers
+    tabs.forEach(function (tab) {
+        tab.addEventListener('click', function (e) {
+            e.preventDefault();
+            const cat = this.dataset.catName;
+            switchCategory(cat);
+        });
+    });
+
+    // Next / Prev category cycling
+    if (nextCatBtn) {
+        nextCatBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            const currentIdx = tabs.findIndex(function (t) {
+                return (t.dataset.catName || '').trim() === activeCatName;
+            });
+            if (currentIdx === -1 || currentIdx >= tabs.length - 1) {
+                // If on last tab (e.g. 'all'), scroll down or focus the Submit button!
+                if (submitStep2Btn) {
+                    submitStep2Btn.focus();
+                    submitStep2Btn.classList.add('pulse-highlight');
+                    setTimeout(function () { submitStep2Btn.classList.remove('pulse-highlight'); }, 800);
+                }
+            } else {
+                const nextTab = tabs[currentIdx + 1];
+                if (nextTab) switchCategory(nextTab.dataset.catName);
             }
         });
     }
 
-    // ── Search + category filtering ─────────────────────────────────────────
+    if (prevCatBtn) {
+        prevCatBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            const currentIdx = tabs.findIndex(function (t) {
+                return (t.dataset.catName || '').trim() === activeCatName;
+            });
+            if (currentIdx > 0) {
+                const prevTab = tabs[currentIdx - 1];
+                if (prevTab) switchCategory(prevTab.dataset.catName);
+            }
+        });
+    }
+
+    // ── Live Filtering (Search + Category) ──
     function filterSymptoms() {
         const query = (searchInput.value || '').toLowerCase().trim();
         let anyVisible = false;
 
         symptomIndex.forEach(function (s) {
-            const catMatch = activeCategory === 'all' || s.category === activeCategory;
-            const searchMatch = !query || s.search.includes(query) ||
-                s.desc.toLowerCase().includes(query);
-            const visible = catMatch && searchMatch;
-            s.el.style.display = visible ? '' : 'none';
-            if (visible) anyVisible = true;
-        });
+            const catMatch = activeCatName === 'all' || s.category === activeCatName;
+            const searchMatch = !query || s.search.includes(query) || s.desc.toLowerCase().includes(query);
+            // If user is searching, show all matches regardless of category tab
+            const isVisible = query ? searchMatch : (catMatch && searchMatch);
 
-        // Hide groups that have no visible items
-        groups.forEach(function (group) {
-            const visibleItems = group.querySelectorAll('.symptom-item')
-                ? Array.from(group.querySelectorAll('.symptom-item')).filter(function (el) {
-                    return el.style.display !== 'none';
-                })
-                : [];
-            group.style.display = visibleItems.length ? '' : 'none';
+            s.el.style.display = isVisible ? '' : 'none';
+            if (isVisible) anyVisible = true;
         });
 
         if (noResults) noResults.classList.toggle('d-none', anyVisible);
     }
 
-    // ── Suggestions dropdown ────────────────────────────────────────────────
+    // ── Search Suggestions ──
     function renderSuggestions() {
         const query = (searchInput.value || '').toLowerCase().trim();
-        activeSuggestion = -1;
-        if (!query) {
-            suggestionBox.classList.add('d-none');
-            suggestionBox.innerHTML = '';
+        if (!query || !suggestionBox) {
+            if (suggestionBox) {
+                suggestionBox.classList.add('d-none');
+                suggestionBox.innerHTML = '';
+            }
             return;
         }
+
         const matches = symptomIndex.filter(function (s) {
-            return !s.input.checked &&
-                (s.search.includes(query) || s.desc.toLowerCase().includes(query));
-        }).slice(0, 8);
+            return !s.input.checked && (s.search.includes(query) || s.desc.toLowerCase().includes(query));
+        }).slice(0, 6);
 
         if (matches.length === 0) {
             suggestionBox.classList.add('d-none');
@@ -141,48 +162,64 @@ document.addEventListener('DOMContentLoaded', function () {
 
         suggestionBox.innerHTML = '';
         matches.forEach(function (s) {
-            const row = document.createElement('div');
-            row.className = 'symptom-suggestion';
-            row.dataset.id = s.id;
-            row.innerHTML = '<div class="s-name">' + escapeHtml(s.name) + '</div>' +
-                (s.desc ? '<div class="s-desc">' + escapeHtml(s.desc) + '</div>' : '');
-            row.addEventListener('mousedown', function (ev) {
-                ev.preventDefault(); // keep focus in the input
-                selectSymptom(s);
+            const item = document.createElement('div');
+            item.className = 'p-2 border-bottom cursor-pointer hover-bg-light';
+            item.innerHTML = '<div class="fw-bold text-dark small">' + escapeHtml(s.name) + '</div>' +
+                (s.desc ? '<div class="text-muted" style="font-size:0.75rem;">' + escapeHtml(s.desc) + '</div>' : '');
+            item.addEventListener('click', function (e) {
+                e.preventDefault();
+                s.input.checked = true;
+                searchInput.value = '';
+                suggestionBox.classList.add('d-none');
+                suggestionBox.innerHTML = '';
+                onSelectionChanged();
+                filterSymptoms();
             });
-            suggestionBox.appendChild(row);
+            suggestionBox.appendChild(item);
         });
         suggestionBox.classList.remove('d-none');
     }
 
-    function selectSymptom(s) {
-        s.input.checked = true;
-        searchInput.value = '';
-        suggestionBox.classList.add('d-none');
-        suggestionBox.innerHTML = '';
-        onSelectionChanged();
-        filterSymptoms();
+    // ── Removable Selected Tags ──
+    function renderTags() {
+        if (!tagsBox) return;
+        const selected = getSelectedSymptoms();
+        tagsBox.innerHTML = '';
+        if (selected.length === 0) {
+            tagsBox.classList.add('d-none');
+            return;
+        }
+        tagsBox.classList.remove('d-none');
+        selected.forEach(function (s) {
+            const tag = document.createElement('span');
+            tag.className = 'symptom-tag';
+            tag.innerHTML = '<span>' + escapeHtml(s.name) + '</span>';
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.innerHTML = '<i class="bi bi-x"></i>';
+            btn.setAttribute('aria-label', 'Remove ' + s.name);
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                s.input.checked = false;
+                onSelectionChanged();
+            });
+            tag.appendChild(btn);
+            tagsBox.appendChild(tag);
+        });
     }
 
-    function moveActiveSuggestion(dir) {
-        const rows = Array.from(suggestionBox.querySelectorAll('.symptom-suggestion'));
-        if (!rows.length) return;
-        activeSuggestion = (activeSuggestion + dir + rows.length) % rows.length;
-        rows.forEach(function (r, i) { r.classList.toggle('active', i === activeSuggestion); });
-    }
-
-    // ── Top Possible Illnesses widget ───────────────────────────────────────
+    // ── Live AI Match Prediction Widget ──
     function renderTopIllnesses() {
         if (!topIllnessesBox) return;
-        const selectedIds = checkedInfos().map(function (s) { return String(s.id); });
+        const selectedIds = getSelectedSymptoms().map(function (s) { return String(s.id); });
 
         if (selectedIds.length === 0) {
-            topIllnessesBox.innerHTML = '<div class="symptom-illness-empty text-muted small">' +
-                '<i class="bi bi-search me-1"></i>ជ្រើសរើសរោគសញ្ញា ដើម្បីមើលជំងឺដែលអាចទំនង</div>';
+            topIllnessesBox.innerHTML = '<div class="symptom-illness-empty text-muted small text-center py-3 bg-light rounded-3">' +
+                '<i class="bi bi-check2-circle d-block fs-3 mb-1 text-primary"></i>' +
+                'ជ្រើសរើសរោគសញ្ញា ដើម្បីមើលការទស្សន៍ទាយជំងឺ</div>';
             return;
         }
 
-        // Score each disease by how many selected symptoms it shares.
         const scores = [];
         Object.keys(diseaseData.diseases).forEach(function (name) {
             const info = diseaseData.diseases[name];
@@ -191,15 +228,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 return diseaseSymptoms.indexOf(id) !== -1;
             }).length;
             if (overlap > 0) {
-                const ratio = diseaseSymptoms.length
-                    ? overlap / diseaseSymptoms.length
-                    : 0;
+                const ratio = diseaseSymptoms.length ? overlap / diseaseSymptoms.length : 0;
                 scores.push({ name: name, overlap: overlap, ratio: ratio, info: info });
             }
         });
 
         if (scores.length === 0) {
-            topIllnessesBox.innerHTML = '<div class="text-muted small">' +
+            topIllnessesBox.innerHTML = '<div class="text-muted small text-center py-3 bg-light rounded-3">' +
                 '<i class="bi bi-info-circle me-1"></i>មិនទាន់មានជំងឺដែលត្រូវនឹងរោគសញ្ញាទេ</div>';
             return;
         }
@@ -209,113 +244,76 @@ document.addEventListener('DOMContentLoaded', function () {
             return b.ratio - a.ratio;
         });
 
-        const top = scores.slice(0, 5);
         topIllnessesBox.innerHTML = '';
-        top.forEach(function (item, idx) {
+        scores.slice(0, 4).forEach(function (item) {
             const pct = Math.round(item.ratio * 100);
             const row = document.createElement('div');
-            row.className = 'symptom-illness-item';
-            const meta = [];
-            if (item.info.category) meta.push(escapeHtml(item.info.category));
-            meta.push(item.overlap + ' រោគសញ្ញាត្រូវគ្នា');
-            row.innerHTML =
-                '<span class="il-rank">' + (idx + 1) + '</span>' +
-                '<div class="flex-grow-1">' +
-                    '<div class="il-name">' + escapeHtml(item.name) + '</div>' +
-                    '<div class="il-meta">' + meta.join(' • ') + '</div>' +
-                    '<div class="il-bar"><span style="width:' + pct + '%"></span></div>' +
-                '</div>';
+            row.className = 'symptom-illness-item shadow-xs mb-2 p-2 rounded-2 border-start border-4 border-success bg-white';
+            row.innerHTML = '<div class="d-flex justify-content-between align-items-start">' +
+                '<div>' +
+                    '<div class="fw-bold text-dark small mb-0">' + escapeHtml(item.name) + '</div>' +
+                    '<div class="text-muted" style="font-size: 0.72rem;">' + item.overlap + ' រោគសញ្ញាត្រូវគ្នា</div>' +
+                '</div>' +
+                '<div class="text-end">' +
+                    '<span class="badge bg-success bg-opacity-10 text-success fw-bold">' + pct + '%</span>' +
+                '</div>' +
+            '</div>';
             topIllnessesBox.appendChild(row);
         });
     }
 
-    function escapeHtml(str) {
-        return String(str)
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;');
-    }
-
-    // ── Central update after any selection change ───────────────────────────
-    // Preserve the window scroll position: rendering tags / top-illnesses
-    // mutates the DOM above the list and can otherwise shift the viewport,
-    // and clicking a hidden checkbox label can nudge the page.
+    // ── Update Badge Counts & Global State ──
     function onSelectionChanged() {
-        const scrollX = window.scrollX;
-        const scrollY = window.scrollY;
         renderTags();
-        updateGroupCounts();
         renderTopIllnesses();
-        window.scrollTo(scrollX, scrollY);
-    }
 
-    // ── Wire up events ──────────────────────────────────────────────────────
-    searchInput.addEventListener('input', function () {
-        filterSymptoms();
-        renderSuggestions();
-    });
-
-    searchInput.addEventListener('keydown', function (ev) {
-        if (suggestionBox.classList.contains('d-none')) return;
-        if (ev.key === 'ArrowDown') { ev.preventDefault(); moveActiveSuggestion(1); }
-        else if (ev.key === 'ArrowUp') { ev.preventDefault(); moveActiveSuggestion(-1); }
-        else if (ev.key === 'Enter') {
-            const rows = suggestionBox.querySelectorAll('.symptom-suggestion');
-            if (activeSuggestion >= 0 && rows[activeSuggestion]) {
-                ev.preventDefault();
-                const id = rows[activeSuggestion].dataset.id;
-                const s = symptomIndex.find(function (x) { return String(x.id) === String(id); });
-                if (s) selectSymptom(s);
+        // Update category badges with count of checked symptoms
+        const selected = getSelectedSymptoms();
+        tabs.forEach(function (tab) {
+            const cat = (tab.dataset.catName || '').trim();
+            const badge = tab.querySelector('[data-category-badge]');
+            if (badge) {
+                const countInCat = selected.filter(function (s) { return s.category === cat; }).length;
+                badge.textContent = countInCat;
+                badge.classList.toggle('d-none', countInCat === 0);
             }
-        } else if (ev.key === 'Escape') {
-            suggestionBox.classList.add('d-none');
-        }
-    });
-
-    // Hide suggestions when focus leaves the search area
-    document.addEventListener('click', function (ev) {
-        if (!ev.target.closest('.symptom-search-shell')) {
-            suggestionBox.classList.add('d-none');
-        }
-    });
-
-    // Checkbox changes (direct clicks on cards)
-    symptomIndex.forEach(function (s) {
-        if (s.input) s.input.addEventListener('change', onSelectionChanged);
-    });
-
-    // Category quick-filter pills
-    tabs.forEach(function (tab) {
-        tab.addEventListener('click', function () {
-            tabs.forEach(function (t) { t.classList.remove('active'); });
-            this.classList.add('active');
-            activeCategory = this.dataset.category;
-            filterSymptoms();
-        });
-    });
-
-    // Collapsible group headers
-    groups.forEach(function (group) {
-        const header = group.querySelector('.symptom-group-header');
-        if (!header) return;
-        header.addEventListener('click', function () {
-            const collapsed = group.classList.toggle('collapsed');
-            header.setAttribute('aria-expanded', String(!collapsed));
-        });
-    });
-
-    // Clear all selections
-    if (clearBtn) {
-        clearBtn.addEventListener('click', function () {
-            symptomIndex.forEach(function (s) { if (s.input) s.input.checked = false; });
-            searchInput.value = '';
-            filterSymptoms();
-            onSelectionChanged();
         });
     }
 
-    // ── Initial paint (restores selections coming back from step 3) ──
+    // Checkbox change events
+    symptomIndex.forEach(function (s) {
+        if (s.input) {
+            s.input.addEventListener('change', onSelectionChanged);
+        }
+    });
+
+    // Search input events
+    if (searchInput) {
+        searchInput.addEventListener('input', function () {
+            filterSymptoms();
+            renderSuggestions();
+        });
+    }
+
+    // Clear all symptoms button (លុបការជ្រើសទាំងអស់)
+    if (clearBtn) {
+        clearBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            symptomIndex.forEach(function (s) {
+                if (s.input) s.input.checked = false;
+            });
+            onSelectionChanged();
+            filterSymptoms();
+        });
+    }
+
+    function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str || '';
+        return div.innerHTML;
+    }
+
+    // Initial setup
     onSelectionChanged();
-    filterSymptoms();
+    switchCategory(activeCatName);
 });

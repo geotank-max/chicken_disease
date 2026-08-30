@@ -189,8 +189,9 @@
         {% endblock %}
 
         <!-- Main wrapper (navbar + content) -->
-        <div class="app-main">
+        <div class="app-main {% block app_main_class %}{% endblock %}">
             <!-- Top Navbar: fixed -->
+            {% block app_navbar %}
             <header class="app-navbar">
                 <div class="navbar-left">
                     <button class="sidebar-toggle d-md-none" id="sidebarToggle">
@@ -227,6 +228,7 @@
                 {% endif %}
                 {% endblock %}
             </header>
+            {% endblock %}
 
             <!-- Page Content: scrollable -->
             <div class="app-content">

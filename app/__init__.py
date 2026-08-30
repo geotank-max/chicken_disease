@@ -136,7 +136,13 @@ def create_app(config_class: type[Config] = Config):
 
     @app.route("/")
     def home():
-        return redirect(url_for("auth.login"))
+        from flask_login import current_user
+        if current_user.is_authenticated:
+            if current_user.has_permission("view_dashboard"):
+                return redirect(url_for("dashboard.index"))
+            return redirect(url_for("user_home.index"))
+        return redirect(url_for("expert_system.diagnose", step="1"))
+
 
     with app.app_context():
         from app.models.role import RoleTable

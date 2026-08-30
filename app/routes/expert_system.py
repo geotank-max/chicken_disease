@@ -164,9 +164,41 @@ def author_rules():
     return redirect(url_for("expert_system.rules_index"))
 
 
+def commit_pending_diagnosis_case(user_id: int):
+    """Finalize and persist a pending diagnosis case from session for the given user."""
+    selected_ids = session.get("diagnosis_symptoms", [])
+    flock_data = session.get("diagnosis_wizard", {})
+    staged_photos = session.get("diagnosis_photos", [])
+    if not selected_ids:
+        return None
+
+    diagnosis_results = DiagnosisService.run_inference(selected_ids)
+    saved_case = DiagnosisService.record_case(
+        user_id,
+        selected_ids,
+        diagnosis_results[0] if diagnosis_results else None,
+        flock_data=flock_data,
+    )
+
+    # Commit any staged photos now that we have a case ID
+    if staged_photos and saved_case:
+        _commit_photos_to_case(saved_case.id, staged_photos)
+
+    session.pop("diagnosis_wizard", None)
+    session.pop("diagnosis_symptoms", None)
+    session.pop("diagnosis_photos", None)
+
+    if saved_case and saved_case.disease:
+        AuditService.log("DIAGNOSE", "Case", saved_case.id, f"Diagnosis saved: {saved_case.disease.name}")
+
+    # Notify all doctors/admins about the new pending case
+    if saved_case:
+        NotificationService.notify_doctors_new_case(saved_case)
+
+    return saved_case
+
+
 @expert_system_bp.route("/diagnose", methods=["GET", "POST"])
-@login_required
-@require_permission("run_diagnosis")
 def diagnose():
     step = request.args.get("step", "1")
     if request.method == "POST":
@@ -231,30 +263,14 @@ def diagnose():
             return redirect(url_for("expert_system.diagnose", step="2"))
 
         if request.method == "POST" and request.form.get("action") == "save":
-            diagnosis_results = DiagnosisService.run_inference(selected_ids)
-            saved_case = DiagnosisService.record_case(
-                current_user.id,
-                selected_ids,
-                diagnosis_results[0] if diagnosis_results else None,
-                flock_data=flock_data,
-            )
+            if not current_user.is_authenticated:
+                flash("សូមចូលគណនី ឬចុះឈ្មោះដើម្បីរក្សាទុកករណី។", "info")
+                return redirect(url_for("auth.login"))
 
-            # Commit any staged photos now that we have a case ID
-            staged_photos = session.get("diagnosis_photos", [])
-            if staged_photos:
-                _commit_photos_to_case(saved_case.id, staged_photos)
-
-            session.pop("diagnosis_wizard", None)
-            session.pop("diagnosis_symptoms", None)
-            session.pop("diagnosis_photos", None)
-            if saved_case and saved_case.disease:
-                AuditService.log("DIAGNOSE", "Case", saved_case.id, f"Diagnosis saved: {saved_case.disease.name}")
-
-            # Notify all doctors/admins about the new pending case
-            NotificationService.notify_doctors_new_case(saved_case)
-
-            flash("ករណីត្រូវបានរក្សាទុកដោយជោគជ័យ។", "success")
-            return redirect(url_for("expert_system.cases_detail", case_id=saved_case.id))
+            saved_case = commit_pending_diagnosis_case(current_user.id)
+            if saved_case:
+                flash("ករណីត្រូវបានរក្សាទុកដោយជោគជ័យ។", "success")
+                return redirect(url_for("expert_system.cases_detail", case_id=saved_case.id))
 
         diagnosis_results = DiagnosisService.run_inference(selected_ids)
 
