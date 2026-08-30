@@ -6,14 +6,18 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{% block title %}Dashboard{% endblock %} - IDNS</title>
 
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/favicon.svg') }}">
+    <link rel="alternate icon" href="{{ url_for('static', filename='images/logo1.png') }}">
+
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+Khmer:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Khmer:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=2.3">
     {% block extra_styles %}{% endblock %}
 </head>
 <body>
@@ -24,7 +28,7 @@
             <!-- Brand -->
             <div class="sidebar-brand">
                 <a href="{{ url_for('dashboard.index') if current_user.is_authenticated and current_user.has_permission('view_dashboard') else url_for('user_home.index') if current_user.is_authenticated else url_for('auth.login') }}" class="text-decoration-none">
-                    <img src="{{ url_for('static', filename='images/logo1.png') }}" alt="IDNS" class="sidebar-logo">
+                    <img src="{{ url_for('static', filename='images/favicon.svg') }}" alt="IDNS" class="sidebar-logo">
                     <div class="sidebar-brand-text">
                         <span class="fw-bold">IDNS</span>
                         <small>Chicken Diagnosis</small>

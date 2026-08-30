@@ -6,155 +6,130 @@
 
 {% block extra_styles %}
 <style>
-    /* ── Treatment progress: segmented numbered stepper ── */
-    .treatment-stepper {
+    /* ── Enhanced Treatment Action Hub ── */
+    .treatment-card-wrapper {
+        background: #ffffff;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius);
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .treatment-header-bar {
+        background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+        border-bottom: 1px solid var(--primary-border);
+        padding: 0.95rem 1.25rem;
+    }
+
+    .treatment-progress-track {
+        height: 6px;
+        background: #e2e8f0;
+        border-radius: 999px;
+        overflow: hidden;
+        margin-top: 0.55rem;
+    }
+
+    .treatment-progress-bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+        border-radius: 999px;
+        transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .treatment-step-card {
+        border: 1.5px solid var(--border-color);
+        border-radius: 0.75rem;
+        background: #ffffff;
+        padding: 0.85rem 1rem;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+        display: flex;
         align-items: flex-start;
-        display: flex;
-        gap: 0;
-        margin: 0.25rem 0 1.1rem;
-    }
-
-    .treatment-stepper .tstep-node {
-        display: flex;
-        flex: 1 1 0;
-        flex-direction: column;
-        align-items: center;
-        position: relative;
-        text-align: center;
-    }
-
-    /* connector line drawn to the LEFT of every node except the first */
-    .treatment-stepper .tstep-node::before {
-        background: #e3e8ef;
-        content: "";
-        height: 4px;
-        left: -50%;
-        position: absolute;
-        right: 50%;
-        top: 0.9rem;
-        z-index: 0;
-    }
-
-    .treatment-stepper .tstep-node:first-child::before {
-        display: none;
-    }
-
-    /* filled connector when the step is completed */
-    .treatment-stepper .tstep-node.is-done::before,
-    .treatment-stepper .tstep-node.is-current::before {
-        background: #22c55e;
-    }
-
-    .treatment-stepper .tstep-dot {
-        align-items: center;
-        background: #fff;
-        border: 2px solid #d6dde6;
-        border-radius: 50%;
-        color: #94a3b8;
-        display: inline-flex;
-        font-size: 0.85rem;
-        font-weight: 700;
-        height: 1.85rem;
-        justify-content: center;
-        position: relative;
-        transition: all 0.2s ease;
-        width: 1.85rem;
-        z-index: 1;
-    }
-
-    .treatment-stepper .tstep-node.is-current .tstep-dot {
-        border-color: #22c55e;
-        box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.15);
-        color: #16a34a;
-    }
-
-    .treatment-stepper .tstep-node.is-done .tstep-dot {
-        background: #22c55e;
-        border-color: #22c55e;
-        color: #fff;
-    }
-
-    .treatment-stepper .tstep-caption {
-        color: #94a3b8;
-        font-size: 0.72rem;
-        font-weight: 600;
-        margin-top: 0.35rem;
-        max-width: 8rem;
-    }
-
-    .treatment-stepper .tstep-node.is-done .tstep-caption,
-    .treatment-stepper .tstep-node.is-current .tstep-caption {
-        color: #475569;
-    }
-
-    /* ── Treatment checklist: convenient clickable rows ── */
-    .treatment-checklist .treatment-step {
-        align-items: center;
-        border: 1px solid #e5e9f0;
-        border-radius: 0.7rem;
-        cursor: pointer;
-        gap: 0.75rem;
-        padding: 0.7rem 0.85rem;
-        transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+        gap: 0.85rem;
         user-select: none;
+        margin-bottom: 0;
     }
 
-    .treatment-checklist .treatment-step:hover {
-        border-color: #22c55e;
-        box-shadow: 0 2px 8px rgba(34, 197, 94, 0.1);
+    .treatment-step-card:hover {
+        border-color: var(--primary-border);
+        background: #f8fafc;
+        box-shadow: 0 4px 12px rgba(5, 150, 105, 0.08);
+        transform: translateY(-1px);
     }
 
-    .treatment-checklist .treatment-step.is-done {
+    .treatment-step-card.is-done {
         background: #f0fdf4;
-        border-color: #bbf7d0;
+        border-color: #86efac;
     }
 
-    .treatment-checklist .treatment-step-check {
-        border-color: #cbd5e1;
+    .treatment-step-card.is-done:hover {
+        border-color: #4ade80;
+        background: #ecfdf5;
+    }
+
+    .treatment-check-box {
+        width: 20px;
+        height: 20px;
+        border-radius: 6px;
+        border: 2px solid #cbd5e1;
         cursor: pointer;
-        flex: 0 0 auto;
-        height: 1.35rem;
-        margin-top: 0;
-        width: 1.35rem;
+        margin-top: 3px;
+        flex-shrink: 0;
+        transition: all 0.15s ease;
+        accent-color: var(--primary);
     }
 
-    .treatment-checklist .treatment-step-check:checked {
-        background-color: #22c55e;
-        border-color: #22c55e;
+    .treatment-check-box:checked {
+        background-color: var(--primary);
+        border-color: var(--primary);
     }
 
-    .treatment-checklist .treatment-step-check:focus {
-        box-shadow: 0 0 0 0.2rem rgba(34, 197, 94, 0.2);
-    }
-
-    .treatment-checklist .tstep-index {
-        align-items: center;
-        background: #eef2f7;
-        border-radius: 0.5rem;
-        color: #64748b;
-        display: inline-flex;
-        flex: 0 0 auto;
-        font-size: 0.8rem;
+    .treatment-step-badge {
+        font-size: 0.72rem;
         font-weight: 700;
-        height: 1.6rem;
-        justify-content: center;
-        width: 1.6rem;
+        padding: 0.2rem 0.55rem;
+        border-radius: 999px;
+        background: var(--primary-light);
+        color: var(--primary);
+        border: 1px solid var(--primary-border);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
     }
 
-    .treatment-checklist .treatment-step.is-done .tstep-index {
+    .treatment-step-card.is-done .treatment-step-badge {
         background: #dcfce7;
-        color: #16a34a;
+        color: #15803d;
+        border-color: #86efac;
     }
 
-    .treatment-checklist .form-check-label {
-        cursor: pointer;
-        flex: 1 1 auto;
-        line-height: 1.35;
+    .treatment-step-note {
+        font-size: 0.78rem;
+        color: #64748b;
+        background: #f1f5f9;
+        border-radius: 6px;
+        padding: 0.3rem 0.6rem;
+        margin-top: 0.35rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
     }
 
-    .treatment-checklist .treatment-step-check:disabled,
-    .treatment-checklist .treatment-step-check:disabled ~ * {
-        cursor: default;
+    .treatment-step-card.is-done .treatment-step-note {
+        background: rgba(255, 255, 255, 0.75);
+    }
+
+    .treatment-celebration-banner {
+        background: linear-gradient(135deg, #065f46 0%, #059669 100%);
+        color: white;
+        border-radius: 0.75rem;
+        padding: 0.75rem 1rem;
+        animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-4px); }
+        to { opacity: 1; transform: translateY(0); }
     }
 </style>
 {% endblock %}
@@ -184,7 +159,9 @@
                         <h5 class="text-uppercase text-muted small fw-bold mb-1">ការធ្វើរោគវិនិច្ឆ័យសម្រាប់</h5>
                         <h3 class="fw-bold text-dark mb-0">{{ case.final_disease.name if case.final_disease else 'មិនស្គាល់' }}</h3>
                         {% if case.final_disease and case.final_disease.category %}
-                        <span class="badge bg-primary bg-opacity-10 text-primary mt-2">{{ case.final_disease.category.name }}</span>
+                        <span class="badge rounded-pill bg-light text-dark border px-3 py-1.5 mt-2 fw-semibold" style="font-size: 0.82rem;">
+                            <i class="bi bi-tag-fill text-success me-1"></i>{{ case.final_disease.category.name }}
+                        </span>
                         {% endif %}
                     </div>
                     <div class="text-end">
@@ -199,11 +176,11 @@
                 {% if case.confidence is not none %}
                 <div class="bg-light p-4 border-bottom">
                     <div class="d-flex justify-content-between align-items-end mb-2">
-                        <span class="fw-bold text-muted text-uppercase small">កម្រិតទំនុកចិត្ត</span>
-                        <span class="fw-bold fs-4 {% if case.confidence > 80 %}text-success{% elif case.confidence > 50 %}text-warning{% else %}text-danger{% endif %}">{{ case.confidence }}%</span>
+                        <span class="fw-bold text-muted text-uppercase small">កម្រិតទំនុកចិត្ត (AI Match Confidence)</span>
+                        <span class="fw-bold fs-4 {% if case.confidence >= 70 %}text-success{% elif case.confidence >= 40 %}text-warning-emphasis{% else %}text-danger{% endif %}">{{ case.confidence }}%</span>
                     </div>
                     <div class="progress" style="height: 8px;">
-                        <div class="progress-bar {% if case.confidence > 80 %}bg-success{% elif case.confidence > 50 %}bg-warning{% else %}bg-danger{% endif %}" style="width: {{ case.confidence }}%"></div>
+                        <div class="progress-bar {% if case.confidence >= 70 %}bg-success{% elif case.confidence >= 40 %}bg-warning{% else %}bg-danger{% endif %}" style="width: {{ case.confidence }}%"></div>
                     </div>
                 </div>
                 {% endif %}
@@ -248,59 +225,96 @@
                             <p class="text-secondary mb-0">{{ case.final_disease.description }}</p>
                         </div>
                         <div class="mb-4">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <h6 class="fw-bold text-uppercase text-muted small mb-0">ការព្យាបាល</h6>
-                                {% set tp = case.treatment_progress %}
-                                {% if tp.total %}
-                                <span class="small fw-bold text-success" id="treatmentProgressLabel">{{ tp.done }}/{{ tp.total }}</span>
-                                {% endif %}
-                            </div>
+                            {% set tp = case.treatment_progress %}
                             {% set steps = case.treatment_steps %}
-                            {% if steps %}
                             {% set owner = case.user_id == current_user.id %}
-                            <div class="p-3 bg-success bg-opacity-10 rounded border border-success border-opacity-10">
-                                {# Segmented, numbered progress stepper #}
-                                <div class="treatment-stepper" id="treatmentStepper" role="progressbar"
-                                     aria-valuemin="0" aria-valuemax="{{ tp.total }}" aria-valuenow="{{ tp.done }}">
-                                    {% for step in steps %}
-                                    <div class="tstep-node {% if step.done %}is-done{% endif %}"
-                                         data-step-key="{{ step.key }}">
-                                        <span class="tstep-dot">
-                                            {% if step.done %}<i class="bi bi-check-lg"></i>{% else %}{{ loop.index }}{% endif %}
+                            
+                            <div class="treatment-card-wrapper">
+                                <!-- Treatment Header Bar with Live Progress -->
+                                <div class="treatment-header-bar">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="rounded-circle bg-white text-success d-flex align-items-center justify-content-center shadow-sm" style="width: 28px; height: 28px; font-size: 0.9rem;">
+                                                <i class="bi bi-capsule"></i>
+                                            </span>
+                                            <h6 class="fw-bold mb-0 text-dark">ការព្យាបាល (Treatment Plan)</h6>
+                                        </div>
+                                        {% if tp.total %}
+                                        {% set pct = (tp.done / tp.total * 100)|round|int %}
+                                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-2.5 py-1" id="treatmentProgressLabel">
+                                            <i class="bi bi-check2-circle me-1"></i><span id="treatmentDoneCount">{{ tp.done }}</span>/{{ tp.total }} ជំហាន (<span id="treatmentPercent">{{ pct }}</span>%)
                                         </span>
-                                        <span class="tstep-caption text-truncate">{{ step.text }}</span>
+                                        {% endif %}
                                     </div>
-                                    {% endfor %}
+
+                                    {% if tp.total %}
+                                    <div class="treatment-progress-track">
+                                        <div class="treatment-progress-bar-fill" id="treatmentProgressBar" style="width: {{ pct }}%;"></div>
+                                    </div>
+                                    {% endif %}
                                 </div>
 
-                                <div class="treatment-checklist d-flex flex-column gap-2"
-                                     data-case-id="{{ case.id }}"
-                                     data-toggle-url="{{ url_for('expert_system.cases_treatment_step', case_id=case.id) }}"
-                                     data-can-edit="{{ '1' if owner else '0' }}">
-                                    {% for step in steps %}
-                                    <label class="form-check treatment-step {% if step.done %}is-done{% endif %} m-0">
-                                        <span class="tstep-index">{{ loop.index }}</span>
-                                        <input class="form-check-input treatment-step-check" type="checkbox"
-                                               id="tstep-{{ step.key }}"
-                                               data-step-key="{{ step.key }}"
-                                               {% if step.done %}checked{% endif %}
-                                               {% if not owner %}disabled{% endif %}>
-                                        <span class="form-check-label {% if step.done %}text-decoration-line-through text-muted{% endif %}">
-                                            {{ step.text }}
-                                            {% if step.note %}<span class="d-block small text-muted fst-italic">{{ step.note }}</span>{% endif %}
-                                        </span>
-                                    </label>
-                                    {% endfor %}
+                                <!-- Treatment Steps List -->
+                                <div class="p-3">
+                                    {% if steps %}
+                                    <!-- Celebration Banner (shown when 100% complete) -->
+                                    <div class="treatment-celebration-banner mb-3 {% if tp.done < tp.total %}d-none{% endif %}" id="treatmentAllDoneBanner">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <i class="bi bi-patch-check-fill fs-5"></i>
+                                            <span class="fw-bold small">អបអរសាទរ! ជំហានព្យាបាលទាំងអស់ត្រូវបានអនុវត្តរួចរាល់។ (All steps completed!)</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="treatment-checklist d-flex flex-column gap-2"
+                                         data-case-id="{{ case.id }}"
+                                         data-toggle-url="{{ url_for('expert_system.cases_treatment_step', case_id=case.id) }}"
+                                         data-can-edit="{{ '1' if owner else '0' }}"
+                                         data-total-steps="{{ tp.total }}">
+                                        {% for step in steps %}
+                                        <label class="treatment-step-card {% if step.done %}is-done{% endif %}" for="tstep-{{ step.key }}" data-step-key="{{ step.key }}" data-step-index="{{ loop.index }}">
+                                            <input class="treatment-check-box treatment-step-check" type="checkbox"
+                                                   id="tstep-{{ step.key }}"
+                                                   data-step-key="{{ step.key }}"
+                                                   {% if step.done %}checked{% endif %}
+                                                   {% if not owner %}disabled{% endif %}>
+                                            
+                                            <div class="flex-grow-1">
+                                                <div class="d-flex align-items-center justify-content-between gap-1 mb-1">
+                                                    <span class="treatment-step-badge">
+                                                        {% if step.done %}
+                                                        <i class="bi bi-check-circle-fill"></i> បានអនុវត្ត
+                                                        {% else %}
+                                                        ជំហានទី {{ loop.index }}
+                                                        {% endif %}
+                                                    </span>
+                                                </div>
+                                                
+                                                <div class="treatment-step-title fw-bold {% if step.done %}text-decoration-line-through text-muted{% else %}text-dark{% endif %}" style="font-size: 0.92rem;">
+                                                    {{ step.text }}
+                                                </div>
+                                                
+                                                {% if step.note %}
+                                                <div class="treatment-step-note">
+                                                    <i class="bi bi-info-circle text-primary"></i>
+                                                    <span>{{ step.note }}</span>
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                        </label>
+                                        {% endfor %}
+                                    </div>
+
+                                    {% if not owner %}
+                                    <p class="small text-muted mb-0 mt-3 d-flex align-items-center gap-1">
+                                        <i class="bi bi-lock me-1"></i> មានតែម្ចាស់ករណីទេដែលអាចកត់ត្រាការអនុវត្ត (Read-only for visitors)
+                                    </p>
+                                    {% endif %}
+
+                                    {% else %}
+                                    <p class="mb-0 text-secondary" style="white-space: pre-line;">{{ case.final_disease.treatment }}</p>
+                                    {% endif %}
                                 </div>
-                                {% if not owner %}
-                                <p class="small text-muted mb-0 mt-2"><i class="bi bi-info-circle me-1"></i>មានតែម្ចាស់ករណីទេដែលអាចធីកជំហានបាន។</p>
-                                {% endif %}
                             </div>
-                            {% else %}
-                            <div class="p-3 bg-success bg-opacity-10 rounded border border-success border-opacity-10">
-                                <p class="mb-0">{{ case.final_disease.treatment }}</p>
-                            </div>
-                            {% endif %}
                         </div>
                         {% if case.final_disease.prevention %}
                         <div>
@@ -606,8 +620,10 @@ document.addEventListener('DOMContentLoaded', function() {
         const toggleUrl = checklist.dataset.toggleUrl;
         const csrf = document.querySelector('meta[name="csrf-token"]')?.content
                      || (document.querySelector('input[name="csrf_token"]')?.value || '');
-        const stepper = document.getElementById('treatmentStepper');
-        const label = document.getElementById('treatmentProgressLabel');
+        const doneCountEl = document.getElementById('treatmentDoneCount');
+        const percentEl   = document.getElementById('treatmentPercent');
+        const progressBar = document.getElementById('treatmentProgressBar');
+        const allDoneBanner = document.getElementById('treatmentAllDoneBanner');
 
         checklist.querySelectorAll('.treatment-step-check').forEach(box => {
             box.addEventListener('change', async () => {
@@ -627,36 +643,40 @@ document.addEventListener('DOMContentLoaded', function() {
                     const data = await res.json();
                     if (!res.ok || !data.ok) throw new Error('toggle failed');
 
-                    // Update the checklist row's visual done-state
-                    const row = box.closest('.treatment-step');
-                    const lbl = row ? row.querySelector('.form-check-label') : null;
-                    if (row) row.classList.toggle('is-done', done);
-                    if (lbl) {
-                        lbl.classList.toggle('text-decoration-line-through', done);
-                        lbl.classList.toggle('text-muted', done);
-                    }
+                    // Update the card's visual done-state
+                    const card = box.closest('.treatment-step-card');
+                    const title = card ? card.querySelector('.treatment-step-title') : null;
+                    const badge = card ? card.querySelector('.treatment-step-badge') : null;
+                    const stepIndex = card ? card.dataset.stepIndex : '';
 
-                    // Update the matching stepper node (dot fill + check icon)
-                    if (stepper) {
-                        const node = stepper.querySelector('.tstep-node[data-step-key="' + stepKey + '"]');
-                        if (node) {
-                            node.classList.toggle('is-done', done);
-                            const dot = node.querySelector('.tstep-dot');
-                            if (dot) {
-                                if (done) {
-                                    dot.innerHTML = '<i class="bi bi-check-lg"></i>';
-                                } else {
-                                    // restore the step's ordinal number
-                                    const nodes = Array.from(stepper.querySelectorAll('.tstep-node'));
-                                    dot.textContent = String(nodes.indexOf(node) + 1);
-                                }
-                            }
+                    if (card) card.classList.toggle('is-done', done);
+                    if (title) {
+                        title.classList.toggle('text-decoration-line-through', done);
+                        title.classList.toggle('text-muted', done);
+                        title.classList.toggle('text-dark', !done);
+                    }
+                    if (badge) {
+                        if (done) {
+                            badge.innerHTML = '<i class="bi bi-check-circle-fill"></i> បានអនុវត្ត';
+                        } else {
+                            badge.textContent = 'ជំហានទី ' + stepIndex;
                         }
                     }
 
-                    // Update the "done/total" counter + ARIA
-                    if (label && data.progress) label.textContent = data.progress.done + '/' + data.progress.total;
-                    if (stepper && data.progress) stepper.setAttribute('aria-valuenow', data.progress.done);
+                    // Update progress meters
+                    if (data.progress) {
+                        const total = data.progress.total;
+                        const doneCount = data.progress.done;
+                        const pct = Math.round((doneCount / total) * 100);
+
+                        if (doneCountEl) doneCountEl.textContent = doneCount;
+                        if (percentEl) percentEl.textContent = pct;
+                        if (progressBar) progressBar.style.width = pct + '%';
+
+                        if (allDoneBanner) {
+                            allDoneBanner.classList.toggle('d-none', doneCount < total);
+                        }
+                    }
                 } catch (err) {
                     box.checked = !done; // revert on failure
                 } finally {
@@ -810,7 +830,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div id="lbCat" class="text-white-50 small fw-semibold text-uppercase" style="letter-spacing:.05em;"></div>
                     <div id="lbName" class="text-white small mt-1" style="word-break:break-all;max-width:60vw;"></div>
                 </div>
-                <span id="lbCounter" class="badge bg-white bg-opacity-10 text-white fw-normal me-3 px-3 py-2 rounded-pill"></span>
+                <span id="lbCounter" class="badge text-white fw-normal me-3 px-3 py-2 rounded-pill" style="background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.2);"></span>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
 

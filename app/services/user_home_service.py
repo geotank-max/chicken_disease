@@ -27,7 +27,7 @@ class UserHomeService:
         }
 
     @staticmethod
-    def get_recent_cases(user_id: int, limit: int = 3) -> list[Case]:
+    def get_recent_cases(user_id: int, limit: int = 5) -> list[Case]:
         """Return the user's most recent cases."""
         return (
             Case.query
@@ -36,3 +36,10 @@ class UserHomeService:
             .limit(limit)
             .all()
         )
+
+    @staticmethod
+    def get_featured_disease():
+        """Return a featured disease for knowledge spotlight."""
+        from app.models.expert_system import Disease
+        return Disease.query.order_by(Disease.id.asc()).first()
+

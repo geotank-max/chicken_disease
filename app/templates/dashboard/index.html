@@ -6,15 +6,15 @@
 
 {% block content %}
 <!-- Welcome Banner -->
-<div class="card border-0 shadow-sm mb-4 bg-primary bg-gradient text-white overflow-hidden">
+<div class="card border-0 mb-4 banner-emerald overflow-hidden">
     <div class="card-body p-4">
         <div class="row align-items-center">
             <div class="col-md-8">
-                <h4 class="fw-bold mb-1">Welcome back, {{ current_user.full_name }}!</h4>
-                <p class="mb-0 opacity-75">Here's what's happening with your chicken diagnosis system today.</p>
+                <h4 class="fw-bold mb-1 text-white">Welcome back, {{ current_user.full_name }}!</h4>
+                <p class="mb-0 text-white-50">Here's what's happening with your chicken diagnosis system today.</p>
             </div>
             <div class="col-md-4 text-end d-none d-md-block">
-                <i class="bi bi-speedometer2 display-4 opacity-25"></i>
+                <i class="bi bi-speedometer2 display-4 text-white opacity-25"></i>
             </div>
         </div>
     </div>
@@ -439,12 +439,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 datasets: [{
                     label: 'Cases',
                     data: casesData.map(d => d.count),
-                    borderColor: '#2563eb',
-                    backgroundColor: 'rgba(37,99,235,0.08)',
+                    borderColor: '#059669',
+                    backgroundColor: 'rgba(5, 150, 105, 0.12)',
                     fill: true,
                     tension: 0.4,
                     borderWidth: 2.5,
-                    pointBackgroundColor: '#2563eb',
+                    pointBackgroundColor: '#059669',
                     pointBorderColor: '#fff',
                     pointBorderWidth: 2,
                     pointRadius: casesData.length > 31 ? 0 : 3,

@@ -13,7 +13,7 @@
         .label { font-weight: bold; color: #374151; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
         .box { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 12px; }
         .badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 10px; font-weight: bold; }
-        .badge-blue { background: #eff6ff; color: #2563eb; }
+        .badge-blue { background: #ecfdf5; color: #059669; }
         .badge-red { background: #fef2f2; color: #dc2626; }
         .badge-green { background: #ecfdf5; color: #059669; }
         ul { padding-left: 18px; margin: 0; }
@@ -31,8 +31,8 @@
 <body>
     {% if not pdf_mode %}
     <div class="no-print" style="margin-bottom: 20px;">
-        <button onclick="window.print()" style="padding: 8px 16px; cursor: pointer; background: #2563eb; color: white; border: none; border-radius: 4px;">Print</button>
-        <a href="{{ url_for('expert_system.cases_detail', case_id=case.id) }}" style="margin-left: 8px; color: #2563eb;">Back to Case</a>
+        <button onclick="window.print()" style="padding: 8px 16px; cursor: pointer; background: #059669; color: white; border: none; border-radius: 4px; font-weight: 600;">Print</button>
+        <a href="{{ url_for('expert_system.cases_detail', case_id=case.id) }}" style="margin-left: 8px; color: #059669; text-decoration: none; font-weight: 600;">Back to Case</a>
     </div>
     {% endif %}
 
