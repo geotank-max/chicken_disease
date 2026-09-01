@@ -217,6 +217,157 @@
                 </div>
                 {% endif %}
 
+                {# ── Possible Diagnoses Section ───────────────────────────── #}
+                <div class="p-4 border-bottom bg-white">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                                <i class="bi bi-diagram-3-fill"></i>
+                            </span>
+                            <div>
+                                <h6 class="fw-bold text-dark mb-0">លទ្ធផលវិនិច្ឆ័យដែលអាចកើតមាន (Possible Diagnoses)</h6>
+                                <span class="small text-muted">
+                                    {% if case.possible_diagnoses %}
+                                    រកឃើញ {{ case.possible_diagnoses|length }} ជំងឺដែលអាចកើតមានផ្អែកលើការវិភាគរោគសញ្ញា
+                                    {% else %}
+                                    លទ្ធផលរោគវិនិច្ឆ័យចម្បង
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+                        {% if case.possible_diagnoses %}
+                        <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-3 py-1.5 fw-bold">
+                            {{ case.possible_diagnoses|length }} លទ្ធផល
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    <div class="d-flex flex-column gap-3">
+                        {% if case.possible_diagnoses %}
+                            {% for pd in case.possible_diagnoses %}
+                            <div class="p-3 rounded-3 border {% if pd.rank == 1 %}border-success border-2 bg-success bg-opacity-10 shadow-xs{% else %}bg-light bg-opacity-50{% endif %}">
+                                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-2">
+                                    <div class="d-flex flex-wrap align-items-center gap-2">
+                                        {% if pd.rank == 1 %}
+                                        <span class="badge bg-success px-2.5 py-1.5 fw-bold">
+                                            <i class="bi bi-patch-check-fill me-1"></i>ទំនងបំផុត (Most likely)
+                                        </span>
+                                        {% else %}
+                                        <span class="badge bg-secondary bg-opacity-25 text-dark px-2.5 py-1 fw-bold border">
+                                            ជម្រើសទី {{ pd.rank }}
+                                        </span>
+                                        {% endif %}
+
+                                        <h5 class="fw-bold mb-0 {% if pd.rank == 1 %}text-success{% else %}text-dark{% endif %}">
+                                            {{ pd.disease.name }}
+                                        </h5>
+
+                                        {% if pd.disease.category %}
+                                        <span class="badge bg-white text-secondary border">{{ pd.disease.category.name }}</span>
+                                        {% endif %}
+
+                                        {% if pd.disease.severity %}
+                                        <span class="badge bg-{{ pd.disease.severity_color }} bg-opacity-10 text-{{ pd.disease.severity_color }} border border-{{ pd.disease.severity_color }} border-opacity-25">
+                                            {{ pd.disease.severity_label_km }}
+                                        </span>
+                                        {% endif %}
+
+                                        {% if pd.disease.is_contagious %}
+                                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25">
+                                            <i class="bi bi-exclamation-triangle-fill me-1"></i>{{ pd.disease.contagious_label_km }}
+                                        </span>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="text-md-end">
+                                            <span class="small text-muted d-block" style="font-size: 0.75rem;">កម្រិតទំនុកចិត្ត</span>
+                                            <span class="fw-bold fs-5 text-{{ pd.confidence_color }}">{{ pd.confidence }}%</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="progress mb-2" style="height: 6px;">
+                                    <div class="progress-bar bg-{{ pd.confidence_color }}" style="width: {{ pd.confidence }}%"></div>
+                                </div>
+
+                                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 small text-muted">
+                                    <span>
+                                        <i class="bi bi-diagram-2 me-1"></i>
+                                        {% if pd.rule %}
+                                        {{ pd.rule.title }} &bull;
+                                        {% endif %}
+                                        ផ្ទៀងផ្ទាត់លើ <strong>{{ pd.matched_symptom_count }}/{{ pd.required_symptom_count }}</strong> រោគសញ្ញា
+                                    </span>
+
+                                    {% if pd.rank > 1 %}
+                                    <button class="btn btn-sm btn-link text-decoration-none p-0 text-primary fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#pd-details-{{ pd.id }}" aria-expanded="false">
+                                        <i class="bi bi-info-circle me-1"></i>ព័ត៌មាន & វិធីព្យាបាល <i class="bi bi-chevron-down ms-1"></i>
+                                    </button>
+                                    {% endif %}
+                                </div>
+
+                                {% if pd.rank > 1 %}
+                                <div class="collapse mt-3" id="pd-details-{{ pd.id }}">
+                                    <div class="card card-body bg-white border small p-3 rounded-2 shadow-xs">
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <strong class="text-dark d-block mb-1"><i class="bi bi-card-text me-1 text-primary"></i>ការពិពណ៌នា:</strong>
+                                                <p class="text-muted mb-0">{{ pd.disease.description }}</p>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <strong class="text-dark d-block mb-1"><i class="bi bi-capsule me-1 text-success"></i>វិធីព្យាបាល:</strong>
+                                                <p class="text-muted mb-0">{{ pd.disease.treatment }}</p>
+                                            </div>
+                                            {% if pd.disease.prevention %}
+                                            <div class="col-12 border-top pt-2 mt-2">
+                                                <strong class="text-dark d-block mb-1"><i class="bi bi-shield-check me-1 text-info"></i>ការការពារ:</strong>
+                                                <p class="text-muted mb-0">{{ pd.disease.prevention }}</p>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            {# Fallback for legacy single-diagnosis cases #}
+                            {% if case.final_disease %}
+                            <div class="p-3 rounded-3 border border-success border-2 bg-success bg-opacity-10">
+                                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-2">
+                                    <div class="d-flex flex-wrap align-items-center gap-2">
+                                        <span class="badge bg-success px-2.5 py-1.5 fw-bold">
+                                            <i class="bi bi-patch-check-fill me-1"></i>ទំនងបំផុត (Most likely)
+                                        </span>
+                                        <h5 class="fw-bold mb-0 text-success">{{ case.final_disease.name }}</h5>
+                                        {% if case.final_disease.category %}
+                                        <span class="badge bg-white text-secondary border">{{ case.final_disease.category.name }}</span>
+                                        {% endif %}
+                                        {% if case.final_disease.severity %}
+                                        <span class="badge bg-{{ case.final_disease.severity_color }} bg-opacity-10 text-{{ case.final_disease.severity_color }} border border-{{ case.final_disease.severity_color }} border-opacity-25">
+                                            {{ case.final_disease.severity_label_km }}
+                                        </span>
+                                        {% endif %}
+                                    </div>
+                                    {% if case.confidence is not none %}
+                                    <div class="text-md-end">
+                                        <span class="small text-muted d-block" style="font-size: 0.75rem;">កម្រិតទំនុកចិត្ត</span>
+                                        <span class="fw-bold fs-5 text-success">{{ case.confidence }}%</span>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                {% if case.confidence is not none %}
+                                <div class="progress" style="height: 6px;">
+                                    <div class="progress-bar bg-success" style="width: {{ case.confidence }}%"></div>
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+
                 <div class="row g-0">
                     <div class="col-md-7 p-4 border-end">
                         {% if case.final_disease %}
@@ -588,7 +739,7 @@
                 {% endif %}
             </div>
         </div>
-        {% elif (current_user.has_role('Admin') or current_user.has_role('Doctor')) and case.feedback_rating %}
+        {% elif current_user.is_authenticated and (current_user.has_role('Admin') or current_user.has_role('Doctor')) and case.feedback_rating %}
         <div class="card border-0 shadow-sm mt-4">
             <div class="card-header bg-white py-3">
                 <h5 class="mb-0 fw-bold"><i class="bi bi-chat-heart me-2 text-success"></i>មតិប្រតិកម្មអ្នកប្រើ</h5>

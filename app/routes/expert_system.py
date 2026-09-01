@@ -176,8 +176,9 @@ def commit_pending_diagnosis_case(user_id: int):
     saved_case = DiagnosisService.record_case(
         user_id,
         selected_ids,
-        diagnosis_results[0] if diagnosis_results else None,
+        top_result=diagnosis_results[0] if diagnosis_results else None,
         flock_data=flock_data,
+        diagnosis_results=diagnosis_results,
     )
 
     # Commit any staged photos now that we have a case ID

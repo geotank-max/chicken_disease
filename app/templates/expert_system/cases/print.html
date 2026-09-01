@@ -47,7 +47,7 @@
 
     {% if case.final_disease %}
     <div class="section">
-        <div class="label">Diagnosed Disease</div>
+        <div class="label">Diagnosed Disease (Primary / Top Match)</div>
         <div class="box">
             <strong style="font-size: 16px;">{{ case.final_disease.name }}</strong>
             {% if case.confidence is not none %}
@@ -61,6 +61,49 @@
             {% endif %}
         </div>
     </div>
+
+    {% if case.possible_diagnoses and case.possible_diagnoses|length > 0 %}
+    <div class="section">
+        <div class="label">All Possible Diagnoses / Differential Diagnoses ({{ case.possible_diagnoses|length }})</div>
+        <table style="width: 100%; border-collapse: collapse; margin-top: 4px; font-size: 11px;">
+            <thead>
+                <tr style="background: #f3f4f6; border-bottom: 1px solid #d1d5db; text-align: left;">
+                    <th style="padding: 6px 8px; width: 65px;">Rank</th>
+                    <th style="padding: 6px 8px;">Disease Name</th>
+                    <th style="padding: 6px 8px; width: 110px;">Category</th>
+                    <th style="padding: 6px 8px; width: 80px;">Severity</th>
+                    <th style="padding: 6px 8px; width: 100px;">Symptom Match</th>
+                    <th style="padding: 6px 8px; width: 80px; text-align: right;">Confidence</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pd in case.possible_diagnoses %}
+                <tr style="border-bottom: 1px solid #e5e7eb; {% if pd.rank == 1 %}background: #f0fdf4; font-weight: 600;{% endif %}">
+                    <td style="padding: 6px 8px;">
+                        {% if pd.rank == 1 %}
+                        <span style="background: #059669; color: white; padding: 1px 5px; border-radius: 3px; font-size: 9px;">#1 Most likely</span>
+                        {% else %}
+                        #{{ pd.rank }}
+                        {% endif %}
+                    </td>
+                    <td style="padding: 6px 8px;">
+                        {{ pd.disease.name }}
+                        {% if pd.disease.is_contagious %}
+                        <span style="color: #dc2626; font-size: 9px; margin-left: 4px;">[Contagious]</span>
+                        {% endif %}
+                    </td>
+                    <td style="padding: 6px 8px; color: #4b5563;">{{ pd.disease.category.name if pd.disease.category else '-' }}</td>
+                    <td style="padding: 6px 8px; color: #4b5563;">{{ pd.disease.severity or '-' }}</td>
+                    <td style="padding: 6px 8px; color: #4b5563;">{{ pd.matched_symptom_count }}/{{ pd.required_symptom_count }} matched</td>
+                    <td style="padding: 6px 8px; text-align: right; color: {% if pd.confidence >= 70 %}#059669{% elif pd.confidence >= 40 %}#d97706{% else %}#dc2626{% endif %};">
+                        {{ pd.confidence }}%
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
 
     <div class="section">
         <div class="label">Description</div>

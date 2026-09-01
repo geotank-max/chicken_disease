@@ -177,3 +177,28 @@ def migrate_create_tables() -> None:
             "CREATE INDEX ix_tbl_case_treatment_progress_case_id ON tbl_case_treatment_progress (case_id)"
         ))
         db.session.commit()
+
+    # ── tbl_case_diagnoses ──────────────────────────────────────────────────
+    # Stores all possible diagnosis outcomes evaluated for a case during inference.
+    if not _table_exists(inspector, "tbl_case_diagnoses"):
+        db.session.execute(text("""
+            CREATE TABLE tbl_case_diagnoses (
+                id                    SERIAL PRIMARY KEY,
+                case_id               INTEGER NOT NULL
+                                          REFERENCES tbl_cases(id) ON DELETE CASCADE,
+                disease_id            INTEGER NOT NULL
+                                          REFERENCES tbl_diseases(id),
+                rule_id               INTEGER
+                                          REFERENCES tbl_rules(id) ON DELETE SET NULL,
+                confidence            FLOAT NOT NULL,
+                matched_symptom_count INTEGER NOT NULL DEFAULT 0,
+                required_symptom_count INTEGER NOT NULL DEFAULT 0,
+                rank                  INTEGER NOT NULL DEFAULT 1,
+                created_at            TIMESTAMP NOT NULL DEFAULT NOW()
+            )
+        """))
+        db.session.execute(text(
+            "CREATE INDEX ix_tbl_case_diagnoses_case_id ON tbl_case_diagnoses (case_id)"
+        ))
+        db.session.commit()
+

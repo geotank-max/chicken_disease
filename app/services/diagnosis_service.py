@@ -1,4 +1,4 @@
-from app.models.expert_system import Symptom, Rule, Case, CASE_STATUS_PENDING
+from app.models.expert_system import Symptom, Rule, Case, CaseDiagnosis, CASE_STATUS_PENDING
 from extensions import db
 
 MIN_CONFIDENCE_THRESHOLD = 30.0
@@ -93,12 +93,23 @@ class DiagnosisService:
         )
 
     @staticmethod
-    def record_case(user_id, selected_symptom_ids, top_result, flock_data=None):
+    def record_case(user_id, selected_symptom_ids, top_result=None, flock_data=None, diagnosis_results=None):
         flock_data = flock_data or {}
+
+        # Resolve top_result and diagnosis_results
+        if diagnosis_results and not top_result:
+            top_result = diagnosis_results[0]
+        elif top_result and not diagnosis_results:
+            diagnosis_results = [top_result]
+
+        top_disease = top_result.get("disease") if top_result else None
+        top_disease_id = top_disease.id if (top_disease and hasattr(top_disease, "id")) else top_disease
+        top_confidence = top_result.get("confidence") if top_result else None
+
         case = Case(
             user_id=user_id,
-            disease_id=top_result["disease"].id if top_result else None,
-            confidence=top_result["confidence"] if top_result else None,
+            disease_id=top_disease_id,
+            confidence=top_confidence,
             flock_size=flock_data.get("flock_size") or None,
             bird_age=flock_data.get("bird_age") or None,
             breed=flock_data.get("breed") or None,
@@ -120,6 +131,28 @@ class DiagnosisService:
         )
         if selected_symptom_ids:
             case.symptoms = Symptom.query.filter(Symptom.id.in_(selected_symptom_ids)).all()
+
         db.session.add(case)
+        db.session.flush()
+
+        if diagnosis_results:
+            for rank_idx, result in enumerate(diagnosis_results, start=1):
+                disease_obj = result.get("disease")
+                disease_id = disease_obj.id if (disease_obj and hasattr(disease_obj, "id")) else disease_obj
+                rule_obj = result.get("rule")
+                rule_id = rule_obj.id if (rule_obj and hasattr(rule_obj, "id")) else rule_obj
+
+                if disease_id:
+                    case_diag = CaseDiagnosis(
+                        case_id=case.id,
+                        disease_id=disease_id,
+                        rule_id=rule_id,
+                        confidence=float(result.get("confidence", 0.0)),
+                        matched_symptom_count=int(result.get("matched_count", 0)),
+                        required_symptom_count=int(result.get("required_count", 0)),
+                        rank=rank_idx,
+                    )
+                    db.session.add(case_diag)
+
         db.session.commit()
         return case
