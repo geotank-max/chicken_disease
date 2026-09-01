@@ -353,6 +353,22 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "km": "ចាក់គ្រប់កម្រិត",
         "en": "Fully Vaccinated",
     },
+    "opt.vax_completed": {
+        "km": "បានចាក់គ្រប់",
+        "en": "Fully Vaccinated",
+    },
+    "opt.coop_good": {
+        "km": "ល្អ/ស្អាត",
+        "en": "Good / Clean",
+    },
+    "opt.coop_fair": {
+        "km": "មធ្យម",
+        "en": "Fair",
+    },
+    "opt.coop_poor": {
+        "km": "មិនល្អ/កខ្វក់",
+        "en": "Poor / Dirty",
+    },
     "opt.coop_clean": {
         "km": "ស្អាត",
         "en": "Clean",
@@ -572,218 +588,502 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "en": "Results",
     },
 
-    # ── Diagnosis Step 1: Flock Information ───────────────────────────
-    "diag.step1_title": {
-        "km": "ជំហានទី ១: បញ្ចូលព័ត៌មានហ្វូងមាន់",
-        "en": "Step 1: Flock Information & Clinical Context",
+    # ── Diagnosis Step 1: Substep Progress & Pills ───────────────────
+    "diag.step1_progress_sub1": {
+        "km": "ជំហានទី 1 នៃ 4: ព័ត៌មានមូលដ្ឋាន",
+        "en": "Step 1 of 4: Basic Flock Info",
     },
-    "diag.step1_desc": {
-        "km": "ព័ត៌មានលម្អិតជួយឱ្យប្រព័ន្ធ និងវេជ្ជបណ្ឌិតវិភាគស្ថានភាពបានកាន់តែត្រឹមត្រូវ។",
-        "en": "Detailed context improves diagnostic accuracy and helps veterinarian verification.",
+    "diag.step1_progress_sub2": {
+        "km": "ជំហានទី 2 នៃ 4: សុខភាព & ការស្លាប់",
+        "en": "Step 2 of 4: Health & Mortality",
+    },
+    "diag.step1_progress_sub3": {
+        "km": "ជំហានទី 3 នៃ 4: បរិស្ថាន & ទ្រុង",
+        "en": "Step 3 of 4: Environment & Coop",
+    },
+    "diag.step1_progress_sub4": {
+        "km": "ជំហានទី 4 នៃ 4: រូបភាព (ស្រេចចិត្ត)",
+        "en": "Step 4 of 4: Photos (Optional)",
+    },
+    "diag.substep1_name": {
+        "km": "1. ព័ត៌មានមូលដ្ឋាន",
+        "en": "1. Basic Info",
+    },
+    "diag.substep1_sub": {
+        "km": "ទំហំ អាយុ និងពូជ",
+        "en": "Size, age & breed",
+    },
+    "diag.substep2_name": {
+        "km": "2. សុខភាព & ការស្លាប់",
+        "en": "2. Health & Mortality",
+    },
+    "diag.substep2_sub": {
+        "km": "មាន់ឈឺ ស្លាប់ ការស៊ីផឹក",
+        "en": "Sick/dead & intake",
+    },
+    "diag.substep3_name": {
+        "km": "3. បរិស្ថាន & ទ្រុង",
+        "en": "3. Environment & Coop",
+    },
+    "diag.substep3_sub": {
+        "km": "ទ្រុង វ៉ាក់សាំង និងអនាម័យ",
+        "en": "Housing & biosecurity",
+    },
+    "diag.substep4_name": {
+        "km": "4. រូបភាព (ស្រេចចិត្ត)",
+        "en": "4. Photos (Optional)",
+    },
+    "diag.substep4_sub": {
+        "km": "រូបភាពរោគសញ្ញាជាក់ស្តែង",
+        "en": "Symptom photos",
+    },
+
+    # ── Diagnosis Step 1 Sub-step 1: Basic Info ──────────────────────
+    "diag.substep1_header_title": {
+        "km": "ព័ត៌មានមូលដ្ឋាននៃហ្វូងមាន់",
+        "en": "Basic Flock Information",
+    },
+    "diag.substep1_header_sub": {
+        "km": "ព័ត៌មានទូទៅអំពីកសិដ្ឋាន និងហ្វូងមាន់",
+        "en": "General farm and flock details",
     },
     "diag.flock_size": {
-        "km": "ទំហំហ្វូងមាន់ (ក្បាល)",
+        "km": "ចំនួនមាន់ក្នុងហ្វូង (ក្បាល)",
         "en": "Flock Size (Birds)",
     },
     "diag.flock_size_ph": {
-        "km": "ឧ. 500",
-        "en": "e.g. 500",
+        "km": "ឧ. 100",
+        "en": "e.g. 100",
+    },
+    "diag.flock_size_help": {
+        "km": "ចំនួនមាន់សរុបទាំងអស់នៅក្នុងទ្រុង ឬចំការ",
+        "en": "Total number of chickens in the coop or farm",
     },
     "diag.bird_age": {
         "km": "អាយុមាន់",
         "en": "Bird Age",
     },
     "diag.bird_age_ph": {
-        "km": "ឧ. ៤ សប្តាហ៍ ឬ ៤៥ ថ្ងៃ",
-        "en": "e.g. 4 weeks or 45 days",
+        "km": "ឧ. ៧-៩ សប្ដាហ៍ ឬ ៤៥ ថ្ងៃ",
+        "en": "e.g. 7-9 weeks or 45 days",
+    },
+    "diag.bird_age_help": {
+        "km": "អាយុកាលគិតជាថ្ងៃ ឬសប្តាហ៍",
+        "en": "Age in days or weeks",
     },
     "diag.breed": {
-        "km": "ពូជមាន់",
+        "km": "ពូជ/ប្រភេទមាន់",
         "en": "Breed / Type",
     },
     "diag.breed_ph": {
-        "km": "ឧ. មាន់ស្រែ, មាន់សាច់ (Broiler), មាន់ពង",
+        "km": "ឧ. មាន់ស្រែ, មាន់សាច់, មាន់ពង",
         "en": "e.g. Broiler, Layer, Native/Local",
     },
     "diag.location": {
-        "km": "ទីតាំងកសិដ្ឋាន / ខេត្ត",
-        "en": "Farm Location / Province",
+        "km": "ទីតាំង/ខេត្ត",
+        "en": "Location / Province",
     },
     "diag.location_ph": {
         "km": "ឧ. ខេត្តកំពង់ចាម",
         "en": "e.g. Kampong Cham",
     },
+    "diag.btn_to_substep2": {
+        "km": "បន្តទៅសុខភាព & ការស្លាប់",
+        "en": "Continue to Health & Mortality",
+    },
+
+    # ── Diagnosis Step 1 Sub-step 2: Health & Mortality ──────────────
+    "diag.substep2_header_title": {
+        "km": "ស្ថានភាពសុខភាព និងមរណភាព",
+        "en": "Health & Mortality Data",
+    },
+    "diag.substep2_header_sub": {
+        "km": "ចំនួនមាន់ឈឺ ស្លាប់ និងការប្រែប្រួលរាងកាយ",
+        "en": "Sick count, mortality and daily intake changes",
+    },
     "diag.sick_count": {
-        "km": "ចំនួនមាន់ឈឺ",
+        "km": "ចំនួនមាន់ឈឺ (ក្បាល)",
         "en": "Number of Sick Birds",
     },
+    "diag.sick_count_ph": {
+        "km": "ឧ. 5",
+        "en": "e.g. 5",
+    },
     "diag.dead_count": {
-        "km": "ចំនួនមាន់ងាប់",
+        "km": "ចំនួនមាន់ស្លាប់ (ក្បាល)",
         "en": "Number of Dead Birds",
     },
+    "diag.dead_count_ph": {
+        "km": "ឧ. 2",
+        "en": "e.g. 2",
+    },
     "diag.duration": {
-        "km": "រយៈពេលចេញរោគសញ្ញា",
+        "km": "រយៈពេលចាប់ផ្តើមឈឺ",
         "en": "Symptom Duration",
     },
     "diag.duration_ph": {
-        "km": "ឧ. ២ ថ្ងៃ, ១ សប្តាហ៍",
-        "en": "e.g. 2 days, 1 week",
+        "km": "ឧ. ៣ ថ្ងៃ",
+        "en": "e.g. 3 days",
+    },
+    "diag.appetite": {
+        "km": "កម្រិតការស៊ីចំណី",
+        "en": "Feed Intake / Appetite",
+    },
+    "diag.water_intake": {
+        "km": "កម្រិតការផឹកទឹក",
+        "en": "Water Intake Level",
+    },
+    "diag.select_level": {
+        "km": "ជ្រើសរើសកម្រិត",
+        "en": "Select intake level",
+    },
+    "diag.egg_drop": {
+        "km": "ការធ្លាក់ចុះនៃការផលិតពង (ប្រសិនបើមាន់ពង)",
+        "en": "Egg Production Drop (if layers)",
+    },
+    "diag.egg_drop_ph": {
+        "km": "ឧ. 30%",
+        "en": "e.g. 30%",
+    },
+    "diag.btn_to_substep3": {
+        "km": "បន្តទៅបរិស្ថាន & ទ្រុង",
+        "en": "Continue to Environment & Coop",
+    },
+
+    # ── Diagnosis Step 1 Sub-step 3: Environment & Coop ──────────────
+    "diag.substep3_header_title": {
+        "km": "លក្ខខណ្ឌបរិស្ថាន និងការគ្រប់គ្រង",
+        "en": "Environment & Housing Conditions",
+    },
+    "diag.substep3_header_sub": {
+        "km": "ស្ថានភាពទ្រុង ការចាក់វ៉ាក់សាំង និងជីវសុវត្ថិភាព",
+        "en": "Coop conditions, vaccination and biosecurity",
+    },
+    "diag.coop_condition": {
+        "km": "លក្ខខណ្ឌទ្រុង",
+        "en": "Coop / Housing Condition",
+    },
+    "diag.select_coop": {
+        "km": "ជ្រើសរើសស្ថានភាពទ្រុង",
+        "en": "Select coop condition",
     },
     "diag.vaccination": {
         "km": "ស្ថានភាពចាក់វ៉ាក់សាំង",
         "en": "Vaccination Status",
     },
-    "diag.egg_drop": {
-        "km": "ការថយចុះពង (%)",
-        "en": "Egg Production Drop (%)",
+    "diag.select_vaccination": {
+        "km": "ជ្រើសរើស",
+        "en": "Select vaccination",
     },
     "diag.feed_changed": {
-        "km": "ទើបប្តូរចំណី ឬប្រភពទឹក?",
+        "km": "ប្តូរចំណី/ទឹកថ្មីៗ",
         "en": "Recent Feed / Water Change?",
     },
     "diag.new_birds": {
-        "km": "ទើបនាំចូលមាន់ថ្មី?",
-        "en": "New Birds Introduced Recently?",
+        "km": "បន្ថែមមាន់ថ្មីៗ",
+        "en": "New Birds Added Recently?",
     },
     "diag.nearby_sick": {
-        "km": "កសិដ្ឋានក្បែរខាងមានជំងឺ?",
+        "km": "ចំការជិតខាងមានមាន់ឈឺ",
         "en": "Nearby Farms Experiencing Outbreak?",
     },
-    "diag.coop_condition": {
-        "km": "ស្ថានភាពទ្រុងមាន់",
-        "en": "Coop / Housing Condition",
-    },
-    "diag.appetite": {
-        "km": "ការស៊ីចំណី",
-        "en": "Appetite / Feed Intake",
-    },
-    "diag.water_intake": {
-        "km": "ការផឹកទឹក",
-        "en": "Water Intake",
-    },
     "diag.notes": {
-        "km": "កំណត់សម្គាល់បន្ថែមពីម្ចាស់កសិដ្ឋាន",
+        "km": "កំណត់ចំណាំបន្ថែម",
         "en": "Additional Notes / Observations",
     },
     "diag.notes_ph": {
-        "km": "រៀបរាប់ពីការសង្កេតបន្ថែម ដូចជាការផ្តល់ថ្នាំកន្លងមក...",
-        "en": "Describe any additional observations, past treatments, or unusual symptoms...",
+        "km": "ឧ. ចាប់ផ្តើមឈឺក្រោយភ្លៀង ឬបន្ទាប់ពីប្តូរចំណី",
+        "en": "e.g. Started after heavy rain or feed change...",
     },
-    "diag.photos_title": {
-        "km": "រូបភាពរោគសញ្ញា (ជាជម្រើស)",
-        "en": "Symptom Photos (Optional)",
+    "diag.btn_to_substep4": {
+        "km": "បន្តទៅរូបភាព",
+        "en": "Continue to Photos",
     },
-    "diag.photos_desc": {
-        "km": "ការភ្ជាប់រូបភាពលាមក ភ្នែក ឬសរីរាង្គមាន់ ជួយឱ្យពេទ្យសត្វវាយតម្លៃបានលឿន និងច្បាស់។",
-        "en": "Uploading photos of droppings, head/eyes, or affected birds helps veterinarians review accurately.",
+
+    # ── Diagnosis Step 1 Sub-step 4: Photos (Optional) ───────────────
+    "diag.substep4_header_title": {
+        "km": "រូបភាពសញ្ញានៃជំងឺ",
+        "en": "Symptom Photos",
     },
-    "diag.photo_droppings": {
-        "km": "រូបភាពលាមក (Droppings)",
-        "en": "Droppings / Feces",
+    "diag.optional_badge": {
+        "km": "ស្រេចចិត្ត",
+        "en": "Optional",
     },
-    "diag.photo_eyes": {
-        "km": "រូបភាពភ្នែក/ក្បាល (Head & Eyes)",
-        "en": "Eyes & Head",
+    "diag.substep4_header_sub": {
+        "km": "ការភ្ជាប់រូបភាពជួយឱ្យពេទ្យសត្វវាយតម្លៃបានលឿន និងច្បាស់។",
+        "en": "Uploading photos helps veterinarians review and confirm cases accurately.",
     },
-    "diag.photo_body": {
-        "km": "រូបភាពទូទៅ/ដងខ្លួន (General Body)",
-        "en": "General Body / Feathers",
+    "diag.max_photos_badge": {
+        "km": "អតិបរមា 5 រូប / ប្រភេទ",
+        "en": "Max 5 photos / category",
     },
-    "diag.photo_legs": {
-        "km": "រូបភាពជើង/សន្លាក់ (Legs & Joints)",
-        "en": "Legs & Joints",
+    "diag.photos_guide": {
+        "km": "ជ្រើសប្រភេទរូបភាព រួចចុចប្រអប់ខាងក្រោមដើម្បីបន្ថែមរូបដែលច្បាស់។",
+        "en": "Select a photo category chip, then click below to add clear photos.",
     },
-    "diag.photo_organs": {
-        "km": "រូបភាពកោសល្យវិច័យ/សរីរាង្គ (Organs)",
-        "en": "Autopsy / Internal Organs",
+    "diag.add_photo_for": {
+        "km": "បន្ថែមរូបភាព:",
+        "en": "Add photos:",
+    },
+    "diag.choose_photo_btn": {
+        "km": "ជ្រើសរើសរូប",
+        "en": "Choose Files",
+    },
+    "diag.selected_photos_title": {
+        "km": "រូបភាពដែលបានជ្រើស",
+        "en": "Selected Photos",
+    },
+    "diag.no_photos_yet": {
+        "km": "មិនទាន់មានរូបភាពទេ (មិនចាំបាច់ក៏អាចបន្តបាន)",
+        "en": "No photos selected yet (optional to proceed)",
     },
     "diag.btn_to_symptoms": {
-        "km": "បន្តទៅជ្រើសរើសរោគសញ្ញា",
-        "en": "Continue to Select Symptoms",
+        "km": "បន្តទៅជ្រើសរើសរោគសញ្ញា (Step 2)",
+        "en": "Continue to Symptoms Selection (Step 2)",
+    },
+    "diag.photo_droppings_name": {
+        "km": "លាមក",
+        "en": "Droppings / Feces",
+    },
+    "diag.photo_droppings_hint": {
+        "km": "ថតរូបលាមក ពណ៌ ឬសភាព",
+        "en": "Photos showing color or texture of droppings",
+    },
+    "diag.photo_eyes_name": {
+        "km": "ភ្នែក / ក្បាល",
+        "en": "Eyes & Head",
+    },
+    "diag.photo_eyes_hint": {
+        "km": "ភ្នែកហើម ហូរទឹក ឬបិទ",
+        "en": "Swollen eyes, discharge, head lesions",
+    },
+    "diag.photo_comb_name": {
+        "km": "មកុដ / ពុកចង្កា",
+        "en": "Comb & Wattles",
+    },
+    "diag.photo_comb_hint": {
+        "km": "មកុដខ្មៅ ស្លេក ឬប្រែពណ៌",
+        "en": "Cyanotic, pale, or discolored comb",
+    },
+    "diag.photo_skin_name": {
+        "km": "ស្បែក / របួស",
+        "en": "Skin / Lesions",
+    },
+    "diag.photo_skin_hint": {
+        "km": "របួស ដំបៅ ឬកន្ទួលស្បែក",
+        "en": "Wounds, blisters, feather loss",
+    },
+    "diag.photo_dead_name": {
+        "km": "មាន់ស្លាប់",
+        "en": "Dead Birds",
+    },
+    "diag.photo_dead_hint": {
+        "km": "ចំនួន ឬសភាពមាន់ស្លាប់",
+        "en": "Dead bird count or posture",
+    },
+    "diag.photo_coop_name": {
+        "km": "ទ្រុង / បរិស្ថាន",
+        "en": "Coop / Housing",
+    },
+    "diag.photo_coop_hint": {
+        "km": "លក្ខខណ្ឌទ្រុង ឬជុំវិញ",
+        "en": "Housing ventilation and coop condition",
+    },
+    "diag.photo_other_name": {
+        "km": "ផ្សេងៗ",
+        "en": "Other Photos",
+    },
+    "diag.photo_other_hint": {
+        "km": "រូបភាពផ្សេងពីខាងលើ",
+        "en": "Any other supporting photos",
+    },
+    "diag.photos_size_exceeded": {
+        "km": "ទំហំសរុប {size} MB — លើសពី {max} MB។ សូមដកចេញរូបភាពខ្លះ។",
+        "en": "Total size {size} MB exceeds {max} MB limit. Please remove some photos.",
+    },
+    "diag.photos_total_size": {
+        "km": "ទំហំសរុប: {size} MB",
+        "en": "Total size: {size} MB",
     },
 
     # ── Diagnosis Step 2: Symptoms Selection ──────────────────────────
-    "diag.step2_title": {
-        "km": "ជំហានទី ២: ជ្រើសរើសរោគសញ្ញាដែលបានសង្កេតឃើញ",
-        "en": "Step 2: Select Observed Symptoms",
+    "diag.entered_info": {
+        "km": "ព័ត៌មានដែលបានបញ្ចូល",
+        "en": "Entered Flock Information",
     },
-    "diag.step2_desc": {
-        "km": "សូមគូសធីកលើរោគសញ្ញាទាំងអស់ដែលមាននៅក្នុងហ្វូងមាន់របស់អ្នក។",
-        "en": "Check all symptoms observed in your chicken flock to run the inference engine.",
+    "diag.edit_info": {
+        "km": "កែប្រែ",
+        "en": "Edit",
     },
-    "diag.search_symptoms_ph": {
-        "km": "ស្វែងរករោគសញ្ញា (ឧ. ក្អក, លាមកស, ហើមភ្នែក...)",
-        "en": "Search symptoms (e.g. coughing, white diarrhea, swollen eyes...)",
+    "diag.summary_flock": {
+        "km": "ចំនួនមាន់",
+        "en": "Flock Size",
     },
-    "diag.all_categories": {
+    "diag.summary_age": {
+        "km": "អាយុ",
+        "en": "Age",
+    },
+    "diag.summary_breed": {
+        "km": "ប្រភេទមាន់",
+        "en": "Breed",
+    },
+    "diag.summary_sick": {
+        "km": "មាន់ឈឺ",
+        "en": "Sick Birds",
+    },
+    "diag.summary_dead": {
+        "km": "មាន់ស្លាប់",
+        "en": "Dead Birds",
+    },
+    "diag.birds_unit": {
+        "km": "ក្បាល",
+        "en": "birds",
+    },
+    "diag.live_prediction_title": {
+        "km": "ជំងឺដែលអាចទំនង",
+        "en": "Likely Suspected Diseases",
+    },
+    "diag.live_prediction_subtitle": {
+        "km": "ការទស្សន៍ទាយតាមពេលវេលាជាក់ស្តែង",
+        "en": "Real-time AI Match Suggestions",
+    },
+    "diag.live_empty_hint": {
+        "km": "ជ្រើសរើសរោគសញ្ញា ដើម្បីមើលការទស្សន៍ទាយជំងឺ",
+        "en": "Select symptoms to view live disease predictions",
+    },
+    "diag.no_matching_disease": {
+        "km": "មិនទាន់មានជំងឺដែលត្រូវនឹងរោគសញ្ញាទេ",
+        "en": "No matching disease found for selected symptoms",
+    },
+    "diag.matched_symptoms_count": {
+        "km": "{count} រោគសញ្ញាត្រូវគ្នា",
+        "en": "{count} matched symptom(s)",
+    },
+    "diag.select_symptoms_title": {
+        "km": "ជ្រើសរើសរោគសញ្ញាដែលកើតមាន",
+        "en": "Select Observed Symptoms",
+    },
+    "diag.select_symptoms_desc": {
+        "km": "សូមជ្រើសរើសរោគសញ្ញាទាំងអស់ដែលបានសង្កេតឃើញ",
+        "en": "Select all symptoms observed in your flock",
+    },
+    "diag.clear_all": {
+        "km": "លុបការជ្រើសទាំងអស់",
+        "en": "Clear All",
+    },
+    "diag.search_placeholder": {
+        "km": "វាយ ដើម្បីស្វែងរករោគសញ្ញាភ្លាមៗ...",
+        "en": "Type to search symptoms instantly...",
+    },
+    "diag.all_categories_tab": {
         "km": "ទាំងអស់",
-        "en": "All Categories",
+        "en": "All Symptoms",
     },
-    "diag.selected_count": {
-        "km": "បានជ្រើសរើស {count} រោគសញ្ញា",
-        "en": "{count} symptom(s) selected",
+    "diag.symptoms_count_badge": {
+        "km": "{count} រោគសញ្ញា",
+        "en": "{count} symptoms",
     },
-    "diag.min_symptoms_warning": {
-        "km": "សូមជ្រើសរើសយ៉ាងហោចណាស់ ១ រោគសញ្ញាដើម្បីបន្ត។",
-        "en": "Please select at least 1 symptom to proceed with diagnosis.",
+    "diag.no_symptoms_found": {
+        "km": "រកមិនឃើញរោគសញ្ញាដែលត្រូវនឹងពាក្យស្វែងរកទេ។",
+        "en": "No symptoms matched your search query.",
     },
-    "diag.btn_run_diagnosis": {
-        "km": "ដំណើរការវិភាគជំងឺ",
-        "en": "Run Diagnosis Now",
+    "diag.btn_prev_category": {
+        "km": "ប្រភេទមុន",
+        "en": "Previous Category",
+    },
+    "diag.btn_next_category": {
+        "km": "ប្រភេទបន្ទាប់",
+        "en": "Next Category",
+    },
+    "diag.btn_analyze_symptoms": {
+        "km": "វិភាគរោគសញ្ញា",
+        "en": "Analyze Symptoms (Step 3)",
     },
 
-    # ── Diagnosis Step 3: Results ─────────────────────────────────────
-    "diag.step3_title": {
-        "km": "ជំហានទី ៣: លទ្ធផលវិភាគ និងការណែនាំព្យាបាល",
-        "en": "Step 3: Diagnosis Results & Treatment Guide",
+    # ── Diagnosis Step 3: Results & Unlock ────────────────────────────
+    "diag.match_found_title": {
+        "km": "ការវិភាគបានរកឃើញការផ្គូផ្គង!",
+        "en": "Diagnostic Match Found!",
     },
-    "diag.step3_desc": {
-        "km": "ផ្អែកលើច្បាប់វិភាគ និងរោគសញ្ញាដែលអ្នកបានជ្រើសរើស។",
-        "en": "Generated by expert system inference engine based on your reported clinical symptoms.",
+    "diag.match_found_desc": {
+        "km": "ផ្អែកលើព័ត៌មាន និងរោគសញ្ញាដែលអ្នកបានបញ្ចូល ប្រព័ន្ធបានរកឃើញ {count} ជំងឺដែលអាចកើតមាន។",
+        "en": "Based on your reported data, the system identified {count} suspected disease(s).",
     },
-    "diag.primary_disease": {
-        "km": "រោគវិនិច្ឆ័យចម្បង",
-        "en": "Primary Suspected Disease",
+    "diag.highest_confidence_label": {
+        "km": "កម្រិតទំនុកចិត្តខ្ពស់បំផុត",
+        "en": "Highest Confidence",
     },
-    "diag.confidence_score": {
-        "km": "កម្រិតភាពជឿជាក់",
-        "en": "Confidence Score",
+    "diag.likely_match_badge": {
+        "km": "លទ្ធផលដែលអាចទំនង",
+        "en": "Likely Primary Match",
     },
-    "diag.matched_symptoms": {
-        "km": "រោគសញ្ញាដែលត្រូវគ្នា",
-        "en": "Matched Symptoms",
+    "diag.infectious_badge": {
+        "km": "ជំងឺឆ្លង",
+        "en": "Infectious Disease",
     },
-    "diag.other_differentials": {
-        "km": "ជំងឺផ្សេងទៀតដែលអាចកើតមាន",
-        "en": "Other Differential Diagnoses",
+    "diag.disease_desc_title": {
+        "km": "ការពិពណ៌នាជំងឺ",
+        "en": "Disease Description",
     },
-    "diag.treatment_guide": {
-        "km": "ផែនការ និងជំហានព្យាបាល",
-        "en": "Treatment Protocol & Step-by-Step Guide",
+    "diag.treatment_and_meds": {
+        "km": "វិធីព្យាបាល និងថ្នាំ",
+        "en": "Treatment & Medications",
     },
-    "diag.prevention_guide": {
-        "km": "វិធានការបង្ការ និងជីវសុវត្ថិភាព",
-        "en": "Prevention & Biosecurity Measures",
+    "diag.biosecurity_protocol": {
+        "km": "វិធានការការពារជីវសុវត្ថិភាព",
+        "en": "Biosecurity & Prevention Protocol",
     },
-    "diag.disclaimer_title": {
-        "km": "សេចក្តីជូនដំណឹង និងការប្រុងប្រយ័ត្ន",
-        "en": "Veterinary Disclaimer & Urgent Notice",
+    "diag.verified_on_symptoms": {
+        "km": "ផ្ទៀងផ្ទាត់លើ {count} រោគសញ្ញា",
+        "en": "Verified on {count} symptoms",
     },
-    "diag.disclaimer_text": {
-        "km": "លទ្ធផលនេះជាការវិភាគបឋមដោយប្រព័ន្ធជំនាញ។ ករណីធ្ងន់ធ្ងរ សូមទាក់ទងពេទ្យសត្វជំនាញ ឬរង់ចាំការពិនិត្យបញ្ជាក់ពីវេជ្ជបណ្ឌិតក្នុងប្រព័ន្ធ។",
-        "en": "This is an automated preliminary expert diagnosis. In acute outbreaks, consult an accredited veterinarian or submit for online doctor review.",
+    "diag.unlock_title": {
+        "km": "ចូលគណនីដើម្បីមើលលទ្ធផលពេញលេញ",
+        "en": "Sign In to Unlock Full Diagnostic Report",
     },
-    "diag.case_saved_notice": {
-        "km": "ករណីនេះត្រូវបានរក្សាទុកជាស្វ័យប្រវត្តិក្នងប្រវត្តិករណីរបស់អ្នក (លេខកូដ #{case_id})។",
-        "en": "This diagnosis has been saved to your case history (Case #{case_id}).",
+    "diag.unlock_desc": {
+        "km": "បង្កើតគណនីឥតគិតថ្លៃ ឬចូលគណនីដើម្បីមើលឈ្មោះជំងឺ វិធីព្យាបាល ការណែនាំថ្នាំ និងរក្សាទុកប្រវត្តិនៃករណីនេះ។",
+        "en": "Create a free account or sign in to view the disease name, clinical treatment protocol, medication guide, and save this case history.",
     },
-    "diag.view_case_detail": {
-        "km": "មើលរបាយការណ៍ពេញលេញ",
-        "en": "View Full Case Report",
+    "diag.continue_with_google": {
+        "km": "បន្តជាមួយ Google",
+        "en": "Continue with Google",
     },
-    "diag.print_report": {
-        "km": "បោះពុម្ពរបាយការណ៍",
-        "en": "Print Diagnosis Report",
+    "diag.create_free_account": {
+        "km": "បង្កើតគណនីថ្មី (ឥតគិតថ្លៃ)",
+        "en": "Create Free Account",
+    },
+    "diag.already_have_account": {
+        "km": "មានគណនីរួចហើយ? ចូលគណនី",
+        "en": "Already have an account? Sign In",
+    },
+    "diag.edit_symptoms_link": {
+        "km": "កែប្រែរោគសញ្ញា",
+        "en": "Edit Symptoms",
+    },
+    "diag.results_detailed_title": {
+        "km": "លទ្ធផលនៃការវិភាគលម្អិត",
+        "en": "Detailed Diagnostic Results",
+    },
+    "diag.found_count_badge": {
+        "km": "រកឃើញ {count}",
+        "en": "Found {count}",
+    },
+    "diag.save_case_btn": {
+        "km": "រក្សាទុកករណី",
+        "en": "Save Case Report",
+    },
+    "diag.no_match_title": {
+        "km": "រកមិនឃើញការផ្គូផ្គង",
+        "en": "No Matching Diagnosis Found",
+    },
+    "diag.no_match_desc": {
+        "km": "សូមជ្រើសរើសរោគសញ្ញាផ្សេង ឬបន្ថែមរោគសញ្ញា។",
+        "en": "Please select different symptoms or add more observed signs.",
+    },
+    "diag.back_to_symptoms_btn": {
+        "km": "ត្រឡប់ទៅជ្រើសរើសរោគសញ្ញា",
+        "en": "Return to Symptom Selection",
     },
 
     # ── Cases & History ──────────────────────────────────────────────
@@ -881,6 +1181,274 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "km": "ស្ថានភាពតាមដានក្រោយព្យាបាល",
         "en": "Follow-up Health Status",
     },
+    "case_detail.back_to_history": {
+        "km": "ត្រឡប់ទៅប្រវត្តិ",
+        "en": "Back to History",
+    },
+    "case_detail.print": {
+        "km": "បោះពុម្ព",
+        "en": "Print",
+    },
+    "case_detail.diagnosis_for": {
+        "km": "ការធ្វើរោគវិនិច្ឆ័យសម្រាប់",
+        "en": "Diagnosis For",
+    },
+    "case_detail.date": {
+        "km": "កាលបរិច្ឆេទ",
+        "en": "Date",
+    },
+    "case_detail.ai_confidence": {
+        "km": "កម្រិតទំនុកចិត្ត (AI Match Confidence)",
+        "en": "AI Match Confidence",
+    },
+    "case_detail.farm_info": {
+        "km": "ព័ត៌មានចំការ",
+        "en": "Farm Information",
+    },
+    "case_detail.flock_size": {
+        "km": "ចំនួន",
+        "en": "Size",
+    },
+    "case_detail.bird_age": {
+        "km": "អាយុ",
+        "en": "Age",
+    },
+    "case_detail.breed": {
+        "km": "ប្រភេទ",
+        "en": "Breed",
+    },
+    "case_detail.location": {
+        "km": "ទីតាំង",
+        "en": "Location",
+    },
+    "case_detail.health_risk_info": {
+        "km": "ព័ត៌មានសុខភាព និងហានិភ័យ",
+        "en": "Health & Risk Factors",
+    },
+    "case_detail.sick_count": {
+        "km": "មាន់ឈឺ",
+        "en": "Sick Birds",
+    },
+    "case_detail.dead_count": {
+        "km": "មាន់ស្លាប់",
+        "en": "Dead Birds",
+    },
+    "case_detail.symptom_duration": {
+        "km": "រយៈពេលរោគសញ្ញា",
+        "en": "Symptom Duration",
+    },
+    "case_detail.vaccination": {
+        "km": "វ៉ាក់សាំង",
+        "en": "Vaccination",
+    },
+    "case_detail.egg_drop": {
+        "km": "ពងធ្លាក់ចុះ",
+        "en": "Egg Drop",
+    },
+    "case_detail.coop_condition": {
+        "km": "លក្ខខណ្ឌទ្រុង",
+        "en": "Coop Condition",
+    },
+    "case_detail.feed_intake": {
+        "km": "ការស៊ី",
+        "en": "Feed Intake",
+    },
+    "case_detail.water_intake": {
+        "km": "ការផឹកទឹក",
+        "en": "Water Intake",
+    },
+    "case_detail.feed_water_changed": {
+        "km": "ប្តូរចំណី/ទឹក",
+        "en": "Feed/Water Changed",
+    },
+    "case_detail.new_birds_added": {
+        "km": "បន្ថែមមាន់ថ្មី",
+        "en": "New Birds Added",
+    },
+    "case_detail.nearby_farms_sick": {
+        "km": "ចំការជិតខាងឈឺ",
+        "en": "Nearby Outbreak",
+    },
+    "case_detail.possible_diagnoses": {
+        "km": "លទ្ធផលវិនិច្ឆ័យដែលអាចកើតមាន",
+        "en": "Possible Diagnoses",
+    },
+    "case_detail.found_possible_diseases": {
+        "km": "រកឃើញ {count} ជំងឺដែលអាចកើតមានផ្អែកលើការវិភាគរោគសញ្ញា",
+        "en": "Found {count} suspected disease(s) based on symptom analysis",
+    },
+    "case_detail.primary_diagnosis_result": {
+        "km": "លទ្ធផលរោគវិនិច្ឆ័យចម្បង",
+        "en": "Primary Diagnosis Result",
+    },
+    "case_detail.results_count": {
+        "km": "{count} លទ្ធផល",
+        "en": "{count} Results",
+    },
+    "case_detail.most_likely": {
+        "km": "ទំនងបំផុត",
+        "en": "Most likely",
+    },
+    "case_detail.option_rank": {
+        "km": "ជម្រើសទី {rank}",
+        "en": "Option {rank}",
+    },
+    "case_detail.confidence": {
+        "km": "កម្រិតទំនុកចិត្ត",
+        "en": "Confidence",
+    },
+    "case_detail.verified_on_symptoms": {
+        "km": "ផ្ទៀងផ្ទាត់លើ {matched}/{total} រោគសញ្ញា",
+        "en": "Verified on {matched}/{total} symptoms",
+    },
+    "case_detail.info_and_treatment": {
+        "km": "ព័ត៌មាន & វិធីព្យាបាល",
+        "en": "Info & Treatment",
+    },
+    "case_detail.description": {
+        "km": "ការពិពណ៌នា",
+        "en": "Description",
+    },
+    "case_detail.treatment": {
+        "km": "វិធីព្យាបាល",
+        "en": "Treatment",
+    },
+    "case_detail.prevention": {
+        "km": "ការការពារ",
+        "en": "Prevention",
+    },
+    "case_detail.treatment_plan": {
+        "km": "ការព្យាបាល",
+        "en": "Treatment Plan",
+    },
+    "case_detail.steps": {
+        "km": "ជំហាន",
+        "en": "steps",
+    },
+    "case_detail.all_steps_completed": {
+        "km": "អបអរសាទរ! ជំហានព្យាបាលទាំងអស់ត្រូវបានអនុវត្តរួចរាល់។",
+        "en": "Congratulations! All treatment steps completed.",
+    },
+    "case_detail.step_done": {
+        "km": "បានអនុវត្ត",
+        "en": "Done",
+    },
+    "case_detail.step_num": {
+        "km": "ជំហានទី {num}",
+        "en": "Step {num}",
+    },
+    "case_detail.owner_only_record": {
+        "km": "មានតែម្ចាស់ករណីទេដែលអាចកត់ត្រាការអនុវត្ត",
+        "en": "Only the case owner can track implementation progress.",
+    },
+    "case_detail.observed_symptoms": {
+        "km": "រោគសញ្ញាដែលបានសង្កេត",
+        "en": "Observed Symptoms",
+    },
+    "case_detail.reviewed_by_doctor": {
+        "km": "ការពិនិត្យដោយវេជ្ជបណ្ឌិត",
+        "en": "Veterinary Doctor Review",
+    },
+    "case_detail.symptom_photos_title": {
+        "km": "រូបភាពសញ្ញានៃជំងឺ",
+        "en": "Symptom Photos",
+    },
+    "case_detail.photos_summary": {
+        "km": "{photo_count} រូបភាព · {cat_count} ប្រភេទ",
+        "en": "{photo_count} photos · {cat_count} categories",
+    },
+    "case_detail.all_photos": {
+        "km": "ទាំងអស់",
+        "en": "All",
+    },
+    "case_detail.review_case": {
+        "km": "ពិនិត្យករណី",
+        "en": "Review Case",
+    },
+    "case_detail.follow_up_status_title": {
+        "km": "ស្ថានភាពតាមដាន",
+        "en": "Follow-up Status",
+    },
+    "case_detail.last_updated": {
+        "km": "ធ្វើបច្ចុប្បន្នភាពចុងក្រោយ៖",
+        "en": "Last updated:",
+    },
+    "case_detail.how_flock_changing": {
+        "km": "តើសុខភាពមាន់ប្រែប្រួលយ៉ាងណា?",
+        "en": "How is the flock condition changing?",
+    },
+    "case_detail.follow_up_conversation": {
+        "km": "ការសន្ទនាតាមដាន",
+        "en": "Follow-up Conversation",
+    },
+    "case_detail.doctor_badge": {
+        "km": "វេជ្ជបណ្ឌិត",
+        "en": "Veterinarian",
+    },
+    "case_detail.user_default_name": {
+        "km": "អ្នកប្រើ",
+        "en": "User",
+    },
+    "case_detail.no_messages_yet": {
+        "km": "មិនទាន់មានសារនៅឡើយទេ។ ចាប់ផ្តើមការសន្ទនា។",
+        "en": "No messages yet. Start the conversation.",
+    },
+    "case_detail.doctor_placeholder": {
+        "km": "សរសេរមតិ ឬសំណួរបន្ថែម...",
+        "en": "Write clinical notes or questions...",
+    },
+    "case_detail.farmer_placeholder": {
+        "km": "សួរសំណួរបន្ថែមទៅវេជ្ជបណ្ឌិត...",
+        "en": "Ask follow-up questions to the veterinarian...",
+    },
+    "case_detail.send": {
+        "km": "ផ្ញើ",
+        "en": "Send",
+    },
+    "case_detail.sending": {
+        "km": "ផ្ញើ...",
+        "en": "Sending...",
+    },
+    "case_detail.send_failed": {
+        "km": "មិនអាចផ្ញើសារបានទេ។ សូមព្យាយាមម្តងទៀត។",
+        "en": "Could not send message. Please try again.",
+    },
+    "case_detail.feedback_title": {
+        "km": "មតិប្រតិកម្ម",
+        "en": "Feedback",
+    },
+    "case_detail.user_feedback_title": {
+        "km": "មតិប្រតិកម្មអ្នកប្រើ",
+        "en": "User Feedback",
+    },
+    "case_detail.you_rated": {
+        "km": "អ្នកបានវាយតម្លៃ: {rating}/5",
+        "en": "Your rating: {rating}/5",
+    },
+    "case_detail.was_diagnosis_helpful": {
+        "km": "តើការវិនិច្ឆ័យនេះមានប្រយោជន៍សម្រាប់អ្នកដែរឬទេ?",
+        "en": "Was this diagnosis helpful to you?",
+    },
+    "case_detail.additional_feedback_ph": {
+        "km": "មតិបន្ថែម (ស្រេចចិត្ត)...",
+        "en": "Additional feedback (optional)...",
+    },
+    "case_detail.send_feedback": {
+        "km": "ផ្ញើមតិប្រតិកម្ម",
+        "en": "Submit Feedback",
+    },
+    "case_detail.contagious": {
+        "km": "ឆ្លង",
+        "en": "Contagious",
+    },
+    "case_detail.non_contagious": {
+        "km": "មិនឆ្លង",
+        "en": "Non-contagious",
+    },
+    "case_detail.unknown": {
+        "km": "មិនស្គាល់",
+        "en": "Unknown",
+    },
 
     # ── Disease Library ──────────────────────────────────────────────
     "lib.title": {
@@ -898,6 +1466,10 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     "lib.all_categories": {
         "km": "គ្រប់ប្រភេទ",
         "en": "All Categories",
+    },
+    "lib.total_diseases": {
+        "km": "ជំងឺសរុប",
+        "en": "Total Diseases",
     },
     "lib.symptoms_count": {
         "km": "{count} រោគសញ្ញា",
@@ -930,6 +1502,332 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     "lib.non_contagious_badge": {
         "km": "មិនឆ្លង",
         "en": "Non-contagious",
+    },
+    "diag.treatment_guide": {
+        "km": "ជំហានព្យាបាល",
+        "en": "Treatment Guide",
+    },
+    "lib.description": {
+        "km": "ការពិពណ៌នា",
+        "en": "Description",
+    },
+    "lib.cause_type": {
+        "km": "មូលហេតុ និងប្រភេទ",
+        "en": "Cause & Type",
+    },
+    "lib.category_label": {
+        "km": "ក្រុមជំងឺ",
+        "en": "Category",
+    },
+    "lib.symptoms_title": {
+        "km": "រោគសញ្ញា",
+        "en": "Symptoms",
+    },
+    "lib.no_linked_symptoms": {
+        "km": "មិនទាន់មានរោគសញ្ញាភ្ជាប់នៅឡើយទេ។",
+        "en": "No linked symptoms yet.",
+    },
+    "lib.treatment_title": {
+        "km": "ការព្យាបាល",
+        "en": "Treatment",
+    },
+    "lib.treatment_hint": {
+        "km": "នៅពេលអ្នកបង្កើតករណី អ្នកអាចធីកជំហានទាំងនេះម្តងមួយៗ។",
+        "en": "When creating a diagnosis case, you can track these steps individually.",
+    },
+    "lib.prevention_title": {
+        "km": "ការការពារ",
+        "en": "Prevention",
+    },
+    "lib.quick_facts": {
+        "km": "ព័ត៌មានសង្ខេប",
+        "en": "Quick Summary",
+    },
+    "lib.severity": {
+        "km": "កម្រិត",
+        "en": "Severity",
+    },
+    "lib.contagious": {
+        "km": "ការឆ្លង",
+        "en": "Contagious",
+    },
+    "lib.rules": {
+        "km": "វិធានវិនិច្ឆ័យ",
+        "en": "Rules",
+    },
+    "lib.related_rules": {
+        "km": "វិធានវិនិច្ឆ័យពាក់ព័ន្ធ",
+        "en": "Related Rules",
+    },
+    "lib.rule_meta": {
+        "km": "{symptom_count} រោគសញ្ញា · អាទិភាព {priority}",
+        "en": "{symptom_count} symptoms · Priority {priority}",
+    },
+    "lib.edit_rule": {
+        "km": "កែប្រែវិធាន",
+        "en": "Edit Rule",
+    },
+    "lib.no_rules": {
+        "km": "មិនទាន់មានវិធានវិនិច្ឆ័យនៅឡើយទេ។",
+        "en": "No diagnostic rules yet.",
+    },
+    "lib.cta_suspect": {
+        "km": "សង្ស័យថាមាន់របស់អ្នកមានជំងឺនេះមែនទេ?",
+        "en": "Suspect your flock has this disease?",
+    },
+    "lib.cta_start": {
+        "km": "ចាប់ផ្តើមវិភាគ",
+        "en": "Start Diagnosis",
+    },
+    "steps.title": {
+        "km": "ជំហានព្យាបាល (បញ្ជីត្រួតពិនិត្យ)",
+        "en": "Treatment Steps (Checklist)",
+    },
+    "steps.count": {
+        "km": "{count} ជំហាន",
+        "en": "{count} steps",
+    },
+    "steps.desc": {
+        "km": "បង្កើតជំហានព្យាបាលច្បាស់លាស់ដែលកសិករអាចធីកម្តងមួយៗ។ បើមិនមានជំហានទេ ប្រព័ន្ធនឹងបំបែកអត្ថបទ \"ការព្យាបាល\" ខាងលើដោយស្វ័យប្រវត្តិ។",
+        "en": "Author structured treatment steps farmers can check off. If omitted, the system falls back to auto-parsing the raw treatment text.",
+    },
+    "steps.new_step": {
+        "km": "ជំហានថ្មី",
+        "en": "New Step",
+    },
+    "steps.new_step_ph": {
+        "km": "ឧ. ដាក់ឱ្យដោយឡែក...",
+        "en": "e.g. Isolate affected birds...",
+    },
+    "steps.notes_optional": {
+        "km": "កំណត់ចំណាំ (ស្រេចចិត្ត)",
+        "en": "Notes (optional)",
+    },
+    "steps.notes_ph": {
+        "km": "ដូស / ព័ត៌មានបន្ថែម",
+        "en": "Dosage / extra instructions",
+    },
+    "steps.note_placeholder": {
+        "km": "កំណត់ចំណាំ / ដូស (ស្រេចចិត្ត)",
+        "en": "Notes / dosage (optional)",
+    },
+    "steps.move_up": {
+        "km": "ឡើងលើ",
+        "en": "Move up",
+    },
+    "steps.move_down": {
+        "km": "ចុះក្រោម",
+        "en": "Move down",
+    },
+    "steps.no_steps": {
+        "km": "មិនទាន់មានជំហានព្យាបាលដែលបានកំណត់ទេ។",
+        "en": "No treatment steps configured yet.",
+    },
+    "steps.enter_text": {
+        "km": "សូមបញ្ចូលអត្ថបទជំហាន។",
+        "en": "Please enter step text.",
+    },
+    "diseases.create_title": {
+        "km": "បង្កើតជំងឺថ្មី",
+        "en": "Create Disease",
+    },
+    "diseases.edit_title": {
+        "km": "កែប្រែជំងឺ",
+        "en": "Edit Disease",
+    },
+    "diseases.manage_title": {
+        "km": "គ្រប់គ្រងជំងឺ",
+        "en": "Manage Diseases",
+    },
+    "diseases.manage_desc": {
+        "km": "គ្រប់គ្រងប្រវត្តិរូបជំងឺ និងការព្យាបាល",
+        "en": "Manage poultry disease profiles, symptoms and treatment guidelines",
+    },
+    "diseases.no_diseases": {
+        "km": "មិនទាន់មានទិន្នន័យជំងឺនៅឡើយទេ។",
+        "en": "No disease records yet.",
+    },
+    "diseases.no_match": {
+        "km": "រកមិនឃើញជំងឺដែលត្រូវនឹងលក្ខខណ្ឌស្វែងរកទេ។",
+        "en": "No diseases match your search criteria.",
+    },
+    "btn.add_disease": {
+        "km": "បន្ថែមជំងឺ",
+        "en": "Add Disease",
+    },
+
+    # ── Rules Management ─────────────────────────────────────────────
+    "rules.title": {
+        "km": "វិធាន",
+        "en": "Rules",
+    },
+    "rules.subtitle": {
+        "km": "ផ្គូផ្គងរោគសញ្ញាទៅនឹងជំងឺ",
+        "en": "Map symptoms to diseases",
+    },
+    "rules.create_title": {
+        "km": "បង្កើតវិធាន",
+        "en": "Create Rule",
+    },
+    "rules.edit_title": {
+        "km": "កែប្រែវិធាន",
+        "en": "Edit Rule",
+    },
+    "rules.delete_title": {
+        "km": "លុបវិធាន",
+        "en": "Delete Rule",
+    },
+    "rules.delete_confirm": {
+        "km": "តើអ្នកប្រាកដថាចង់លុប {title} ទេ?",
+        "en": "Are you sure you want to delete {title}?",
+    },
+    "rules.confirm_delete_btn": {
+        "km": "បញ្ជាក់ការលុប",
+        "en": "Confirm Delete",
+    },
+    "rules.col_title": {
+        "km": "ចំណងជើង",
+        "en": "Title",
+    },
+    "rules.col_symptoms": {
+        "km": "រោគសញ្ញា",
+        "en": "Symptoms",
+    },
+    "rules.col_disease": {
+        "km": "ជំងឺ",
+        "en": "Disease",
+    },
+    "rules.col_confidence": {
+        "km": "ទំនុកចិត្ត",
+        "en": "Confidence",
+    },
+    "btn.add_rule": {
+        "km": "បន្ថែមវិធាន",
+        "en": "Add Rule",
+    },
+
+    # ── Symptoms Management ──────────────────────────────────────────
+    "symptoms.manage_title": {
+        "km": "ការគ្រប់គ្រងរោគសញ្ញា",
+        "en": "Manage Symptoms",
+    },
+    "symptoms.library_title": {
+        "km": "បណ្ណាល័យរោគសញ្ញា",
+        "en": "Symptom Library",
+    },
+    "symptoms.manage_desc": {
+        "km": "គ្រប់គ្រងរោគសញ្ញាដែលប្រើសម្រាប់ការធ្វើរោគវិនិច្ឆ័យ។",
+        "en": "Manage symptoms used for diagnosis inference.",
+    },
+    "symptoms.all_symptoms": {
+        "km": "រោគសញ្ញាទាំងអស់",
+        "en": "All Symptoms",
+    },
+    "symptoms.new_symptom": {
+        "km": "រោគសញ្ញាថ្មី",
+        "en": "New Symptom",
+    },
+    "symptoms.create_title": {
+        "km": "បង្កើតរោគសញ្ញាថ្មី",
+        "en": "Create Symptom",
+    },
+    "symptoms.edit_title": {
+        "km": "កែប្រែរោគសញ្ញា",
+        "en": "Edit Symptom",
+    },
+    "symptoms.delete_title": {
+        "km": "លុបរោគសញ្ញា",
+        "en": "Delete Symptom",
+    },
+    "symptoms.delete_confirm": {
+        "km": "តើអ្នកប្រាកដថាចង់លុប {name} ទេ?",
+        "en": "Are you sure you want to delete {name}?",
+    },
+    "symptoms.no_symptoms": {
+        "km": "មិនទាន់មានរោគសញ្ញាត្រូវបានបន្ថែមទេ។",
+        "en": "No symptoms added yet.",
+    },
+    "symptoms.add_first": {
+        "km": "បន្ថែមរោគសញ្ញាដំបូង",
+        "en": "Add First Symptom",
+    },
+    "symptoms.detail_title": {
+        "km": "ព័ត៌មានលម្អិតរោគសញ្ញា",
+        "en": "Symptom Details",
+    },
+    "symptoms.name_label": {
+        "km": "ឈ្មោះរោគសញ្ញា",
+        "en": "Symptom Name",
+    },
+    "symptoms.name_ph": {
+        "km": "ឧ. ក្អក",
+        "en": "e.g. Coughing",
+    },
+    "symptoms.desc_ph": {
+        "km": "ការពន្យល់សង្ខេបអំពីរោគសញ្ញា",
+        "en": "Brief description of the symptom",
+    },
+    "symptoms.preview": {
+        "km": "មើលជាមុន",
+        "en": "Live Preview",
+    },
+    "symptoms.preview_default_desc": {
+        "km": "ការពិពណ៌នារោគសញ្ញានឹងបង្ហាញនៅទីនេះ។",
+        "en": "Symptom description will appear here.",
+    },
+    "symptoms.save_btn": {
+        "km": "រក្សាទុករោគសញ្ញា",
+        "en": "Save Symptom",
+    },
+    "symptoms.back_to_library": {
+        "km": "ត្រឡប់ទៅបណ្ណាល័យ",
+        "en": "Back to Library",
+    },
+    "symptoms.update_title": {
+        "km": "ធ្វើបច្ចុប្បន្នភាពព័ត៌មានលម្អិត",
+        "en": "Update Symptom Details",
+    },
+    "symptoms.update_btn": {
+        "km": "ធ្វើបច្ចុប្បន្នភាពរោគសញ្ញា",
+        "en": "Update Symptom",
+    },
+
+    # ── Categories Management ────────────────────────────────────────
+    "categories.manage_title": {
+        "km": "គ្រប់គ្រងប្រភេទ",
+        "en": "Manage Categories",
+    },
+    "categories.manage_desc": {
+        "km": "ដាក់ក្រុមជំងឺតាមការផ្តោតអារម្មណ៍គ្លីនិក",
+        "en": "Group diseases by clinical focus",
+    },
+    "categories.create_title": {
+        "km": "បង្កើតប្រភេទថ្មី",
+        "en": "Create Category",
+    },
+    "categories.edit_title": {
+        "km": "កែប្រែប្រភេទ",
+        "en": "Edit Category",
+    },
+    "categories.delete_title": {
+        "km": "លុបប្រភេទ",
+        "en": "Delete Category",
+    },
+    "categories.delete_confirm": {
+        "km": "តើអ្នកប្រាកដថាចង់លុប {name} ទេ?",
+        "en": "Are you sure you want to delete {name}?",
+    },
+    "categories.col_name": {
+        "km": "ឈ្មោះ",
+        "en": "Name",
+    },
+    "categories.col_description": {
+        "km": "ការពិពណ៌នា",
+        "en": "Description",
+    },
+    "btn.add_category": {
+        "km": "បន្ថែមប្រភេទ",
+        "en": "Add Category",
     },
 
     # ── Auth & Account ───────────────────────────────────────────────
@@ -1108,14 +2006,18 @@ def get_translated_option(label_type: str, value: str | None) -> str:
     if not value:
         return ""
     
+    val_str = str(value).lower()
     key_map = {
-        "yes_no": f"opt.{value}",
-        "vaccination": f"opt.vax_{value}",
-        "coop": f"opt.coop_{value}",
-        "intake": f"opt.intake_{value}",
-        "status": f"status.{value}",
-        "followup": f"followup.{value}",
+        "yes_no": f"opt.{val_str}",
+        "vaccination": f"opt.vax_{val_str}",
+        "coop": f"opt.coop_{val_str}",
+        "intake": f"opt.intake_{val_str}",
+        "status": f"status.{val_str}",
+        "followup": f"followup.{val_str}",
+        "follow_up": f"followup.{val_str}",
+        "severity": f"severity.{val_str}",
+        "contagious": "case_detail.contagious" if val_str in ("true", "1", "yes", "contagious") else "case_detail.non_contagious",
     }
     
-    key = key_map.get(label_type, f"opt.{value}")
-    return t(key, default=value)
+    key = key_map.get(label_type, f"opt.{val_str}")
+    return t(key, default=str(value))

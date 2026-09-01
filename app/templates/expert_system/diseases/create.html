@@ -1,10 +1,10 @@
 {% extends "layouts/base.html" %}
-{% block title %}Create Disease{% endblock %}
-{% block page_title %}Create Disease{% endblock %}
+{% block title %}{{ t('diseases.create_title') }}{% endblock %}
+{% block page_title %}{{ t('diseases.create_title') }}{% endblock %}
 
 {% block content %}
 <div class="card border-0 shadow-sm p-4">
-    <form method="post">
+    <form method="post" id="diseaseCreateForm">
         {{ form.hidden_tag() }}
 
         {% if form.errors %}
@@ -38,7 +38,7 @@
             </div>
             <div class="col-md-6">
                 {{ form.treatment.label(class="form-label fw-bold") }}
-                {{ form.treatment(class="form-control" + (" is-invalid" if form.treatment.errors else ""), rows=3) }}
+                {{ form.treatment(class="form-control" + (" is-invalid" if form.treatment.errors else ""), rows=3, id="treatmentTextarea") }}
                 {% if form.treatment.errors %}<div class="invalid-feedback">{{ form.treatment.errors[0] }}</div>{% endif %}
             </div>
             <div class="col-md-6">
@@ -56,10 +56,221 @@
                 </div>
             </div>
         </div>
+
+        {# ── Treatment steps authoring (structured checklist / Option A) ─────────── #}
+        <div class="card border-0 shadow-sm p-4 mt-4 bg-body-tertiary">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+                <h5 class="fw-bold mb-0"><i class="bi bi-list-check me-2 text-primary"></i>{{ t('steps.title') }}</h5>
+                <span class="badge bg-secondary" id="stepsCount">{{ t('steps.count', count=0) }}</span>
+            </div>
+            <p class="text-muted small mb-3">
+                {{ t('steps.desc') }}
+            </p>
+
+            <input type="hidden" name="treatment_steps_json" id="treatmentStepsJson" value="[]">
+
+            <div id="stepsContainer" class="mb-3">
+                <div class="alert alert-light border text-muted small mb-0" id="stepsEmptyAlert">
+                    <i class="bi bi-info-circle me-1"></i> {{ t('steps.no_steps') }}
+                </div>
+                <div class="list-group d-none" id="stepsListGroup"></div>
+            </div>
+
+            <div class="row g-2 align-items-end border-top pt-3" id="stepAddRow">
+                <div class="col-md-6">
+                    <label class="form-label fw-bold small" for="newStepText">{{ t('steps.new_step') }}</label>
+                    <input type="text" id="newStepText" class="form-control" maxlength="500" placeholder="{{ t('steps.new_step_ph') }}">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-bold small" for="newStepNote">{{ t('steps.notes_optional') }}</label>
+                    <input type="text" id="newStepNote" class="form-control" maxlength="500" placeholder="{{ t('steps.notes_ph') }}">
+                </div>
+                <div class="col-md-2">
+                    <button type="button" id="addStepBtn" class="btn btn-brand w-100"><i class="bi bi-plus-lg me-1"></i>{{ t('btn.add') }}</button>
+                </div>
+            </div>
+
+            <div id="stepsFlash" class="small mt-2" role="status" aria-live="polite"></div>
+        </div>
+
         <div class="d-flex gap-2 mt-4">
             {{ form.submit(class="btn btn-brand") }}
-            <a href="{{ url_for('expert_system.diseases_index') }}" class="btn btn-secondary">Cancel</a>
+            <a href="{{ url_for('expert_system.diseases_index') }}" class="btn btn-secondary">{{ t('btn.cancel') }}</a>
         </div>
     </form>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const listGroup = document.getElementById('stepsListGroup');
+    const emptyAlert = document.getElementById('stepsEmptyAlert');
+    const countBadge = document.getElementById('stepsCount');
+    const hiddenJson = document.getElementById('treatmentStepsJson');
+    const newText = document.getElementById('newStepText');
+    const newNote = document.getElementById('newStepNote');
+    const addBtn = document.getElementById('addStepBtn');
+    const flash = document.getElementById('stepsFlash');
+    const form = document.getElementById('diseaseCreateForm');
+    const treatmentTextarea = document.getElementById('treatmentTextarea');
+
+    if (!listGroup || !addBtn) return;
+
+    let steps = [];
+
+    function showFlash(msg, ok) {
+        if (!flash || !msg) return;
+        flash.textContent = msg;
+        flash.className = 'small mt-2 ' + (ok ? 'text-success' : 'text-warning');
+        clearTimeout(showFlash._t);
+        showFlash._t = setTimeout(() => { flash.textContent = ''; }, 2500);
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    function syncHidden() {
+        hiddenJson.value = JSON.stringify(steps);
+        const currentLang = "{{ current_lang }}";
+        const countText = currentLang === 'km' ? (steps.length + ' ជំហាន') : (steps.length + ' steps');
+        if (countBadge) countBadge.textContent = countText;
+    }
+
+    function renderSteps() {
+        syncHidden();
+
+        if (steps.length === 0) {
+            emptyAlert.classList.remove('d-none');
+            listGroup.classList.add('d-none');
+            listGroup.innerHTML = '';
+            return;
+        }
+
+        emptyAlert.classList.add('d-none');
+        listGroup.classList.remove('d-none');
+
+        const moveUpTitle = "{{ t('steps.move_up') }}";
+        const moveDownTitle = "{{ t('steps.move_down') }}";
+        const deleteTitle = "{{ t('btn.delete') }}";
+        const notePh = "{{ t('steps.note_placeholder') }}";
+
+        let html = '';
+        steps.forEach((step, idx) => {
+            html += `
+            <div class="list-group-item px-3 py-2" data-index="${idx}">
+                <div class="d-flex align-items-center gap-3">
+                    <span class="badge bg-primary rounded-pill">${idx + 1}</span>
+                    <div class="row g-2 align-items-center flex-grow-1">
+                        <div class="col-md-6">
+                            <input type="text" class="form-control form-control-sm step-text-input"
+                                   data-index="${idx}" value="${escapeHtml(step.text)}" maxlength="500" required>
+                        </div>
+                        <div class="col-md-6">
+                            <input type="text" class="form-control form-control-sm step-note-input"
+                                   data-index="${idx}" value="${escapeHtml(step.note || '')}" maxlength="500"
+                                   placeholder="${notePh}">
+                        </div>
+                    </div>
+                    <div class="btn-group btn-group-sm flex-shrink-0" role="group">
+                        <button type="button" class="btn btn-outline-secondary step-move-btn"
+                                data-index="${idx}" data-direction="up" ${idx === 0 ? 'disabled' : ''}
+                                title="${moveUpTitle}"><i class="bi bi-arrow-up"></i></button>
+                        <button type="button" class="btn btn-outline-secondary step-move-btn"
+                                data-index="${idx}" data-direction="down" ${idx === steps.length - 1 ? 'disabled' : ''}
+                                title="${moveDownTitle}"><i class="bi bi-arrow-down"></i></button>
+                        <button type="button" class="btn btn-outline-danger step-delete-btn"
+                                data-index="${idx}" title="${deleteTitle}"><i class="bi bi-trash"></i></button>
+                    </div>
+                </div>
+            </div>`;
+        });
+        listGroup.innerHTML = html;
+    }
+
+    function addStep() {
+        const text = (newText.value || '').trim();
+        const note = (newNote.value || '').trim();
+        if (!text) {
+            newText.focus();
+            showFlash("{{ t('steps.enter_text') }}", false);
+            return;
+        }
+        steps.push({ text: text, note: note });
+        newText.value = '';
+        newNote.value = '';
+        renderSteps();
+        newText.focus();
+    }
+
+    addBtn.addEventListener('click', addStep);
+
+    [newText, newNote].forEach(el => {
+        el.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                addStep();
+            }
+        });
+    });
+
+    listGroup.addEventListener('input', function (e) {
+        const idx = parseInt(e.target.dataset.index, 10);
+        if (isNaN(idx) || !steps[idx]) return;
+
+        if (e.target.classList.contains('step-text-input')) {
+            steps[idx].text = e.target.value.trim();
+            syncHidden();
+        } else if (e.target.classList.contains('step-note-input')) {
+            steps[idx].note = e.target.value.trim();
+            syncHidden();
+        }
+    });
+
+    listGroup.addEventListener('click', function (e) {
+        const btn = e.target.closest('button');
+        if (!btn) return;
+        const idx = parseInt(btn.dataset.index, 10);
+        if (isNaN(idx) || !steps[idx]) return;
+
+        if (btn.classList.contains('step-move-btn')) {
+            e.preventDefault();
+            const dir = btn.dataset.direction;
+            if (dir === 'up' && idx > 0) {
+                const temp = steps[idx];
+                steps[idx] = steps[idx - 1];
+                steps[idx - 1] = temp;
+                renderSteps();
+            } else if (dir === 'down' && idx < steps.length - 1) {
+                const temp = steps[idx];
+                steps[idx] = steps[idx + 1];
+                steps[idx + 1] = temp;
+                renderSteps();
+            }
+        } else if (btn.classList.contains('step-delete-btn')) {
+            e.preventDefault();
+            steps.splice(idx, 1);
+            renderSteps();
+        }
+    });
+
+    // Auto-populate raw treatment textarea if left blank and steps exist
+    if (form && treatmentTextarea) {
+        form.addEventListener('submit', function () {
+            if ((!treatmentTextarea.value || treatmentTextarea.value.trim().length < 5) && steps.length > 0) {
+                treatmentTextarea.value = steps.map((s, i) => `${i + 1}. ${s.text}${s.note ? ' (' + s.note + ')' : ''}`).join('\n');
+            }
+        });
+    }
+
+    renderSteps();
+});
+</script>
 {% endblock %}

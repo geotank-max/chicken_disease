@@ -19,23 +19,23 @@
                     </div>
                     <div class="col-md-6">
                         <input type="text" name="note" class="form-control form-control-sm"
-                               value="{{ step.note or '' }}" maxlength="500"
-                               placeholder="កំណត់ចំណាំ / ដូស (ស្រេចចិត្ត)">
+                                value="{{ step.note or '' }}" maxlength="500"
+                                placeholder="{{ t('steps.note_placeholder') }}">
                     </div>
                 </div>
             </form>
 
             <div class="btn-group btn-group-sm flex-shrink-0" role="group">
                 <button type="button" class="btn btn-outline-primary step-save-btn"
-                        data-step-id="{{ step.id }}" title="រក្សាទុក"><i class="bi bi-check-lg"></i></button>
+                        data-step-id="{{ step.id }}" title="{{ t('btn.save') }}"><i class="bi bi-check-lg"></i></button>
                 <button type="button" class="btn btn-outline-secondary step-move-btn"
                         data-step-id="{{ step.id }}" data-direction="up"
-                        {% if loop.first %}disabled{% endif %} title="ឡើងលើ"><i class="bi bi-arrow-up"></i></button>
+                        {% if loop.first %}disabled{% endif %} title="{{ t('steps.move_up') }}"><i class="bi bi-arrow-up"></i></button>
                 <button type="button" class="btn btn-outline-secondary step-move-btn"
                         data-step-id="{{ step.id }}" data-direction="down"
-                        {% if loop.last %}disabled{% endif %} title="ចុះក្រោម"><i class="bi bi-arrow-down"></i></button>
+                        {% if loop.last %}disabled{% endif %} title="{{ t('steps.move_down') }}"><i class="bi bi-arrow-down"></i></button>
                 <button type="button" class="btn btn-outline-danger step-delete-btn"
-                        data-step-id="{{ step.id }}" title="លុប"><i class="bi bi-trash"></i></button>
+                        data-step-id="{{ step.id }}" title="{{ t('btn.delete') }}"><i class="bi bi-trash"></i></button>
             </div>
         </div>
     </div>
@@ -43,6 +43,6 @@
 </div>
 {% else %}
 <div class="alert alert-light border text-muted small mb-0">
-    <i class="bi bi-info-circle me-1"></i> មិនទាន់មានជំហានព្យាបាលដែលបានកំណត់ទេ។
+    <i class="bi bi-info-circle me-1"></i> {{ t('steps.no_steps') }}
 </div>
 {% endif %}

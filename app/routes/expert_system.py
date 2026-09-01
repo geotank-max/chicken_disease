@@ -1005,6 +1005,35 @@ def diseases_create():
                     "category_id": form.category_id.data,
                 }
             )
+
+            # Process structured treatment steps authored during creation
+            steps_json = request.form.get("treatment_steps_json")
+            if steps_json:
+                try:
+                    import json
+                    steps_list = json.loads(steps_json)
+                    if isinstance(steps_list, list):
+                        for step_item in steps_list:
+                            if isinstance(step_item, dict):
+                                stext = step_item.get("text", "").strip()
+                                snote = step_item.get("note", "").strip()
+                                if stext:
+                                    TreatmentStepService.add(
+                                        disease, stext, snote, created_by_id=current_user.id
+                                    )
+                except Exception:
+                    pass
+            else:
+                steps_texts = request.form.getlist("steps_text[]")
+                steps_notes = request.form.getlist("steps_note[]")
+                for i, stext in enumerate(steps_texts):
+                    stext = stext.strip()
+                    snote = steps_notes[i].strip() if i < len(steps_notes) else ""
+                    if stext:
+                        TreatmentStepService.add(
+                            disease, stext, snote, created_by_id=current_user.id
+                        )
+
             AuditService.log("CREATE", "Disease", disease.id, f"Created disease: {disease.name}")
             flash(f"Disease '{disease.name}' created successfully.", "success")
             return redirect(url_for("expert_system.diseases_index"))

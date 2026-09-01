@@ -1,25 +1,25 @@
 {% extends "layouts/base.html" %}
-{% block title %}វិធាន{% endblock %}
+{% block title %}{{ t('rules.title') }}{% endblock %}
 
 {% block content %}
 <div class="card p-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
-            <h4 class="mb-0">វិធាន</h4>
-            <small class="text-muted">ផ្គូផ្គងរោគសញ្ញាទៅនឹងជំងឺ</small>
+            <h4 class="mb-0">{{ t('rules.title') }}</h4>
+            <small class="text-muted">{{ t('rules.subtitle') }}</small>
         </div>
-        <a href="{{ url_for('expert_system.rules_create') }}" class="btn btn-brand">បន្ថែមវិធាន</a>
+        <a href="{{ url_for('expert_system.rules_create') }}" class="btn btn-brand">{{ t('btn.add_rule') }}</a>
     </div>
 
     <div class="table-responsive">
         <table class="table table-hover border-top">
             <thead class="table-light">
                 <tr>
-                    <th>ចំណងជើង</th>
-                    <th>រោគសញ្ញា</th>
-                    <th>ជំងឺ</th>
-                    <th>ទំនុកចិត្ត</th>
-                    <th class="text-end">សកម្មភាព</th>
+                    <th>{{ t('rules.col_title') }}</th>
+                    <th>{{ t('rules.col_symptoms') }}</th>
+                    <th>{{ t('rules.col_disease') }}</th>
+                    <th>{{ t('rules.col_confidence') }}</th>
+                    <th class="text-end">{{ t('cases.col_actions') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -34,8 +34,8 @@
                     <td><span class="badge bg-danger">{{ rule.disease.name }}</span></td>
                     <td>{{ rule.confidence }}%</td>
                     <td class="text-end">
-                        <a href="{{ url_for('expert_system.rules_edit', rule_id=rule.id) }}" class="btn btn-sm btn-outline-secondary">កែប្រែ</a>
-                        <a href="{{ url_for('expert_system.rules_delete', rule_id=rule.id) }}" class="btn btn-sm btn-outline-danger">លុប</a>
+                        <a href="{{ url_for('expert_system.rules_edit', rule_id=rule.id) }}" class="btn btn-sm btn-outline-secondary">{{ t('btn.edit') }}</a>
+                        <a href="{{ url_for('expert_system.rules_delete', rule_id=rule.id) }}" class="btn btn-sm btn-outline-danger">{{ t('btn.delete') }}</a>
                     </td>
                 </tr>
                 {% endfor %}

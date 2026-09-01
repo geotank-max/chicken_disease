@@ -956,7 +956,7 @@
                 <div class="substep-progress-wrapper mb-3">
                     <div class="d-flex justify-content-between align-items-center mb-1">
                         <span class="small fw-bold text-primary" id="step1ProgressLabel">
-                            <i class="bi bi-layers me-1"></i> ជំហានទី 1 នៃ 4: ព័ត៌មានមូលដ្ឋាន
+                            <i class="bi bi-layers me-1"></i> {{ t('diag.step1_progress_sub1') }}
                         </span>
                         <span class="small fw-bold text-muted" id="step1ProgressPercent">25%</span>
                     </div>
@@ -970,29 +970,29 @@
                     <button type="button" class="substep-pill active" data-substep="1">
                         <span class="pill-badge"><i class="bi bi-house-heart"></i></span>
                         <div class="pill-info">
-                            <span class="pill-name">1. ព័ត៌មានមូលដ្ឋាន</span>
-                            <span class="pill-sub">Basic Info</span>
+                            <span class="pill-name">{{ t('diag.substep1_name') }}</span>
+                            <span class="pill-sub">{{ t('diag.substep1_sub') }}</span>
                         </div>
                     </button>
                     <button type="button" class="substep-pill" data-substep="2">
                         <span class="pill-badge"><i class="bi bi-heart-pulse"></i></span>
                         <div class="pill-info">
-                            <span class="pill-name">2. សុខភាព & ការស្លាប់</span>
-                            <span class="pill-sub">Health & Mortality</span>
+                            <span class="pill-name">{{ t('diag.substep2_name') }}</span>
+                            <span class="pill-sub">{{ t('diag.substep2_sub') }}</span>
                         </div>
                     </button>
                     <button type="button" class="substep-pill" data-substep="3">
                         <span class="pill-badge"><i class="bi bi-cloud-sun"></i></span>
                         <div class="pill-info">
-                            <span class="pill-name">3. បរិស្ថាន & ទ្រុង</span>
-                            <span class="pill-sub">Environment & Coop</span>
+                            <span class="pill-name">{{ t('diag.substep3_name') }}</span>
+                            <span class="pill-sub">{{ t('diag.substep3_sub') }}</span>
                         </div>
                     </button>
                     <button type="button" class="substep-pill" data-substep="4">
                         <span class="pill-badge"><i class="bi bi-camera"></i></span>
                         <div class="pill-info">
-                            <span class="pill-name">4. រូបភាព (ស្រេចចិត្ត)</span>
-                            <span class="pill-sub">Photos (Optional)</span>
+                            <span class="pill-name">{{ t('diag.substep4_name') }}</span>
+                            <span class="pill-sub">{{ t('diag.substep4_sub') }}</span>
                         </div>
                     </button>
                 </div>
@@ -1012,41 +1012,41 @@
                                     <i class="bi bi-house-heart fs-4"></i>
                                 </span>
                                 <div>
-                                    <h5 class="mb-0 fw-bold text-dark">ព័ត៌មានមូលដ្ឋាននៃហ្វូងមាន់</h5>
-                                    <div class="small text-muted">Basic Flock Information</div>
+                                    <h5 class="mb-0 fw-bold text-dark">{{ t('diag.substep1_header_title') }}</h5>
+                                    <div class="small text-muted">{{ t('diag.substep1_header_sub') }}</div>
                                 </div>
                             </div>
                         </div>
                         <div class="card-body p-4">
                             <div class="row g-4">
                                 <div class="col-md-6 diagnosis-field">
-                                    <label class="form-label">ចំនួនមាន់ក្នុងហ្វូង (ក្បាល) <span class="text-danger">*</span></label>
+                                    <label class="form-label">{{ t('diag.flock_size') }} <span class="text-danger">*</span></label>
                                     <div class="diagnosis-control-shell">
                                         <span class="diagnosis-control-icon"><i class="bi bi-grid-3x3-gap"></i></span>
-                                        <input type="number" name="flock_size" class="form-control diagnosis-control" min="1" placeholder="ឧ. 100" value="{{ flock_data.flock_size if flock_data.flock_size is not none else '' }}" required>
+                                        <input type="number" name="flock_size" class="form-control diagnosis-control" min="1" placeholder="{{ t('diag.flock_size_ph') }}" value="{{ flock_data.flock_size if flock_data.flock_size is not none else '' }}" required>
                                     </div>
-                                    <div class="form-text small text-muted">ចំនួនមាន់សរុបទាំងអស់នៅក្នុងទ្រុង ឬចំការ</div>
+                                    <div class="form-text small text-muted">{{ t('diag.flock_size_help') }}</div>
                                 </div>
                                 <div class="col-md-6 diagnosis-field">
-                                    <label class="form-label">អាយុមាន់ <span class="text-danger">*</span></label>
+                                    <label class="form-label">{{ t('diag.bird_age') }} <span class="text-danger">*</span></label>
                                     <div class="diagnosis-control-shell">
                                         <span class="diagnosis-control-icon"><i class="bi bi-calendar-week"></i></span>
-                                        <input type="text" name="bird_age" class="form-control diagnosis-control" placeholder="ឧ. ៧-៩ សប្ដាហ៍ ឬ ៤៥ ថ្ងៃ" value="{{ flock_data.bird_age or '' }}" required>
+                                        <input type="text" name="bird_age" class="form-control diagnosis-control" placeholder="{{ t('diag.bird_age_ph') }}" value="{{ flock_data.bird_age or '' }}" required>
                                     </div>
-                                    <div class="form-text small text-muted">អាយុកាលគិតជាថ្ងៃ ឬសប្តាហ៍</div>
+                                    <div class="form-text small text-muted">{{ t('diag.bird_age_help') }}</div>
                                 </div>
                                 <div class="col-md-6 diagnosis-field">
-                                    <label class="form-label">ពូជ/ប្រភេទមាន់ <span class="text-danger">*</span></label>
+                                    <label class="form-label">{{ t('diag.breed') }} <span class="text-danger">*</span></label>
                                     <div class="diagnosis-control-shell">
                                         <span class="diagnosis-control-icon"><i class="bi bi-tag"></i></span>
-                                        <input type="text" name="breed" class="form-control diagnosis-control" placeholder="ឧ. មាន់ស្រែ, មាន់សាច់, មាន់ពង" value="{{ flock_data.breed or '' }}" required>
+                                        <input type="text" name="breed" class="form-control diagnosis-control" placeholder="{{ t('diag.breed_ph') }}" value="{{ flock_data.breed or '' }}" required>
                                     </div>
                                 </div>
                                 <div class="col-md-6 diagnosis-field">
-                                    <label class="form-label">ទីតាំង/ខេត្ត <span class="text-danger">*</span></label>
+                                    <label class="form-label">{{ t('diag.location') }} <span class="text-danger">*</span></label>
                                     <div class="diagnosis-control-shell">
                                         <span class="diagnosis-control-icon"><i class="bi bi-geo-alt"></i></span>
-                                        <input type="text" name="location" class="form-control diagnosis-control" placeholder="ឧ. ខេត្តកំពង់ចាម" value="{{ flock_data.location or '' }}" required>
+                                        <input type="text" name="location" class="form-control diagnosis-control" placeholder="{{ t('diag.location_ph') }}" value="{{ flock_data.location or '' }}" required>
                                     </div>
                                 </div>
                             </div>
@@ -1054,7 +1054,7 @@
                     </div>
                     <div class="d-flex justify-content-end">
                         <button type="button" class="btn btn-primary px-4 py-2 fw-bold btn-next-substep" data-next="2">
-                            បន្តទៅសុខភាព & ការស្លាប់ <i class="bi bi-arrow-right ms-1"></i>
+                            {{ t('diag.btn_to_substep2') }} <i class="bi bi-arrow-right ms-1"></i>
                         </button>
                     </div>
                 </div>
@@ -1068,63 +1068,63 @@
                                     <i class="bi bi-heart-pulse fs-4"></i>
                                 </span>
                                 <div>
-                                    <h5 class="mb-0 fw-bold text-dark">ស្ថានភាពសុខភាព និងមរណភាព</h5>
-                                    <div class="small text-muted">Health & Mortality Data</div>
+                                    <h5 class="mb-0 fw-bold text-dark">{{ t('diag.substep2_header_title') }}</h5>
+                                    <div class="small text-muted">{{ t('diag.substep2_header_sub') }}</div>
                                 </div>
                             </div>
                         </div>
                         <div class="card-body p-4">
                             <div class="row g-4">
                                 <div class="col-md-6 col-xl-4 diagnosis-field">
-                                    <label class="form-label">ចំនួនមាន់ឈឺ (ក្បាល) <span class="text-danger">*</span></label>
+                                    <label class="form-label">{{ t('diag.sick_count') }} <span class="text-danger">*</span></label>
                                     <div class="diagnosis-control-shell">
                                         <span class="diagnosis-control-icon"><i class="bi bi-thermometer-half"></i></span>
-                                        <input type="number" name="sick_bird_count" class="form-control diagnosis-control" min="0" placeholder="ឧ. 5" value="{{ flock_data.sick_bird_count if flock_data.sick_bird_count is not none else '' }}" required>
+                                        <input type="number" name="sick_bird_count" class="form-control diagnosis-control" min="0" placeholder="{{ t('diag.sick_count_ph') }}" value="{{ flock_data.sick_bird_count if flock_data.sick_bird_count is not none else '' }}" required>
                                     </div>
                                 </div>
                                 <div class="col-md-6 col-xl-4 diagnosis-field">
-                                    <label class="form-label">ចំនួនមាន់ស្លាប់ (ក្បាល) <span class="text-danger">*</span></label>
+                                    <label class="form-label">{{ t('diag.dead_count') }} <span class="text-danger">*</span></label>
                                     <div class="diagnosis-control-shell">
                                         <span class="diagnosis-control-icon"><i class="bi bi-x-circle"></i></span>
-                                        <input type="number" name="dead_bird_count" class="form-control diagnosis-control" min="0" placeholder="ឧ. 2" value="{{ flock_data.dead_bird_count if flock_data.dead_bird_count is not none else '' }}" required>
+                                        <input type="number" name="dead_bird_count" class="form-control diagnosis-control" min="0" placeholder="{{ t('diag.dead_count_ph') }}" value="{{ flock_data.dead_bird_count if flock_data.dead_bird_count is not none else '' }}" required>
                                     </div>
                                 </div>
                                 <div class="col-md-6 col-xl-4 diagnosis-field">
-                                    <label class="form-label">រយៈពេលចាប់ផ្តើមឈឺ <span class="text-danger">*</span></label>
+                                    <label class="form-label">{{ t('diag.duration') }} <span class="text-danger">*</span></label>
                                     <div class="diagnosis-control-shell">
                                         <span class="diagnosis-control-icon"><i class="bi bi-clock-history"></i></span>
-                                        <input type="text" name="symptom_duration" class="form-control diagnosis-control" placeholder="ឧ. ៣ ថ្ងៃ" value="{{ flock_data.symptom_duration or '' }}" required>
+                                        <input type="text" name="symptom_duration" class="form-control diagnosis-control" placeholder="{{ t('diag.duration_ph') }}" value="{{ flock_data.symptom_duration or '' }}" required>
                                     </div>
                                 </div>
                                 <div class="col-md-6 col-xl-6 diagnosis-field">
-                                    <label class="form-label">កម្រិតការស៊ីចំណី <span class="text-danger">*</span></label>
+                                    <label class="form-label">{{ t('diag.appetite') }} <span class="text-danger">*</span></label>
                                     <div class="diagnosis-control-shell">
                                         <span class="diagnosis-control-icon"><i class="bi bi-egg-fried"></i></span>
                                         <select name="appetite_level" class="form-select diagnosis-control" required>
-                                            <option value="">ជ្រើសរើសកម្រិត</option>
-                                            {% for val, label in intake_level_labels.items() %}
-                                            <option value="{{ val }}" {% if flock_data.appetite_level == val %}selected{% endif %}>{{ label }}</option>
+                                            <option value="">{{ t('diag.select_level') }}</option>
+                                            {% for val in intake_level_labels.keys() %}
+                                            <option value="{{ val }}" {% if flock_data.appetite_level == val %}selected{% endif %}>{{ get_translated_option('intake', val) }}</option>
                                             {% endfor %}
                                         </select>
                                     </div>
                                 </div>
                                 <div class="col-md-6 col-xl-6 diagnosis-field">
-                                    <label class="form-label">កម្រិតការផឹកទឹក <span class="text-danger">*</span></label>
+                                    <label class="form-label">{{ t('diag.water_intake') }} <span class="text-danger">*</span></label>
                                     <div class="diagnosis-control-shell">
                                         <span class="diagnosis-control-icon"><i class="bi bi-droplet"></i></span>
                                         <select name="water_intake_level" class="form-select diagnosis-control" required>
-                                            <option value="">ជ្រើសរើសកម្រិត</option>
-                                            {% for val, label in intake_level_labels.items() %}
-                                            <option value="{{ val }}" {% if flock_data.water_intake_level == val %}selected{% endif %}>{{ label }}</option>
+                                            <option value="">{{ t('diag.select_level') }}</option>
+                                            {% for val in intake_level_labels.keys() %}
+                                            <option value="{{ val }}" {% if flock_data.water_intake_level == val %}selected{% endif %}>{{ get_translated_option('intake', val) }}</option>
                                             {% endfor %}
                                         </select>
                                     </div>
                                 </div>
                                 <div class="col-12 diagnosis-field">
-                                    <label class="form-label">ការធ្លាក់ចុះនៃការផលិតពង (ប្រសិនបើមាន់ពង)</label>
+                                    <label class="form-label">{{ t('diag.egg_drop') }}</label>
                                     <div class="diagnosis-control-shell">
                                         <span class="diagnosis-control-icon"><i class="bi bi-percent"></i></span>
-                                        <input type="number" id="egg_production_drop" name="egg_production_drop" class="form-control diagnosis-control" min="0" max="100" placeholder="ឧ. 30%" value="{{ flock_data.egg_production_drop if flock_data.egg_production_drop is not none else '' }}">
+                                        <input type="number" id="egg_production_drop" name="egg_production_drop" class="form-control diagnosis-control" min="0" max="100" placeholder="{{ t('diag.egg_drop_ph') }}" value="{{ flock_data.egg_production_drop if flock_data.egg_production_drop is not none else '' }}">
                                     </div>
                                 </div>
                             </div>
@@ -1132,10 +1132,10 @@
                     </div>
                     <div class="d-flex justify-content-between">
                         <button type="button" class="btn btn-outline-secondary px-4 py-2 btn-prev-substep" data-prev="1">
-                            <i class="bi bi-arrow-left me-1"></i> ថយក្រោយ
+                            <i class="bi bi-arrow-left me-1"></i> {{ t('btn.back') }}
                         </button>
                         <button type="button" class="btn btn-primary px-4 py-2 fw-bold btn-next-substep" data-next="3">
-                            បន្តទៅបរិស្ថាន & ទ្រុង <i class="bi bi-arrow-right ms-1"></i>
+                            {{ t('diag.btn_to_substep3') }} <i class="bi bi-arrow-right ms-1"></i>
                         </button>
                     </div>
                 </div>
@@ -1149,71 +1149,71 @@
                                     <i class="bi bi-cloud-sun fs-4"></i>
                                 </span>
                                 <div>
-                                    <h5 class="mb-0 fw-bold text-dark">លក្ខខណ្ឌបរិស្ថាន និងការគ្រប់គ្រង</h5>
-                                    <div class="small text-muted">Coop Condition & Biosecurity</div>
+                                    <h5 class="mb-0 fw-bold text-dark">{{ t('diag.substep3_header_title') }}</h5>
+                                    <div class="small text-muted">{{ t('diag.substep3_header_sub') }}</div>
                                 </div>
                             </div>
                         </div>
                         <div class="card-body p-4">
                             <div class="row g-4">
                                 <div class="col-md-6 diagnosis-field">
-                                    <label class="form-label">លក្ខខណ្ឌទ្រុង <span class="text-danger">*</span></label>
+                                    <label class="form-label">{{ t('diag.coop_condition') }} <span class="text-danger">*</span></label>
                                     <div class="diagnosis-control-shell">
                                         <span class="diagnosis-control-icon"><i class="bi bi-house-door"></i></span>
                                         <select name="coop_condition" class="form-select diagnosis-control" required>
-                                            <option value="">ជ្រើសរើសស្ថានភាពទ្រុង</option>
-                                            {% for val, label in coop_condition_labels.items() %}
-                                            <option value="{{ val }}" {% if flock_data.coop_condition == val %}selected{% endif %}>{{ label }}</option>
+                                            <option value="">{{ t('diag.select_coop') }}</option>
+                                            {% for val in coop_condition_labels.keys() %}
+                                            <option value="{{ val }}" {% if flock_data.coop_condition == val %}selected{% endif %}>{{ get_translated_option('coop', val) }}</option>
                                             {% endfor %}
                                         </select>
                                     </div>
                                 </div>
                                 <div class="col-md-6 diagnosis-field">
-                                    <label class="form-label">ស្ថានភាពចាក់វ៉ាក់សាំង <span class="text-danger">*</span></label>
+                                    <label class="form-label">{{ t('diag.vaccination') }} <span class="text-danger">*</span></label>
                                     <div class="diagnosis-control-shell">
                                         <span class="diagnosis-control-icon"><i class="bi bi-shield-check"></i></span>
                                         <select name="vaccination_status" class="form-select diagnosis-control" required>
-                                            <option value="">ជ្រើសរើស</option>
-                                            {% for val, label in vaccination_labels.items() %}
-                                            <option value="{{ val }}" {% if flock_data.vaccination_status == val %}selected{% endif %}>{{ label }}</option>
+                                            <option value="">{{ t('diag.select_vaccination') }}</option>
+                                            {% for val in vaccination_labels.keys() %}
+                                            <option value="{{ val }}" {% if flock_data.vaccination_status == val %}selected{% endif %}>{{ get_translated_option('vaccination', val) }}</option>
                                             {% endfor %}
                                         </select>
                                     </div>
                                 </div>
 
                                 <div class="col-md-4 diagnosis-field">
-                                    <label class="form-label">ប្តូរចំណី/ទឹកថ្មីៗ <span class="text-danger">*</span></label>
+                                    <label class="form-label">{{ t('diag.feed_changed') }} <span class="text-danger">*</span></label>
                                     <div class="diagnosis-choice-group" role="radiogroup">
-                                        {% for val, label in yes_no_labels.items() %}
+                                        {% for val in yes_no_labels.keys() %}
                                         <input type="radio" class="btn-check" name="feed_or_water_changed" id="feed_or_water_changed_{{ val }}" value="{{ val }}" {% if flock_data.feed_or_water_changed == val %}checked{% endif %} required>
-                                        <label for="feed_or_water_changed_{{ val }}">{{ label }}</label>
+                                        <label for="feed_or_water_changed_{{ val }}">{{ get_translated_option('yes_no', val) }}</label>
                                         {% endfor %}
                                     </div>
                                 </div>
                                 <div class="col-md-4 diagnosis-field">
-                                    <label class="form-label">បន្ថែមមាន់ថ្មីៗ <span class="text-danger">*</span></label>
+                                    <label class="form-label">{{ t('diag.new_birds') }} <span class="text-danger">*</span></label>
                                     <div class="diagnosis-choice-group" role="radiogroup">
-                                        {% for val, label in yes_no_labels.items() %}
+                                        {% for val in yes_no_labels.keys() %}
                                         <input type="radio" class="btn-check" name="new_birds_added" id="new_birds_added_{{ val }}" value="{{ val }}" {% if flock_data.new_birds_added == val %}checked{% endif %} required>
-                                        <label for="new_birds_added_{{ val }}">{{ label }}</label>
+                                        <label for="new_birds_added_{{ val }}">{{ get_translated_option('yes_no', val) }}</label>
                                         {% endfor %}
                                     </div>
                                 </div>
                                 <div class="col-md-4 diagnosis-field">
-                                    <label class="form-label">ចំការជិតខាងមានមាន់ឈឺ <span class="text-danger">*</span></label>
+                                    <label class="form-label">{{ t('diag.nearby_sick') }} <span class="text-danger">*</span></label>
                                     <div class="diagnosis-choice-group" role="radiogroup">
-                                        {% for val, label in yes_no_labels.items() %}
+                                        {% for val in yes_no_labels.keys() %}
                                         <input type="radio" class="btn-check" name="nearby_farms_sick" id="nearby_farms_sick_{{ val }}" value="{{ val }}" {% if flock_data.nearby_farms_sick == val %}checked{% endif %} required>
-                                        <label for="nearby_farms_sick_{{ val }}">{{ label }}</label>
+                                        <label for="nearby_farms_sick_{{ val }}">{{ get_translated_option('yes_no', val) }}</label>
                                         {% endfor %}
                                     </div>
                                 </div>
 
                                 <div class="col-12 diagnosis-field">
-                                    <label class="form-label">កំណត់ចំណាំបន្ថែម</label>
+                                    <label class="form-label">{{ t('diag.notes') }}</label>
                                     <div class="diagnosis-control-shell">
                                         <span class="diagnosis-control-icon align-items-start pt-3"><i class="bi bi-pencil-square"></i></span>
-                                        <textarea name="notes" class="form-control diagnosis-control" rows="3" placeholder="ឧ. ចាប់ផ្តើមឈឺក្រោយភ្លៀង ឬបន្ទាប់ពីប្តូរចំណី">{{ flock_data.notes or '' }}</textarea>
+                                        <textarea name="notes" class="form-control diagnosis-control" rows="3" placeholder="{{ t('diag.notes_ph') }}">{{ flock_data.notes or '' }}</textarea>
                                     </div>
                                 </div>
                             </div>
@@ -1221,10 +1221,10 @@
                     </div>
                     <div class="d-flex justify-content-between">
                         <button type="button" class="btn btn-outline-secondary px-4 py-2 btn-prev-substep" data-prev="2">
-                            <i class="bi bi-arrow-left me-1"></i> ថយក្រោយ
+                            <i class="bi bi-arrow-left me-1"></i> {{ t('btn.back') }}
                         </button>
                         <button type="button" class="btn btn-primary px-4 py-2 fw-bold btn-next-substep" data-next="4">
-                            បន្តទៅរូបភាព <i class="bi bi-arrow-right ms-1"></i>
+                            {{ t('diag.btn_to_substep4') }} <i class="bi bi-arrow-right ms-1"></i>
                         </button>
                     </div>
                 </div>
@@ -1239,27 +1239,27 @@
                                         <i class="bi bi-camera fs-4"></i>
                                     </span>
                                     <div>
-                                        <h5 class="mb-0 fw-bold text-dark">រូបភាពសញ្ញានៃជំងឺ <span class="badge bg-secondary bg-opacity-10 text-secondary border fs-6 fw-normal">ស្រេចចិត្ត</span></h5>
-                                        <div class="small text-muted">Upload Symptom Photos (Optional)</div>
+                                        <h5 class="mb-0 fw-bold text-dark">{{ t('diag.substep4_header_title') }} <span class="badge bg-secondary bg-opacity-10 text-secondary border fs-6 fw-normal">{{ t('diag.optional_badge') }}</span></h5>
+                                        <div class="small text-muted">{{ t('diag.substep4_header_sub') }}</div>
                                     </div>
                                 </div>
                                 <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-10">
-                                    អតិបរមា 5 រូប / ប្រភេទ
+                                    {{ t('diag.max_photos_badge') }}
                                 </span>
                             </div>
                         </div>
                         <div class="card-body p-4">
                             {% set photo_categories = [
-                                ("photos_droppings",  "droppings",  "bi-droplet-fill",   "លាមក",                  "ថតរូបលាមក ពណ៌ ឬសភាព"),
-                                ("photos_eyes",       "eyes",       "bi-eye-fill",       "ភ្នែក",                  "ភ្នែកហើម ហូរទឹក ឬបិទ"),
-                                ("photos_comb",       "comb",       "bi-lightning-fill", "មកុដ",                  "មកុដខ្មៅ ស្លេក ឬប្រែពណ៌"),
-                                ("photos_skin",       "skin",       "bi-bandaid-fill",   "ស្បែក / របួស",           "របួស ដំបៅ ឬកន្ទួលស្បែក"),
-                                ("photos_dead_birds", "dead_birds", "bi-x-circle-fill",  "មាន់ស្លាប់",              "ចំនួន ឬសភាពមាន់ស្លាប់"),
-                                ("photos_coop",       "coop",       "bi-house-fill",     "ទ្រុង / ស្ថានទីចិញ្ចឹម", "លក្ខខណ្ឌទ្រុង ឬជុំវិញ"),
-                                ("photos_other",      "other",      "bi-image-fill",     "ផ្សេងៗ",                 "រូបភាពផ្សេងពីខាងលើ")
+                                ("photos_droppings",  "droppings",  "bi-droplet-fill",   t('diag.photo_droppings_name'), t('diag.photo_droppings_hint')),
+                                ("photos_eyes",       "eyes",       "bi-eye-fill",       t('diag.photo_eyes_name'),      t('diag.photo_eyes_hint')),
+                                ("photos_comb",       "comb",       "bi-lightning-fill", t('diag.photo_comb_name'),      t('diag.photo_comb_hint')),
+                                ("photos_skin",       "skin",       "bi-bandaid-fill",   t('diag.photo_skin_name'),      t('diag.photo_skin_hint')),
+                                ("photos_dead_birds", "dead_birds", "bi-x-circle-fill",  t('diag.photo_dead_name'),      t('diag.photo_dead_hint')),
+                                ("photos_coop",       "coop",       "bi-house-fill",     t('diag.photo_coop_name'),      t('diag.photo_coop_hint')),
+                                ("photos_other",      "other",      "bi-image-fill",     t('diag.photo_other_name'),     t('diag.photo_other_hint'))
                             ] %}
 
-                            <p class="small text-muted mb-3">ជ្រើសប្រភេទរូបភាព រួចចុចប្រអប់ខាងក្រោមដើម្បីបន្ថែមរូបដែលច្បាស់។</p>
+                            <p class="small text-muted mb-3">{{ t('diag.photos_guide') }}</p>
 
                             <div class="photo-category-scroll mb-3" id="photoCategoryChips">
                                 {% for field_name, category, icon, label, hint in photo_categories %}
@@ -1280,11 +1280,11 @@
                                     <i class="bi bi-cloud-arrow-up"></i>
                                 </div>
                                 <div>
-                                    <div class="fw-bold text-dark">បន្ថែមរូបភាព: <span id="activePhotoLabel">{{ photo_categories[0][3] }}</span></div>
+                                    <div class="fw-bold text-dark">{{ t('diag.add_photo_for') }} <span id="activePhotoLabel">{{ photo_categories[0][3] }}</span></div>
                                     <div class="small text-muted" id="activePhotoHint">{{ photo_categories[0][4] }}</div>
                                 </div>
                                 <button type="button" class="btn btn-sm btn-primary ms-sm-auto">
-                                    <i class="bi bi-plus-lg me-1"></i> ជ្រើសរើសរូប
+                                    <i class="bi bi-plus-lg me-1"></i> {{ t('diag.choose_photo_btn') }}
                                 </button>
                             </div>
 
@@ -1300,11 +1300,11 @@
 
                             <div class="photo-preview-panel mt-3">
                                 <div class="d-flex align-items-center justify-content-between mb-2">
-                                    <span class="small fw-bold text-muted text-uppercase">រូបភាពដែលបានជ្រើស</span>
+                                    <span class="small fw-bold text-muted text-uppercase">{{ t('diag.selected_photos_title') }}</span>
                                     <span id="totalSizeWarning" class="small text-muted"></span>
                                 </div>
                                 <div id="photoEmptyState" class="text-center py-3 text-muted small bg-light rounded-3">
-                                    <i class="bi bi-images me-1"></i> មិនទាន់មានរូបភាពទេ (មិនចាំបាច់ក៏អាចបន្តបាន)
+                                    <i class="bi bi-images me-1"></i> {{ t('diag.no_photos_yet') }}
                                 </div>
                                 <div id="photoPreviewGrid" class="photo-preview-grid d-none"></div>
                             </div>
@@ -1312,10 +1312,10 @@
                     </div>
                     <div class="d-flex justify-content-between">
                         <button type="button" class="btn btn-outline-secondary px-4 py-2 btn-prev-substep" data-prev="3">
-                            <i class="bi bi-arrow-left me-1"></i> ថយក្រោយ
+                            <i class="bi bi-arrow-left me-1"></i> {{ t('btn.back') }}
                         </button>
                         <button type="submit" class="btn btn-success px-5 py-2 fw-bold shadow-sm" id="submitStep1Btn">
-                            បន្តទៅជ្រើសរើសរោគសញ្ញា (Step 2) <i class="bi bi-arrow-right ms-1"></i>
+                            {{ t('diag.btn_to_symptoms') }} <i class="bi bi-arrow-right ms-1"></i>
                         </button>
                     </div>
                 </div>
@@ -1338,18 +1338,18 @@
                 <div class="card border-0 shadow-sm mb-4">
                     <div class="card-body p-3">
                         <div class="d-flex align-items-center justify-content-between mb-2">
-                            <h6 class="fw-bold text-muted text-uppercase small mb-0">ព័ត៌មានដែលបានបញ្ចូល</h6>
+                            <h6 class="fw-bold text-muted text-uppercase small mb-0">{{ t('diag.entered_info') }}</h6>
                             <a href="{{ url_for('expert_system.diagnose', step='1') }}" class="btn btn-xs btn-outline-secondary py-0 px-2 small">
-                                <i class="bi bi-pencil me-1"></i>កែប្រែ
+                                <i class="bi bi-pencil me-1"></i>{{ t('diag.edit_info') }}
                             </a>
                         </div>
                         {% if flock_data %}
                         <dl class="summary-grid mb-0 small">
-                            {% if flock_data.flock_size %}<dt>ចំនួនមាន់</dt><dd>{{ flock_data.flock_size }} ក្បាល</dd>{% endif %}
-                            {% if flock_data.bird_age %}<dt>អាយុ</dt><dd>{{ flock_data.bird_age }}</dd>{% endif %}
-                            {% if flock_data.breed %}<dt>ប្រភេទមាន់</dt><dd>{{ flock_data.breed }}</dd>{% endif %}
-                            {% if flock_data.sick_bird_count %}<dt>មាន់ឈឺ</dt><dd class="text-danger fw-bold">{{ flock_data.sick_bird_count }} ក្បាល</dd>{% endif %}
-                            {% if flock_data.dead_bird_count %}<dt>មាន់ស្លាប់</dt><dd class="text-danger fw-bold">{{ flock_data.dead_bird_count }} ក្បាល</dd>{% endif %}
+                            {% if flock_data.flock_size %}<dt>{{ t('diag.summary_flock') }}</dt><dd>{{ flock_data.flock_size }} {{ t('diag.birds_unit') }}</dd>{% endif %}
+                            {% if flock_data.bird_age %}<dt>{{ t('diag.summary_age') }}</dt><dd>{{ flock_data.bird_age }}</dd>{% endif %}
+                            {% if flock_data.breed %}<dt>{{ t('diag.summary_breed') }}</dt><dd>{{ flock_data.breed }}</dd>{% endif %}
+                            {% if flock_data.sick_bird_count %}<dt>{{ t('diag.summary_sick') }}</dt><dd class="text-danger fw-bold">{{ flock_data.sick_bird_count }} {{ t('diag.birds_unit') }}</dd>{% endif %}
+                            {% if flock_data.dead_bird_count %}<dt>{{ t('diag.summary_dead') }}</dt><dd class="text-danger fw-bold">{{ flock_data.dead_bird_count }} {{ t('diag.birds_unit') }}</dd>{% endif %}
                         </dl>
                         {% endif %}
                     </div>
@@ -1360,15 +1360,15 @@
                     <div class="card-body p-4">
                         <div class="d-flex align-items-center justify-content-between mb-1">
                             <h6 class="fw-bold text-primary mb-0">
-                                <i class="bi bi-magic me-1"></i> ជំងឺដែលអាចទំនង
+                                <i class="bi bi-magic me-1"></i> {{ t('diag.live_prediction_title') }}
                             </h6>
                             <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 small">Live AI</span>
                         </div>
-                        <div class="small text-muted mb-3">Live Matching Suggestions</div>
+                        <div class="small text-muted mb-3">{{ t('diag.live_prediction_subtitle') }}</div>
                         <div id="topIllnesses">
                             <div class="symptom-illness-empty text-muted small text-center py-3 bg-light rounded-3">
                                 <i class="bi bi-check2-circle d-block fs-3 mb-1 text-primary"></i>
-                                ជ្រើសរើសរោគសញ្ញា ដើម្បីមើលការទស្សន៍ទាយជំងឺ
+                                {{ t('diag.live_empty_hint') }}
                             </div>
                         </div>
                     </div>
@@ -1381,11 +1381,11 @@
                     <div class="card-header bg-white py-3 px-4 border-bottom">
                         <div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-2 mb-3">
                             <div>
-                                <h5 class="mb-0 fw-bold text-dark">ជ្រើសរើសរោគសញ្ញាដែលកើតមាន</h5>
-                                <div class="small text-muted">Select all observed symptoms</div>
+                                <h5 class="mb-0 fw-bold text-dark">{{ t('diag.select_symptoms_title') }}</h5>
+                                <div class="small text-muted">{{ t('diag.select_symptoms_desc') }}</div>
                             </div>
                             <button type="button" id="clearSymptoms" class="btn btn-sm btn-outline-danger align-self-start">
-                                <i class="bi bi-trash me-1"></i> លុបការជ្រើសទាំងអស់
+                                <i class="bi bi-trash me-1"></i> {{ t('diag.clear_all') }}
                             </button>
                         </div>
 
@@ -1393,7 +1393,7 @@
                         <div class="symptom-search-shell">
                             <i class="bi bi-search symptom-search-icon"></i>
                             <input type="text" id="symptomSearch" class="form-control symptom-search-input"
-                                   placeholder="វាយ ដើម្បីស្វែងរករោគសញ្ញាភ្លាមៗ..." autocomplete="off">
+                                   placeholder="{{ t('diag.search_placeholder') }}" autocomplete="off">
                             <div id="symptomSuggestions" class="symptom-suggestions d-none"></div>
                         </div>
 
@@ -1410,7 +1410,7 @@
                             {% endfor %}
                             <button type="button" class="category-substep-tab" data-cat-name="all">
                                 <i class="bi bi-grid-fill"></i>
-                                <span>ទាំងអស់ (All)</span>
+                                <span>{{ t('diag.all_categories_tab') }}</span>
                             </button>
                         </div>
                     </div>
@@ -1422,7 +1422,7 @@
                                 <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
                                     <h6 class="fw-bold text-dark mb-0">
                                         <i class="bi bi-tag-fill text-primary me-1"></i> {{ cat_name }}
-                                        <span class="badge rounded-pill bg-light text-muted ms-1 small fw-normal">{{ symptoms|length }} រោគសញ្ញា</span>
+                                        <span class="badge rounded-pill bg-light text-muted ms-1 small fw-normal">{{ t('diag.symptoms_count_badge', count=symptoms|length) }}</span>
                                     </h6>
                                 </div>
                                 <div class="row g-3">
@@ -1450,21 +1450,21 @@
 
                         <div id="symptomNoResults" class="text-center py-5 text-muted d-none">
                             <i class="bi bi-search display-6 d-block mb-2"></i>
-                            រកមិនឃើញរោគសញ្ញាដែលត្រូវនឹងពាក្យស្វែងរកទេ។
+                            {{ t('diag.no_symptoms_found') }}
                         </div>
 
                         <!-- Bottom Category Navigation & Submit -->
                         <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-3 mt-4 pt-3 border-top">
                             <div class="d-flex gap-2">
                                 <button type="button" class="btn btn-outline-secondary px-3" id="prevCatBtn">
-                                    <i class="bi bi-arrow-left me-1"></i> ប្រភេទមុន
+                                    <i class="bi bi-arrow-left me-1"></i> {{ t('diag.btn_prev_category') }}
                                 </button>
                                 <button type="button" class="btn btn-outline-primary px-3" id="nextCatBtn">
-                                    ប្រភេទបន្ទាប់ <i class="bi bi-arrow-right ms-1"></i>
+                                    {{ t('diag.btn_next_category') }} <i class="bi bi-arrow-right ms-1"></i>
                                 </button>
                             </div>
                             <button type="submit" class="btn btn-primary px-4 py-2 fw-bold shadow-sm" id="submitStep2Btn">
-                                <i class="bi bi-magic me-1"></i> វិភាគរោគសញ្ញា (Analyze)
+                                <i class="bi bi-magic me-1"></i> {{ t('diag.btn_analyze_symptoms') }}
                             </button>
                         </div>
                     </div>
@@ -1492,16 +1492,16 @@
                         </div>
                         <div>
                             <h5 class="fw-bold text-success mb-1">
-                                <i class="bi bi-check-circle-fill me-1"></i> ការវិភាគបានរកឃើញការផ្គូផ្គង!
+                                <i class="bi bi-check-circle-fill me-1"></i> {{ t('diag.match_found_title') }}
                             </h5>
                             <p class="mb-0 text-muted small">
-                                ផ្អែកលើព័ត៌មាន និងរោគសញ្ញាដែលអ្នកបានបញ្ចូល ប្រព័ន្ធបានរកឃើញ <strong>{{ results|length }} ជំងឺដែលអាចកើតមាន</strong>។
+                                {{ t('diag.match_found_desc', count=results|length)|safe }}
                             </p>
                         </div>
                     </div>
                     <div class="text-md-end bg-white px-3 py-2 rounded-3 border border-success border-opacity-25 shadow-sm">
                         <div class="display-6 fw-bold text-success">{{ results[0].confidence }}%</div>
-                        <div class="small text-muted fw-bold text-uppercase">កម្រិតទំនុកចិត្តខ្ពស់បំផុត</div>
+                        <div class="small text-muted fw-bold text-uppercase">{{ t('diag.highest_confidence_label') }}</div>
                     </div>
                 </div>
             </div>
@@ -1513,14 +1513,14 @@
                         <div class="card-body p-0">
                             <div class="d-flex justify-content-between align-items-start mb-3">
                                 <div>
-                                    <span class="badge bg-primary mb-2">លទ្ធផលដែលអាចទំនង</span>
+                                    <span class="badge bg-primary mb-2">{{ t('diag.likely_match_badge') }}</span>
                                     <h3 class="h4 fw-bold text-primary mb-1">██████████████████</h3>
-                                    <span class="badge bg-secondary bg-opacity-10 text-secondary border">ជំងឺឆ្លង / Infectious</span>
+                                    <span class="badge bg-secondary bg-opacity-10 text-secondary border">{{ t('diag.infectious_badge') }}</span>
                                     <span class="badge bg-danger bg-opacity-10 text-danger border ms-1">ធ្ងន់ធ្ងរ</span>
                                 </div>
                                 <div class="text-end">
                                     <div class="display-6 fw-bold text-success">{{ results[0].confidence }}%</div>
-                                    <div class="small text-muted text-uppercase fw-bold">ទំនុកចិត្ត</div>
+                                    <div class="small text-muted text-uppercase fw-bold">{{ t('home.confidence') }}</div>
                                 </div>
                             </div>
                             <div class="progress mb-3" style="height: 6px;">
@@ -1528,19 +1528,19 @@
                             </div>
                             <div class="row g-3">
                                 <div class="col-md-6">
-                                    <p class="mb-1 small text-muted fw-bold">ការពិពណ៌នាជំងឺ</p>
+                                    <p class="mb-1 small text-muted fw-bold">{{ t('diag.disease_desc_title') }}</p>
                                     <p class="mb-0">██████████████████████████████████████████████████████████████████████████████████████████████████████████████</p>
                                 </div>
                                 <div class="col-md-6">
-                                    <p class="mb-1 small text-muted fw-bold">វិធីព្យាបាល និងថ្នាំ</p>
+                                    <p class="mb-1 small text-muted fw-bold">{{ t('diag.treatment_and_meds') }}</p>
                                     <p class="mb-0">██████████████████████████████████████████████████████████████████████████████████████████████████████████████</p>
                                 </div>
                                 <div class="col-12">
-                                    <p class="mb-1 small text-muted fw-bold">វិធានការការពារជីវសុវត្ថិភាព</p>
+                                    <p class="mb-1 small text-muted fw-bold">{{ t('diag.biosecurity_protocol') }}</p>
                                     <p class="mb-0">██████████████████████████████████████████████████████████████████████████████████████████████████████████████</p>
                                 </div>
                             </div>
-                            <small class="text-muted d-block mt-3"><i class="bi bi-diagram-2 me-1"></i>ផ្ទៀងផ្ទាត់លើ {{ results[0].matched_count }} រោគសញ្ញា</small>
+                            <small class="text-muted d-block mt-3"><i class="bi bi-diagram-2 me-1"></i>{{ t('diag.verified_on_symptoms', count=results[0].matched_count) }}</small>
                         </div>
                     </div>
                 </div>
@@ -1551,27 +1551,27 @@
                         <div class="diagnosis-unlock-icon">
                             <i class="bi bi-lock-fill"></i>
                         </div>
-                        <h4 class="fw-bold text-dark mb-2">ចូលគណនីដើម្បីមើលលទ្ធផលពេញលេញ</h4>
+                        <h4 class="fw-bold text-dark mb-2">{{ t('diag.unlock_title') }}</h4>
                         <p class="text-muted small mb-4">
-                            បង្កើតគណនីឥតគិតថ្លៃ ឬចូលគណនីដើម្បីមើលឈ្មោះជំងឺ វិធីព្យាបាល ការណែនាំថ្នាំ និងរក្សាទុកប្រវត្តិនៃករណីនេះ។
+                            {{ t('diag.unlock_desc') }}
                         </p>
 
                         <div class="d-grid gap-2 mb-3">
                             <a href="{{ url_for('oauth.google_login') }}" class="btn btn-outline-dark py-2 fw-semibold d-flex align-items-center justify-content-center gap-2 border shadow-sm">
                                 <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
-                                <span>បន្តជាមួយ Google</span>
+                                <span>{{ t('diag.continue_with_google') }}</span>
                             </a>
                             <a href="{{ url_for('auth.register') }}" class="btn btn-primary py-2 fw-bold shadow-sm">
-                                <i class="bi bi-person-plus-fill me-1"></i> បង្កើតគណនីថ្មី (ឥតគិតថ្លៃ)
+                                <i class="bi bi-person-plus-fill me-1"></i> {{ t('diag.create_free_account') }}
                             </a>
                             <a href="{{ url_for('auth.login') }}" class="btn btn-outline-secondary py-2 fw-semibold">
-                                <i class="bi bi-box-arrow-in-right me-1"></i> មានគណនីរួចហើយ? ចូលគណនី
+                                <i class="bi bi-box-arrow-in-right me-1"></i> {{ t('diag.already_have_account') }}
                             </a>
                         </div>
 
                         <div class="pt-2 border-top">
                             <a href="{{ url_for('expert_system.diagnose', step='2') }}" class="text-muted small text-decoration-none">
-                                <i class="bi bi-arrow-left me-1"></i> កែប្រែរោគសញ្ញា
+                                <i class="bi bi-arrow-left me-1"></i> {{ t('diag.edit_symptoms_link') }}
                             </a>
                         </div>
                     </div>
@@ -1581,8 +1581,8 @@
             {% else %}
             <!-- Authenticated User View: Full Unlocked Diagnosis -->
             <div class="d-flex align-items-center justify-content-between mb-3">
-                <h4 class="fw-bold mb-0">លទ្ធផលនៃការវិភាគលម្អិត</h4>
-                <span class="badge bg-primary rounded-pill">រកឃើញ {{ results|length }}</span>
+                <h4 class="fw-bold mb-0">{{ t('diag.results_detailed_title') }}</h4>
+                <span class="badge bg-primary rounded-pill">{{ t('diag.found_count_badge', count=results|length) }}</span>
             </div>
 
             {% for result in results %}
@@ -1590,7 +1590,7 @@
                 <div class="card-body p-4">
                     <div class="d-flex justify-content-between align-items-start mb-3">
                         <div>
-                            {% if loop.first %}<span class="badge bg-primary mb-2">លទ្ធផលដែលអាចទំនង</span>{% endif %}
+                            {% if loop.first %}<span class="badge bg-primary mb-2">{{ t('diag.likely_match_badge') }}</span>{% endif %}
                             <h3 class="h4 fw-bold text-primary mb-1">{{ result.disease.name }}</h3>
                             {% if result.disease.category %}
                             <span class="badge bg-secondary bg-opacity-10 text-secondary border">{{ result.disease.category.name }}</span>
@@ -1601,20 +1601,20 @@
                         </div>
                         <div class="text-end">
                             <div class="display-6 fw-bold {% if result.confidence > 80 %}text-success{% elif result.confidence > 50 %}text-warning{% else %}text-danger{% endif %}">{{ result.confidence }}%</div>
-                            <div class="small text-muted text-uppercase fw-bold">ទំនុកចិត្ត</div>
+                            <div class="small text-muted text-uppercase fw-bold">{{ t('home.confidence') }}</div>
                         </div>
                     </div>
                     <div class="progress mb-3" style="height: 6px;">
                         <div class="progress-bar {% if result.confidence > 80 %}bg-success{% elif result.confidence > 50 %}bg-warning{% else %}bg-danger{% endif %}" style="width: {{ result.confidence }}%"></div>
                     </div>
                     <div class="row g-3">
-                        <div class="col-md-6"><p class="mb-1 small text-muted fw-bold">ការពិពណ៌នា</p><p class="mb-0">{{ result.disease.description }}</p></div>
-                        <div class="col-md-6"><p class="mb-1 small text-muted fw-bold">ការព្យាបាល</p><p class="mb-0">{{ result.disease.treatment }}</p></div>
+                        <div class="col-md-6"><p class="mb-1 small text-muted fw-bold">{{ t('diag.disease_desc_title') }}</p><p class="mb-0">{{ result.disease.description }}</p></div>
+                        <div class="col-md-6"><p class="mb-1 small text-muted fw-bold">{{ t('diag.treatment_and_meds') }}</p><p class="mb-0">{{ result.disease.treatment }}</p></div>
                         {% if result.disease.prevention %}
-                        <div class="col-12"><p class="mb-1 small text-muted fw-bold">ការការពារ</p><p class="mb-0">{{ result.disease.prevention }}</p></div>
+                        <div class="col-12"><p class="mb-1 small text-muted fw-bold">{{ t('diag.biosecurity_protocol') }}</p><p class="mb-0">{{ result.disease.prevention }}</p></div>
                         {% endif %}
                     </div>
-                    <small class="text-muted d-block mt-2"><i class="bi bi-diagram-2 me-1"></i>{{ result.rule.title }} ({{ result.matched_count }}/{{ result.required_count }} រោគសញ្ញា)</small>
+                    <small class="text-muted d-block mt-2"><i class="bi bi-diagram-2 me-1"></i>{{ result.rule.title }} ({{ result.matched_count }}/{{ result.required_count }})</small>
                 </div>
             </div>
             {% endfor %}
@@ -1623,8 +1623,8 @@
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <input type="hidden" name="step" value="3">
                 <input type="hidden" name="action" value="save">
-                <a href="{{ url_for('expert_system.diagnose', step='2') }}" class="btn btn-outline-secondary">ថយក្រោយ</a>
-                <button type="submit" class="btn btn-success px-4 fw-bold"><i class="bi bi-save me-1"></i> រក្សាទុកករណី</button>
+                <a href="{{ url_for('expert_system.diagnose', step='2') }}" class="btn btn-outline-secondary">{{ t('btn.back') }}</a>
+                <button type="submit" class="btn btn-success px-4 fw-bold"><i class="bi bi-save me-1"></i> {{ t('diag.save_case_btn') }}</button>
             </form>
             {% endif %}
 
@@ -1632,9 +1632,9 @@
             <div class="card border-0 shadow-sm text-center py-5">
                 <div class="card-body">
                     <i class="bi bi-search text-muted display-4 d-block mb-3"></i>
-                    <h4 class="fw-bold">រកមិនឃើញការផ្គូផ្គង</h4>
-                    <p class="text-muted">សូមជ្រើសរើសរោគសញ្ញាផ្សេង ឬបន្ថែមរោគសញ្ញា។</p>
-                    <a href="{{ url_for('expert_system.diagnose', step='2') }}" class="btn btn-primary">ត្រឡប់ទៅជ្រើសរើសរោគសញ្ញា</a>
+                    <h4 class="fw-bold">{{ t('diag.no_match_title') }}</h4>
+                    <p class="text-muted">{{ t('diag.no_match_desc') }}</p>
+                    <a href="{{ url_for('expert_system.diagnose', step='2') }}" class="btn btn-primary">{{ t('diag.back_to_symptoms_btn') }}</a>
                 </div>
             </div>
             {% endif %}
@@ -1656,10 +1656,10 @@ document.addEventListener('DOMContentLoaded', function () {
     const progressPercent = document.getElementById('step1ProgressPercent');
 
     const stepLabels = {
-        1: "ជំហានទី 1 នៃ 4: ព័ត៌មានមូលដ្ឋាន (Basic Info)",
-        2: "ជំហានទី 2 នៃ 4: សុខភាព & ការស្លាប់ (Health & Mortality)",
-        3: "ជំហានទី 3 នៃ 4: បរិស្ថាន & ទ្រុង (Environment & Coop)",
-        4: "ជំហានទី 4 នៃ 4: រូបភាព (Photos - Optional)"
+        1: "{{ t('diag.step1_progress_sub1') }}",
+        2: "{{ t('diag.step1_progress_sub2') }}",
+        3: "{{ t('diag.step1_progress_sub3') }}",
+        4: "{{ t('diag.step1_progress_sub4') }}"
     };
 
     let currentSubstep = 1;
@@ -1757,13 +1757,13 @@ document.addEventListener('DOMContentLoaded', function () {
         const mb = (total / 1024 / 1024).toFixed(1);
         if (total > MAX_TOTAL_BYTES) {
             if (sizeWarning) {
-                sizeWarning.textContent = 'ទំហំសរុប ' + mb + ' MB — លើសពី ' + MAX_TOTAL_MB + ' MB។ សូមដកចេញរូបភាពខ្លះ។';
+                sizeWarning.textContent = "{{ t('diag.photos_size_exceeded', size='__SIZE__', max='__MAX__') }}".replace('__SIZE__', mb).replace('__MAX__', MAX_TOTAL_MB);
                 sizeWarning.className = 'small text-danger';
             }
             if (submitBtn) submitBtn.disabled = true;
         } else {
             if (sizeWarning) {
-                sizeWarning.textContent = total > 0 ? 'ទំហំសរុប: ' + mb + ' MB' : '';
+                sizeWarning.textContent = total > 0 ? "{{ t('diag.photos_total_size', size='__SIZE__') }}".replace('__SIZE__', mb) : '';
                 sizeWarning.className = 'small text-muted';
             }
             if (submitBtn) submitBtn.disabled = false;
@@ -2085,7 +2085,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (selectedIds.length === 0) {
                 topIllnessesBox.innerHTML = '<div class="symptom-illness-empty text-muted small text-center py-3 bg-light rounded-3">' +
                     '<i class="bi bi-check2-circle d-block fs-3 mb-1 text-primary"></i>' +
-                    'ជ្រើសរើសរោគសញ្ញា ដើម្បីមើលការទស្សន៍ទាយជំងឺ</div>';
+                    "{{ t('diag.live_empty_hint') }}</div>";
                 return;
             }
 
@@ -2104,7 +2104,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (scores.length === 0) {
                 topIllnessesBox.innerHTML = '<div class="text-muted small text-center py-3 bg-light rounded-3">' +
-                    '<i class="bi bi-info-circle me-1"></i>មិនទាន់មានជំងឺដែលត្រូវនឹងរោគសញ្ញាទេ</div>';
+                    '<i class="bi bi-info-circle me-1"></i>' + "{{ t('diag.no_matching_disease') }}</div>";
                 return;
             }
 
@@ -2116,12 +2116,13 @@ document.addEventListener('DOMContentLoaded', function () {
             topIllnessesBox.innerHTML = '';
             scores.slice(0, 4).forEach(function (item) {
                 const pct = Math.round(item.ratio * 100);
+                const matchText = "{{ t('diag.matched_symptoms_count', count='__CNT__') }}".replace('__CNT__', item.overlap);
                 const row = document.createElement('div');
                 row.className = 'symptom-illness-item shadow-xs mb-2 p-2 rounded-2 border-start border-4 border-success bg-white';
                 row.innerHTML = '<div class="d-flex justify-content-between align-items-start">' +
                     '<div>' +
                         '<div class="fw-bold text-dark small mb-0">' + escapeHtml(item.name) + '</div>' +
-                        '<div class="text-muted" style="font-size: 0.72rem;">' + item.overlap + ' រោគសញ្ញាត្រូវគ្នា</div>' +
+                        '<div class="text-muted" style="font-size: 0.72rem;">' + matchText + '</div>' +
                     '</div>' +
                     '<div class="text-end">' +
                         '<span class="badge bg-success bg-opacity-10 text-success fw-bold">' + pct + '%</span>' +
