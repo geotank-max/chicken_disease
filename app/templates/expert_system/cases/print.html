@@ -31,18 +31,18 @@
 <body>
     {% if not pdf_mode %}
     <div class="no-print" style="margin-bottom: 20px;">
-        <button onclick="window.print()" style="padding: 8px 16px; cursor: pointer; background: #059669; color: white; border: none; border-radius: 4px; font-weight: 600;">Print</button>
-        <a href="{{ url_for('expert_system.cases_detail', case_id=case.id) }}" style="margin-left: 8px; color: #059669; text-decoration: none; font-weight: 600;">Back to Case</a>
+        <button onclick="window.print()" style="padding: 8px 16px; cursor: pointer; background: #059669; color: white; border: none; border-radius: 4px; font-weight: 600;">{{ t('btn.print') }}</button>
+        <a href="{{ url_for('expert_system.cases_detail', case_id=case.id) }}" style="margin-left: 8px; color: #059669; text-decoration: none; font-weight: 600;">{{ t('btn.back') }}</a>
     </div>
     {% endif %}
 
-    <h1>Chicken Disease Diagnosis Report</h1>
-    <h2>IDNS Expert System &mdash; Case #{{ case.id }}</h2>
+    <h1>{{ t('print.report_header') }}</h1>
+    <h2>{{ t('print.system_name') }} &mdash; {{ t('print.case_id') }} #{{ case.id }}</h2>
 
     <div class="meta">
-        Date: {{ case.created_at.strftime('%d/%m/%Y %H:%M') }} |
-        Status: {{ case.status_label_km }} |
-        {% if case.user %}User: {{ case.user.full_name }}{% endif %}
+        {{ t('cases.col_date') }}: {{ case.created_at.strftime('%d/%m/%Y %H:%M') }} |
+        {{ t('cases.col_status') }}: {{ get_translated_option('status', case.status) }} |
+        {% if case.user %}{{ t('nav.users') }}: {{ case.user.full_name }}{% endif %}
     </div>
 
     {% if case.final_disease %}

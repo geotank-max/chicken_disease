@@ -1,8 +1,8 @@
 {% extends "layouts/base.html" %}
 
-{% block title %}ទំព័រដើម{% endblock %}
-{% block page_title %}ទំព័រដើម / User Dashboard{% endblock %}
-{% block page_subtitle %}សួស្តី {{ current_user.full_name }}! សង្ខេបស្ថានភាព និងប្រព័ន្ធវិភាគហ្វូងមាន់របស់អ្នក។{% endblock %}
+{% block title %}{{ t('nav.home') }}{% endblock %}
+{% block page_title %}{{ t('nav.home') }}{% endblock %}
+{% block page_subtitle %}{{ t('home.welcome_prefix') }}, {{ current_user.full_name }}! {{ t('home.hero_subtitle') }}{% endblock %}
 
 {% block extra_styles %}
 <style>
@@ -28,7 +28,7 @@
     .home-case-card {
         border: 1px solid var(--border-color);
         border-radius: var(--radius);
-        background: #ffffff;
+        background: var(--bg-card);
         padding: 1.15rem;
         transition: all 0.2s ease;
     }
@@ -58,6 +58,11 @@
         border: 1px solid var(--primary-border);
         border-radius: var(--radius);
     }
+
+    [data-theme="dark"] .spotlight-card {
+        background: linear-gradient(135deg, rgba(5, 150, 105, 0.15) 0%, rgba(16, 185, 129, 0.1) 100%);
+        border-color: var(--primary-border);
+    }
 </style>
 {% endblock %}
 
@@ -69,20 +74,20 @@
         <div class="card border-0 banner-emerald home-hero-banner p-4 shadow-sm h-100">
             <div class="position-relative" style="z-index: 2;">
                 <div class="d-inline-flex align-items-center gap-1.5 px-3 py-1 rounded-pill text-white small fw-semibold mb-2" style="background: rgba(255, 255, 255, 0.18); border: 1px solid rgba(255, 255, 255, 0.3); backdrop-filter: blur(4px);">
-                    <i class="bi bi-shield-check"></i> ជំនួយការសុខភាពហ្វូងមាន់ (Flock Health Assistant)
+                    <i class="bi bi-shield-check"></i> {{ t('home.assistant_badge') }}
                 </div>
-                <h3 class="fw-bold text-white mb-1">សួស្តី, {{ current_user.full_name }}! 👋</h3>
+                <h3 class="fw-bold text-white mb-1">{{ t('home.welcome_prefix') }}, {{ current_user.full_name }}! 👋</h3>
                 <p class="text-white-50 small mb-0 max-w-lg">
-                    ការពារ និងថែទាំហ្វូងមាន់របស់អ្នក ជាមួយនឹងប្រព័ន្ធវិភាគឆ្លាតវៃ និងការបញ្ជាក់ពីវេជ្ជបណ្ឌិត។
+                    {{ t('home.hero_subtitle') }}
                 </p>
             </div>
 
             <div class="position-relative pt-3 d-flex flex-wrap align-items-center gap-3" style="z-index: 2;">
                 <a href="{{ url_for('expert_system.diagnose') }}" class="btn btn-light btn-lg fw-bold text-success px-4 py-2 shadow-sm rounded-3">
-                    <i class="bi bi-plus-circle-fill text-success me-1"></i> វិភាគជំងឺថ្មី (Start Diagnosis)
+                    <i class="bi bi-plus-circle-fill text-success me-1"></i> {{ t('home.start_diagnosis') }}
                 </a>
                 <span class="text-white-50 small">
-                    <i class="bi bi-clock me-1"></i> ចំណាយពេល ~១ នាទី
+                    <i class="bi bi-clock me-1"></i> {{ t('home.duration_hint') }}
                 </span>
             </div>
 
@@ -96,14 +101,14 @@
         <div class="card border-0 shadow-sm h-100 d-flex flex-column justify-content-between">
             <div class="card-body p-4">
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <span class="small fw-bold text-muted text-uppercase tracking-wider">ស្ថានភាពទូទៅ / Status</span>
+                    <span class="small fw-bold text-muted text-uppercase tracking-wider">{{ t('home.flock_status_title') }}</span>
                     {% if stats.pending > 0 %}
                     <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 rounded-pill px-2.5 py-1">
-                        <i class="bi bi-hourglass-split me-1"></i> កំពុងតាមដាន
+                        <i class="bi bi-hourglass-split me-1"></i> {{ t('status.monitoring') }}
                     </span>
                     {% else %}
                     <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-2.5 py-1">
-                        <i class="bi bi-check-circle-fill me-1"></i> ស្ថានភាពល្អ
+                        <i class="bi bi-check-circle-fill me-1"></i> {{ t('status.good') }}
                     </span>
                     {% endif %}
                 </div>
@@ -111,21 +116,21 @@
                 <div class="row g-2 mb-3">
                     <div class="col-6">
                         <div class="p-3 rounded-3 bg-light border">
-                            <span class="text-muted small d-block mb-1">ករណីសរុប</span>
+                            <span class="text-muted small d-block mb-1">{{ t('home.total_cases') }}</span>
                             <h3 class="fw-bold mb-0 text-dark">{{ stats.total }}</h3>
                         </div>
                     </div>
                     <div class="col-6">
                         <div class="p-3 rounded-3 bg-warning bg-opacity-10 border border-warning border-opacity-25">
-                            <span class="text-warning small d-block mb-1 fw-semibold">រង់ចាំពិនិត្យ</span>
+                            <span class="text-warning small d-block mb-1 fw-semibold">{{ t('home.pending_review') }}</span>
                             <h3 class="fw-bold mb-0 text-dark">{{ stats.pending }}</h3>
                         </div>
                     </div>
                 </div>
 
                 <div class="pt-2 border-top d-flex justify-content-between align-items-center text-muted small">
-                    <span>បានបញ្ជាក់: <strong class="text-success fw-bold">{{ stats.confirmed }}</strong></span>
-                    <span>សប្តាហ៍នេះ: <strong class="text-dark fw-bold">{{ stats.this_week }}</strong></span>
+                    <span>{{ t('home.confirmed_count') }}: <strong class="text-success fw-bold">{{ stats.confirmed }}</strong></span>
+                    <span>{{ t('home.this_week') }}: <strong class="text-dark fw-bold">{{ stats.this_week }}</strong></span>
                 </div>
             </div>
         </div>
@@ -138,10 +143,10 @@
     <div class="col-lg-8">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h5 class="fw-bold mb-0 text-dark">
-                <i class="bi bi-clock-history me-2 text-primary"></i>ករណីថ្មីៗ (Recent Diagnoses)
+                <i class="bi bi-clock-history me-2 text-primary"></i>{{ t('home.recent_cases_title') }}
             </h5>
             <a href="{{ url_for('expert_system.cases_index') }}" class="btn btn-sm btn-outline-primary fw-semibold">
-                មើលទាំងអស់ ({{ stats.total }}) <i class="bi bi-arrow-right ms-1"></i>
+                {{ t('btn.view_all') }} ({{ stats.total }}) <i class="bi bi-arrow-right ms-1"></i>
             </a>
         </div>
 
@@ -158,19 +163,19 @@
                         <div>
                             <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
                                 <h6 class="fw-bold mb-0 text-dark">
-                                    {{ case.final_disease.name if case.final_disease else 'មិនទាន់បញ្ជាក់ / Inconclusive' }}
+                                    {{ case.final_disease.name if case.final_disease else t('home.inconclusive') }}
                                 </h6>
                                 {% if case.status == 'confirmed' %}
                                 <span class="badge status-badge status-confirmed">
-                                    <i class="bi bi-patch-check-fill me-1"></i> បានបញ្ជាក់
+                                    <i class="bi bi-patch-check-fill me-1"></i> {{ t('status.confirmed') }}
                                 </span>
                                 {% elif case.status == 'rejected' %}
                                 <span class="badge status-badge status-rejected">
-                                    <i class="bi bi-x-circle me-1"></i> បានបដិសេធ
+                                    <i class="bi bi-x-circle me-1"></i> {{ t('status.rejected') }}
                                 </span>
                                 {% else %}
                                 <span class="badge status-badge status-pending">
-                                    <i class="bi bi-hourglass-split me-1"></i> រង់ចាំពិនិត្យ
+                                    <i class="bi bi-hourglass-split me-1"></i> {{ t('status.pending') }}
                                 </span>
                                 {% endif %}
                             </div>
@@ -178,10 +183,10 @@
                             <div class="d-flex flex-wrap align-items-center gap-3 text-muted small">
                                 <span><i class="bi bi-calendar3 me-1"></i>{{ case.created_at.strftime('%d/%m/%Y') }}</span>
                                 {% if case.confidence is not none %}
-                                <span><i class="bi bi-bullseye me-1 text-primary"></i>ភាពជឿជាក់: <strong class="text-primary fw-bold">{{ "%.0f"|format(case.confidence) }}%</strong></span>
+                                <span><i class="bi bi-bullseye me-1 text-primary"></i>{{ t('home.confidence') }}: <strong class="text-primary fw-bold">{{ "%.0f"|format(case.confidence) }}%</strong></span>
                                 {% endif %}
                                 {% if case.flock_size %}
-                                <span><i class="bi bi-grid-3x3-gap me-1"></i>ហ្វូង: {{ case.flock_size }} ក្បាល</span>
+                                <span><i class="bi bi-grid-3x3-gap me-1"></i>{{ case.flock_size }} {{ t('home.flock_birds') }}</span>
                                 {% endif %}
                             </div>
                         </div>
@@ -190,10 +195,10 @@
                     <!-- Action Buttons -->
                     <div class="d-flex align-items-center gap-2 align-self-end align-self-sm-center">
                         <a href="{{ url_for('expert_system.cases_detail', case_id=case.id) }}" class="btn btn-sm btn-outline-secondary px-3">
-                            លម្អិត
+                            {{ t('btn.detail') }}
                         </a>
                         <a href="{{ url_for('expert_system.cases_print', case_id=case.id) }}" target="_blank" class="btn btn-sm btn-outline-primary px-3">
-                            <i class="bi bi-printer me-1"></i>បោះពុម្ព
+                            <i class="bi bi-printer me-1"></i>{{ t('btn.print') }}
                         </a>
                     </div>
                 </div>
@@ -205,10 +210,10 @@
         <div class="card border-0 shadow-sm text-center py-5">
             <div class="card-body">
                 <i class="bi bi-inbox text-muted display-4 d-block mb-3 opacity-50"></i>
-                <h5 class="fw-bold">អ្នកមិនទាន់មានករណីវិភាគទេ</h5>
-                <p class="text-muted small">ចាប់ផ្តើមការធ្វើរោគវិនិច្ឆ័យដំបូងរបស់អ្នក ដើម្បីពិនិត្យសុខភាពហ្វូងមាន់។</p>
+                <h5 class="fw-bold">{{ t('home.empty_cases_title') }}</h5>
+                <p class="text-muted small">{{ t('home.empty_cases_desc') }}</p>
                 <a href="{{ url_for('expert_system.diagnose') }}" class="btn btn-primary px-4 mt-2">
-                    <i class="bi bi-plus-circle me-1"></i> ចាប់ផ្តើមវិភាគឥឡូវនេះ
+                    <i class="bi bi-plus-circle me-1"></i> {{ t('home.start_diagnosis') }}
                 </a>
             </div>
         </div>
@@ -222,10 +227,10 @@
         <div class="card spotlight-card p-4 shadow-sm mb-4">
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <span class="small fw-bold text-success text-uppercase">
-                    <i class="bi bi-journal-medical me-1"></i>ចំណេះដឹងជំងឺ
+                    <i class="bi bi-journal-medical me-1"></i>{{ t('home.disease_spotlight') }}
                 </span>
                 <a href="{{ url_for('expert_system.library_index') }}" class="small fw-bold text-success text-decoration-none">
-                    បណ្ណាល័យ →
+                    {{ t('nav.disease_library') }} →
                 </a>
             </div>
             <h6 class="fw-bold text-dark mb-1">{{ featured_disease.name }}</h6>
@@ -233,7 +238,7 @@
                 {{ featured_disease.description[:110] }}{% if featured_disease.description|length > 110 %}...{% endif %}
             </p>
             <a href="{{ url_for('expert_system.library_detail', disease_id=featured_disease.id) }}" class="btn btn-sm btn-outline-success w-100 fw-semibold">
-                <i class="bi bi-book me-1"></i>អានមគ្គុទ្ទេសក៍ពេញលេញ
+                <i class="bi bi-book me-1"></i>{{ t('home.read_full_guide') }}
             </a>
         </div>
         {% endif %}
@@ -242,21 +247,21 @@
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-header bg-white border-0 pt-3 pb-0">
                 <h6 class="fw-bold mb-0">
-                    <i class="bi bi-lightbulb-fill text-warning me-2"></i>គន្លឹះថែទាំ (Biosecurity Tips)
+                    <i class="bi bi-lightbulb-fill text-warning me-2"></i>{{ t('home.biosecurity_tips_title') }}
                 </h6>
             </div>
             <div class="card-body">
                 <div class="d-flex align-items-start gap-2 mb-3">
                     <i class="bi bi-check-circle-fill text-success fs-6 mt-1 flex-shrink-0"></i>
-                    <p class="small text-muted mb-0">ជ្រើសរើសរោគសញ្ញាច្រើនជាងមួយ ដើម្បីទទួលបានលទ្ធផលវិភាគកាន់តែច្បាស់។</p>
+                    <p class="small text-muted mb-0">{{ t('home.tip_1') }}</p>
                 </div>
                 <div class="d-flex align-items-start gap-2 mb-3">
                     <i class="bi bi-check-circle-fill text-success fs-6 mt-1 flex-shrink-0"></i>
-                    <p class="small text-muted mb-0">ករណីដែលបានបញ្ជាក់ដោយវេជ្ជបណ្ឌិតមានភាពជឿជាក់ និងមានជំហានព្យាបាលច្បាស់លាស់។</p>
+                    <p class="small text-muted mb-0">{{ t('home.tip_2') }}</p>
                 </div>
                 <div class="d-flex align-items-start gap-2">
                     <i class="bi bi-exclamation-triangle-fill text-warning fs-6 mt-1 flex-shrink-0"></i>
-                    <p class="small text-muted mb-0">បើមាន់មានរោគសញ្ញាធ្ងន់ធ្ងរ សូមបំបែកមាន់ឈឺជាបន្ទាន់ និងទាក់ទងពេទ្យសត្វ។</p>
+                    <p class="small text-muted mb-0">{{ t('home.tip_3') }}</p>
                 </div>
             </div>
         </div>
@@ -266,11 +271,11 @@
         <div class="card border-0 shadow-sm p-3 bg-light">
             <div class="d-flex align-items-center justify-content-between gap-2">
                 <div>
-                    <h6 class="fw-bold mb-0 small text-dark">តើអ្នកជាវេជ្ជបណ្ឌិតសត្វ?</h6>
-                    <small class="text-muted" style="font-size: 0.72rem;">ដាក់ពាក្យដើម្បីទទួលបានសិទ្ធិពិនិត្យករណី។</small>
+                    <h6 class="fw-bold mb-0 small text-dark">{{ t('home.doctor_cta_title') }}</h6>
+                    <small class="text-muted" style="font-size: 0.72rem;">{{ t('home.doctor_cta_desc') }}</small>
                 </div>
                 <a href="{{ url_for('doctor_app.apply') }}" class="btn btn-sm btn-dark fw-semibold flex-shrink-0 px-3">
-                    ដាក់ពាក្យ
+                    {{ t('nav.apply_doctor') }}
                 </a>
             </div>
         </div>

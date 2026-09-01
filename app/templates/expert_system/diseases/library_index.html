@@ -1,8 +1,8 @@
 {% extends "layouts/base.html" %}
 
-{% block title %}បណ្ណាល័យជំងឺ{% endblock %}
-{% block page_title %}បណ្ណាល័យជំងឺ{% endblock %}
-{% block page_subtitle %}Disease Knowledge Library{% endblock %}
+{% block title %}{{ t('lib.title') }}{% endblock %}
+{% block page_title %}{{ t('lib.title') }}{% endblock %}
+{% block page_subtitle %}{{ t('lib.subtitle') }}{% endblock %}
 
 {% block content %}
 <!-- Intro Banner -->
@@ -10,8 +10,8 @@
     <div class="card-body p-4">
         <div class="row align-items-center">
             <div class="col-md-9">
-                <h4 class="fw-bold mb-1 text-white"><i class="bi bi-journal-medical me-2"></i>បណ្ណាល័យចំណេះដឹងអំពីជំងឺមាន់</h4>
-                <p class="mb-0 text-white-50">ស្វែងយល់អំពីជំងឺ រោគសញ្ញា ការព្យាបាល និងការការពារ ដើម្បីថែទាំហ្វូងមាន់របស់អ្នក។</p>
+                <h4 class="fw-bold mb-1 text-white"><i class="bi bi-journal-medical me-2"></i>{{ t('lib.title') }}</h4>
+                <p class="mb-0 text-white-50">{{ t('lib.subtitle') }}</p>
             </div>
             <div class="col-md-3 text-end d-none d-md-block">
                 <i class="bi bi-book display-4 text-white opacity-25"></i>
@@ -26,17 +26,17 @@
         <div class="row g-2 align-items-end">
             <div class="col-12 col-md-5">
                 <label class="form-label small text-muted mb-1">
-                    <i class="bi bi-search me-1"></i>ស្វែងរក / Search
+                    <i class="bi bi-search me-1"></i>{{ t('btn.search') }}
                 </label>
                 <input type="text" id="lib-search" class="form-control form-control-sm"
-                       placeholder="ឈ្មោះជំងឺ ឬ ការពិពណ៌នា...">
+                       placeholder="{{ t('lib.search_ph') }}">
             </div>
             <div class="col-6 col-md-3">
                 <label class="form-label small text-muted mb-1">
-                    <i class="bi bi-tags me-1"></i>ប្រភេទ / Category
+                    <i class="bi bi-tags me-1"></i>{{ t('nav.categories') }}
                 </label>
                 <select id="lib-category" class="form-select form-select-sm">
-                    <option value="">ទាំងអស់ / All</option>
+                    <option value="">{{ t('lib.all_categories') }}</option>
                     {% for c in categories %}
                     <option value="{{ c.name }}">{{ c.name }}</option>
                     {% endfor %}
@@ -44,23 +44,23 @@
             </div>
             <div class="col-6 col-md-2">
                 <label class="form-label small text-muted mb-1">
-                    <i class="bi bi-activity me-1"></i>កម្រិត / Severity
+                    <i class="bi bi-activity me-1"></i>{{ t('diag.confidence_score') }} / {{ t('dashboard.filter_status') }}
                 </label>
                 <select id="lib-severity" class="form-select form-select-sm">
-                    <option value="">ទាំងអស់ / All</option>
-                    <option value="high">ធ្ងន់ធ្ងរ / High</option>
-                    <option value="medium">មធ្យម / Medium</option>
-                    <option value="low">ស្រាល / Low</option>
+                    <option value="">{{ t('status.all') }}</option>
+                    <option value="high">{{ t('severity.high') }}</option>
+                    <option value="medium">{{ t('severity.medium') }}</option>
+                    <option value="low">{{ t('severity.low') }}</option>
                 </select>
             </div>
             <div class="col-12 col-md-2 d-grid">
                 {% if can_manage %}
                 <a href="{{ url_for('expert_system.diseases_create') }}" class="btn btn-sm btn-primary">
-                    <i class="bi bi-plus-lg me-1"></i>បន្ថែមជំងឺ
+                    <i class="bi bi-plus-lg me-1"></i>{{ t('btn.create') }}
                 </a>
                 {% else %}
                 <button type="button" id="lib-clear" class="btn btn-sm btn-outline-secondary">
-                    <i class="bi bi-x-lg me-1"></i>សម្អាត
+                    <i class="bi bi-x-lg me-1"></i>{{ t('btn.reset') }}
                 </button>
                 {% endif %}
             </div>
@@ -70,7 +70,7 @@
 
 <!-- Result count -->
 <p class="text-muted small mb-3" id="lib-count">
-    <i class="bi bi-collection me-1"></i>ជំងឺសរុប / Total: <span class="fw-bold">{{ diseases|length }}</span>
+    <i class="bi bi-collection me-1"></i>{{ t('dashboard.stat_total_cases') }}: <span class="fw-bold">{{ diseases|length }}</span>
 </p>
 
 <!-- Disease Cards Grid -->
@@ -89,8 +89,8 @@
                            class="text-decoration-none stretched-link text-dark">{{ disease.name }}</a>
                     </h6>
                     {% if disease.is_contagious %}
-                    <span class="badge rounded-pill bg-danger bg-opacity-10 text-danger border flex-shrink-0" title="ជំងឺឆ្លង">
-                        <i class="bi bi-arrow-repeat me-1"></i>{{ disease.contagious_label_km }}
+                    <span class="badge rounded-pill bg-danger bg-opacity-10 text-danger border flex-shrink-0" title="{{ t('lib.contagious_badge') }}">
+                        <i class="bi bi-arrow-repeat me-1"></i>{{ t('lib.contagious_badge') }}
                     </span>
                     {% endif %}
                 </div>
@@ -103,7 +103,7 @@
                     {% endif %}
                     {% if disease.severity_level %}
                     <span class="badge rounded-pill bg-{{ disease.severity_color }} bg-opacity-10 text-{{ disease.severity_color }} border">
-                        <i class="bi bi-activity me-1"></i>{{ disease.severity_label_km }}
+                        <i class="bi bi-activity me-1"></i>{{ disease.severity_label_km if current_lang == 'km' else disease.severity_level }}
                     </span>
                     {% endif %}
                 </div>
@@ -114,13 +114,13 @@
 
                 <div class="d-flex align-items-center justify-content-between mt-auto">
                     <small class="text-muted">
-                        <i class="bi bi-diagram-2 me-1"></i>{{ disease.rules|length }} វិធាន
+                        <i class="bi bi-diagram-2 me-1"></i>{{ disease.rules|length }} {{ t('nav.rules') }}
                         {% if disease.has_structured_steps %}
-                        · <i class="bi bi-list-check me-1"></i>{{ disease.treatment_steps|length }} ជំហាន
+                        · <i class="bi bi-list-check me-1"></i>{{ disease.treatment_steps|length }} {{ t('diag.treatment_guide') }}
                         {% endif %}
                     </small>
                     <span class="small text-primary fw-medium">
-                        មើលលម្អិត <i class="bi bi-arrow-right"></i>
+                        {{ t('btn.detail') }} <i class="bi bi-arrow-right"></i>
                     </span>
                 </div>
             </div>
@@ -131,7 +131,7 @@
         <div class="card border-0 shadow-sm">
             <div class="card-body text-center text-muted py-5">
                 <i class="bi bi-journal-x display-5 d-block mb-2 opacity-50"></i>
-                <p class="mb-0">មិនទាន់មានទិន្នន័យជំងឺ / No diseases yet</p>
+                <p class="mb-0">{{ t('home.empty_cases_desc') }}</p>
             </div>
         </div>
     </div>
@@ -142,7 +142,7 @@
 <div id="lib-empty" class="card border-0 shadow-sm d-none">
     <div class="card-body text-center text-muted py-5">
         <i class="bi bi-search display-6 d-block mb-2 opacity-50"></i>
-        <p class="mb-0">រកមិនឃើញជំងឺដែលត្រូវនឹងលក្ខខណ្ឌ / No matching diseases</p>
+        <p class="mb-0">{{ t('cases.no_cases_found') }}</p>
     </div>
 </div>
 {% endblock %}

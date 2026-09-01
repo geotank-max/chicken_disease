@@ -1,8 +1,8 @@
 {% extends "layouts/base.html" %}
 
-{% block title %}ប្រវត្តិករណី{% endblock %}
-{% block page_title %}ប្រវត្តិករណី / Case History{% endblock %}
-{% block page_subtitle %}ពិនិត្យមើលរបាយការណ៍រោគវិនិច្ឆ័យកន្លងមក និងលទ្ធផលតាមដានសុខភាពហ្វូងមាន់។{% endblock %}
+{% block title %}{{ t('cases.title') }}{% endblock %}
+{% block page_title %}{{ t('cases.title') }}{% endblock %}
+{% block page_subtitle %}{{ t('cases.subtitle') }}{% endblock %}
 
 {% block extra_styles %}
 <style>
@@ -17,12 +17,12 @@
         align-items: center;
         gap: 0.35rem;
         border: 1px solid var(--border-color);
-        background: #ffffff;
-        color: #475569;
+        background: var(--bg-card);
+        color: var(--text-secondary);
     }
 
     .case-filter-tab:hover {
-        background: #f8fafc;
+        background: var(--bg-body);
         color: var(--primary);
         border-color: var(--primary-border);
     }
@@ -90,26 +90,26 @@
         <!-- 1-Click Status Filter Tabs -->
         <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 border-bottom pb-3 mb-3">
             <div class="d-flex flex-wrap align-items-center gap-2">
-                <span class="small fw-bold text-muted text-uppercase tracking-wider me-1">ស្ថានភាព:</span>
+                <span class="small fw-bold text-muted text-uppercase tracking-wider me-1">{{ t('cases.filter_by_status') }}:</span>
                 
                 <a href="{{ url_for('expert_system.cases_index', disease_id=filters.disease_id, date_from=filters.date_from, date_to=filters.date_to) }}"
                    class="case-filter-tab {% if not filters.status %}active{% endif %}">
-                    ទាំងអស់ (All)
+                    {{ t('status.all') }}
                 </a>
 
                 <a href="{{ url_for('expert_system.cases_index', status='pending', disease_id=filters.disease_id, date_from=filters.date_from, date_to=filters.date_to) }}"
                    class="case-filter-tab {% if filters.status == 'pending' %}active{% endif %}">
-                    <i class="bi bi-hourglass-split"></i> រង់ចាំពិនិត្យ
+                    <i class="bi bi-hourglass-split"></i> {{ t('status.pending') }}
                 </a>
 
                 <a href="{{ url_for('expert_system.cases_index', status='confirmed', disease_id=filters.disease_id, date_from=filters.date_from, date_to=filters.date_to) }}"
                    class="case-filter-tab {% if filters.status == 'confirmed' %}active{% endif %}">
-                    <i class="bi bi-patch-check-fill"></i> បានបញ្ជាក់
+                    <i class="bi bi-patch-check-fill"></i> {{ t('status.confirmed') }}
                 </a>
 
                 <a href="{{ url_for('expert_system.cases_index', status='rejected', disease_id=filters.disease_id, date_from=filters.date_from, date_to=filters.date_to) }}"
                    class="case-filter-tab {% if filters.status == 'rejected' %}active{% endif %}">
-                    <i class="bi bi-x-circle"></i> បានបដិសេធ
+                    <i class="bi bi-x-circle"></i> {{ t('status.rejected') }}
                 </a>
             </div>
 
@@ -131,10 +131,10 @@
 
             <div class="col-12 col-md-4">
                 <label class="form-label small fw-bold text-muted mb-1">
-                    <i class="bi bi-virus me-1"></i>ជំងឺ / Disease Filter
+                    <i class="bi bi-virus me-1"></i>{{ t('dashboard.filter_disease') }}
                 </label>
                 <select name="disease_id" class="form-select form-select-sm">
-                    <option value="">គ្រប់ជំងឺទាំងអស់ (All Diseases)</option>
+                    <option value="">{{ t('dashboard.filter_all_diseases') }}</option>
                     {% for disease in diseases %}
                     <option value="{{ disease.id }}" {% if filters.disease_id == disease.id %}selected{% endif %}>
                         {{ disease.name }}
@@ -145,23 +145,23 @@
 
             <div class="col-6 col-md-3">
                 <label class="form-label small fw-bold text-muted mb-1">
-                    <i class="bi bi-calendar-event me-1"></i>ពីកាលបរិច្ឆេទ / Date From
+                    <i class="bi bi-calendar-event me-1"></i>{{ t('dashboard.date_from') }}
                 </label>
                 <input type="date" name="date_from" class="form-control form-control-sm" value="{{ filters.date_from }}">
             </div>
 
             <div class="col-6 col-md-3">
                 <label class="form-label small fw-bold text-muted mb-1">
-                    <i class="bi bi-calendar-check me-1"></i>ដល់កាលបរិច្ឆេទ / Date To
+                    <i class="bi bi-calendar-check me-1"></i>{{ t('dashboard.date_to') }}
                 </label>
                 <input type="date" name="date_to" class="form-control form-control-sm" value="{{ filters.date_to }}">
             </div>
 
             <div class="col-12 col-md-2 d-flex gap-2">
                 <button type="submit" class="btn btn-sm btn-primary flex-grow-1 fw-semibold">
-                    <i class="bi bi-funnel-fill me-1"></i>ត្រង
+                    <i class="bi bi-funnel-fill me-1"></i>{{ t('btn.filter') }}
                 </button>
-                <a href="{{ url_for('expert_system.cases_index') }}" class="btn btn-sm btn-outline-secondary px-3" title="Clear Filters">
+                <a href="{{ url_for('expert_system.cases_index') }}" class="btn btn-sm btn-outline-secondary px-3" title="{{ t('btn.clear_filters') }}">
                     <i class="bi bi-arrow-clockwise"></i>
                 </a>
             </div>
@@ -175,13 +175,13 @@
         <div class="d-flex justify-content-between align-items-center">
             <h6 class="mb-0 fw-bold text-dark d-flex align-items-center gap-2">
                 <i class="bi bi-clock-history text-primary"></i>
-                <span>កំណត់ត្រារោគវិនិច្ឆ័យ (Diagnosis Records)</span>
+                <span>{{ t('dashboard.recent_diagnoses_table') }}</span>
                 <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-2.5 py-1 ms-1">
-                    {{ pagination.total }} ករណី
+                    {{ pagination.total }}
                 </span>
             </h6>
             <small class="text-muted">
-                ទំព័រ {{ pagination.page }} នៃ {{ pagination.pages or 1 }}
+                {{ pagination.page }} / {{ pagination.pages or 1 }}
             </small>
         </div>
     </div>
@@ -190,15 +190,15 @@
         <table class="table table-cases align-middle mb-0">
             <thead class="bg-light">
                 <tr>
-                    <th class="ps-4 py-3 text-uppercase small fw-bold text-muted" style="width: 15%;">កាលបរិច្ឆេទ</th>
+                    <th class="ps-4 py-3 text-uppercase small fw-bold text-muted" style="width: 15%;">{{ t('cases.col_date') }}</th>
                     {% if current_user.has_role('Admin') or current_user.has_role('Doctor') %}
-                    <th class="py-3 text-uppercase small fw-bold text-muted" style="width: 15%;">អ្នកប្រើប្រាស់</th>
+                    <th class="py-3 text-uppercase small fw-bold text-muted" style="width: 15%;">{{ t('nav.users') }}</th>
                     {% endif %}
-                    <th class="py-3 text-uppercase small fw-bold text-muted" style="width: 25%;">ជំងឺដែលបានកំណត់</th>
-                    <th class="py-3 text-uppercase small fw-bold text-muted" style="width: 12%;">ទំនុកចិត្ត</th>
-                    <th class="py-3 text-uppercase small fw-bold text-muted" style="width: 13%;">ស្ថានភាព</th>
-                    <th class="py-3 text-uppercase small fw-bold text-muted" style="width: 20%;">រោគសញ្ញា</th>
-                    <th class="pe-4 py-3 text-end text-uppercase small fw-bold text-muted" style="width: 15%;">សកម្មភាព</th>
+                    <th class="py-3 text-uppercase small fw-bold text-muted" style="width: 25%;">{{ t('cases.col_disease') }}</th>
+                    <th class="py-3 text-uppercase small fw-bold text-muted" style="width: 12%;">{{ t('cases.col_confidence') }}</th>
+                    <th class="py-3 text-uppercase small fw-bold text-muted" style="width: 13%;">{{ t('cases.col_status') }}</th>
+                    <th class="py-3 text-uppercase small fw-bold text-muted" style="width: 20%;">{{ t('nav.symptoms') }}</th>
+                    <th class="pe-4 py-3 text-end text-uppercase small fw-bold text-muted" style="width: 15%;">{{ t('cases.col_actions') }}</th>
                 </tr>
             </thead>
             <tbody class="divide-y">
@@ -218,13 +218,11 @@
                     <td>
                         <div class="d-flex align-items-center">
                             <div class="bg-light rounded-circle border d-flex align-items-center justify-content-center me-2 text-primary fw-bold small" style="width: 32px; height: 32px;">
-                                {{ case.user.username[0]|upper if case.user else '?' }}
+                                {{ case.user.username[0] | upper if case.user else '?' }}
                             </div>
                             <div>
-                                <span class="small fw-semibold text-dark d-block">{{ case.user.username if case.user else 'មិនស្គាល់' }}</span>
-                                {% if case.user and case.user.roles %}
-                                <span class="text-muted" style="font-size: 0.7rem;">{{ case.user.roles[0].name }}</span>
-                                {% endif %}
+                                <span class="fw-semibold small text-dark d-block">{{ case.user.full_name or case.user.username if case.user else 'Unknown' }}</span>
+                                <small class="text-muted" style="font-size: 0.72rem;">@{{ case.user.username if case.user else 'unknown' }}</small>
                             </div>
                         </div>
                     </td>
@@ -237,34 +235,30 @@
                                 <i class="bi bi-virus"></i>
                             </div>
                             <div>
-                                {% if case.final_disease %}
-                                    <div class="fw-bold text-dark mb-0">{{ case.final_disease.name }}</div>
-                                    {% if case.final_disease.category %}
-                                    <small class="text-muted" style="font-size: 0.72rem;">{{ case.final_disease.category.name }}</small>
-                                    {% endif %}
-                                {% elif case.disease %}
-                                    <div class="fw-bold text-dark mb-0">{{ case.disease.name }}</div>
-                                {% else %}
-                                    <span class="text-muted fst-italic">មិនទាន់កំណត់ / Inconclusive</span>
+                                <span class="fw-bold text-dark d-block">
+                                    {{ case.final_disease.name if case.final_disease else t('home.inconclusive') }}
+                                </span>
+                                {% if case.flock_size %}
+                                <small class="text-muted">{{ case.flock_size }} {{ t('home.flock_birds') }}{% if case.bird_age %} · {{ case.bird_age }}{% endif %}</small>
                                 {% endif %}
                             </div>
                         </div>
                     </td>
 
-                    <!-- Confidence Meter -->
-                    <td class="text-nowrap">
+                    <!-- Confidence -->
+                    <td>
                         {% if case.confidence is not none %}
-                            {% set conf = case.confidence|round|int %}
-                            <div class="d-inline-flex flex-column">
-                                <span class="badge rounded-pill {% if conf >= 70 %}bg-success bg-opacity-10 text-success border border-success border-opacity-25{% elif conf >= 40 %}bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25{% else %}bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25{% endif %} fw-bold px-2 py-0.5" style="font-size: 0.76rem;">
-                                    {{ conf }}%
-                                </span>
-                                <div class="confidence-meter">
-                                    <div class="confidence-meter-fill {% if conf >= 70 %}bg-success{% elif conf >= 40 %}bg-warning{% else %}bg-secondary{% endif %}" style="width: {{ conf }}%;"></div>
-                                </div>
+                        <div class="d-flex flex-column">
+                            <span class="fw-bold small {% if case.confidence >= 80 %}text-success{% elif case.confidence >= 50 %}text-warning{% else %}text-danger{% endif %}">
+                                {{ "%.0f"|format(case.confidence) }}%
+                            </span>
+                            <div class="confidence-meter">
+                                <div class="confidence-meter-fill {% if case.confidence >= 80 %}bg-success{% elif case.confidence >= 50 %}bg-warning{% else %}bg-danger{% endif %}"
+                                     style="width: {{ case.confidence }}%;"></div>
                             </div>
+                        </div>
                         {% else %}
-                            <span class="text-muted small">-</span>
+                        <span class="text-muted small">---</span>
                         {% endif %}
                     </td>
 
@@ -272,52 +266,57 @@
                     <td>
                         {% if case.status == 'confirmed' %}
                         <span class="badge status-badge status-confirmed">
-                            <i class="bi bi-patch-check-fill me-1"></i> បានបញ្ជាក់
+                            <i class="bi bi-patch-check-fill me-1"></i> {{ t('status.confirmed') }}
                         </span>
                         {% elif case.status == 'rejected' %}
                         <span class="badge status-badge status-rejected">
-                            <i class="bi bi-x-circle me-1"></i> បានបដិសេធ
+                            <i class="bi bi-x-circle me-1"></i> {{ t('status.rejected') }}
                         </span>
                         {% else %}
                         <span class="badge status-badge status-pending">
-                            <i class="bi bi-hourglass-split me-1"></i> រង់ចាំពិនិត្យ
+                            <i class="bi bi-hourglass-split me-1"></i> {{ t('status.pending') }}
                         </span>
                         {% endif %}
                     </td>
 
-                    <!-- Symptoms -->
+                    <!-- Symptoms Count / Badges -->
                     <td>
-                        <div class="d-flex flex-wrap gap-1" style="max-width: 280px;">
-                            {% for s in case.symptoms[:3] %}
-                            <span class="symptom-tag-pill" title="{{ s.name }}">{{ s.name }}</span>
+                        <div class="d-flex flex-wrap gap-1 align-items-center">
+                            {% for symptom in case.symptoms[:3] %}
+                            <span class="symptom-tag-pill">{{ symptom.name }}</span>
                             {% endfor %}
                             {% if case.symptoms|length > 3 %}
-                            <span class="symptom-tag-pill bg-light text-muted" title="{{ case.symptoms|length }} symptoms total">+{{ case.symptoms|length - 3 }}</span>
+                            <span class="badge bg-light text-muted border small">+{{ case.symptoms|length - 3 }}</span>
                             {% endif %}
                         </div>
                     </td>
 
-                    <!-- Action Buttons -->
+                    <!-- Actions -->
                     <td class="pe-4 text-end text-nowrap">
-                        <div class="d-inline-flex align-items-center gap-1">
-                            <a href="{{ url_for('expert_system.cases_detail', case_id=case.id) }}" class="btn btn-sm btn-outline-primary fw-semibold px-2.5 py-1">
-                                មើលលម្អិត
-                            </a>
-                            <a href="{{ url_for('expert_system.cases_print', case_id=case.id) }}" target="_blank" class="btn btn-sm btn-outline-secondary px-2 py-1" title="Print PDF">
-                                <i class="bi bi-printer"></i>
-                            </a>
-                        </div>
+                        <a href="{{ url_for('expert_system.cases_detail', case_id=case.id) }}" 
+                           class="btn btn-sm btn-outline-secondary px-2.5 py-1"
+                           title="{{ t('btn.detail') }}">
+                            <i class="bi bi-eye me-1"></i> {{ t('btn.detail') }}
+                        </a>
+                        <a href="{{ url_for('expert_system.cases_print', case_id=case.id) }}" 
+                           target="_blank"
+                           class="btn btn-sm btn-outline-primary px-2.5 py-1 ms-1"
+                           title="{{ t('btn.print') }}">
+                            <i class="bi bi-printer"></i>
+                        </a>
                     </td>
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="{% if current_user.has_role('Admin') or current_user.has_role('Doctor') %}7{% else %}6{% endif %}" class="text-center py-5">
-                        <div class="text-muted mb-2"><i class="bi bi-clipboard-x display-4 opacity-50"></i></div>
-                        <h6 class="fw-bold text-dark">រកមិនឃើញប្រវត្តិរោគវិនិច្ឆ័យទេ</h6>
-                        <p class="text-muted small mb-3">មិនមានទិន្នន័យដែលត្រូវគ្នានឹងតម្រងស្វែងរករបស់អ្នកទេ។</p>
-                        <a href="{{ url_for('expert_system.cases_index') }}" class="btn btn-sm btn-outline-primary">
-                            <i class="bi bi-arrow-clockwise me-1"></i>សម្អាតតម្រង
-                        </a>
+                    <td colspan="7" class="text-center py-5">
+                        <div class="py-4">
+                            <i class="bi bi-inbox text-muted display-4 d-block mb-3 opacity-50"></i>
+                            <h6 class="fw-bold text-dark mb-1">{{ t('cases.no_cases_found') }}</h6>
+                            <p class="text-muted small mb-3">{{ t('home.empty_cases_desc') }}</p>
+                            <a href="{{ url_for('expert_system.diagnose') }}" class="btn btn-sm btn-primary px-3">
+                                <i class="bi bi-plus-circle me-1"></i> {{ t('home.start_diagnosis') }}
+                            </a>
+                        </div>
                     </td>
                 </tr>
                 {% endfor %}

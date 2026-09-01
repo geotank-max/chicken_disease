@@ -1,8 +1,8 @@
 {% extends "layouts/base.html" %}
 
-{% block title %}Dashboard{% endblock %}
-{% block page_title %}Dashboard{% endblock %}
-{% block page_subtitle %}System overview and analytics{% endblock %}
+{% block title %}{{ t('nav.dashboard') }}{% endblock %}
+{% block page_title %}{{ t('nav.dashboard') }}{% endblock %}
+{% block page_subtitle %}{{ t('dashboard.subtitle') }}{% endblock %}
 
 {% block content %}
 <!-- Welcome Banner -->
@@ -10,8 +10,8 @@
     <div class="card-body p-4">
         <div class="row align-items-center">
             <div class="col-md-8">
-                <h4 class="fw-bold mb-1 text-white">Welcome back, {{ current_user.full_name }}!</h4>
-                <p class="mb-0 text-white-50">Here's what's happening with your chicken diagnosis system today.</p>
+                <h4 class="fw-bold mb-1 text-white">{{ t('dashboard.welcome_banner', name=current_user.full_name) }}</h4>
+                <p class="mb-0 text-white-50">{{ t('dashboard.banner_desc') }}</p>
             </div>
             <div class="col-md-4 text-end d-none d-md-block">
                 <i class="bi bi-speedometer2 display-4 text-white opacity-25"></i>
@@ -26,22 +26,22 @@
         <form method="get" action="{{ url_for('dashboard.index') }}" class="row g-2 align-items-end">
             <div class="col-6 col-md-3 col-lg-3">
                 <label class="form-label small text-muted mb-1">
-                    <i class="bi bi-calendar-event me-1"></i>ចាប់ពី / From
+                    <i class="bi bi-calendar-event me-1"></i>{{ t('dashboard.date_from') }}
                 </label>
                 <input type="date" name="date_from" value="{{ filters.date_from }}" class="form-control form-control-sm">
             </div>
             <div class="col-6 col-md-3 col-lg-3">
                 <label class="form-label small text-muted mb-1">
-                    <i class="bi bi-calendar-check me-1"></i>ដល់ / To
+                    <i class="bi bi-calendar-check me-1"></i>{{ t('dashboard.date_to') }}
                 </label>
                 <input type="date" name="date_to" value="{{ filters.date_to }}" class="form-control form-control-sm">
             </div>
             <div class="col-6 col-md-3 col-lg-3">
                 <label class="form-label small text-muted mb-1">
-                    <i class="bi bi-virus me-1"></i>ជំងឺ / Disease
+                    <i class="bi bi-virus me-1"></i>{{ t('dashboard.filter_disease') }}
                 </label>
                 <select name="disease_id" class="form-select form-select-sm">
-                    <option value="0">ទាំងអស់ / All diseases</option>
+                    <option value="0">{{ t('dashboard.filter_all_diseases') }}</option>
                     {% for d in diseases %}
                     <option value="{{ d.id }}" {% if filters.disease_id == d.id %}selected{% endif %}>{{ d.name }}</option>
                     {% endfor %}
@@ -49,21 +49,21 @@
             </div>
             <div class="col-6 col-md-3 col-lg-2">
                 <label class="form-label small text-muted mb-1">
-                    <i class="bi bi-flag me-1"></i>ស្ថានភាព / Status
+                    <i class="bi bi-flag me-1"></i>{{ t('dashboard.filter_status') }}
                 </label>
                 <select name="status" class="form-select form-select-sm">
-                    <option value="">ទាំងអស់ / All</option>
-                    <option value="pending" {% if filters.status == 'pending' %}selected{% endif %}>រង់ចាំពិនិត្យ / Pending</option>
-                    <option value="confirmed" {% if filters.status == 'confirmed' %}selected{% endif %}>បានបញ្ជាក់ / Confirmed</option>
-                    <option value="rejected" {% if filters.status == 'rejected' %}selected{% endif %}>បានបដិសេធ / Rejected</option>
+                    <option value="">{{ t('status.all') }}</option>
+                    <option value="pending" {% if filters.status == 'pending' %}selected{% endif %}>{{ t('status.pending') }}</option>
+                    <option value="confirmed" {% if filters.status == 'confirmed' %}selected{% endif %}>{{ t('status.confirmed') }}</option>
+                    <option value="rejected" {% if filters.status == 'rejected' %}selected{% endif %}>{{ t('status.rejected') }}</option>
                 </select>
             </div>
             <div class="col-12 col-lg-1 d-grid d-lg-flex gap-2">
-                <button type="submit" class="btn btn-sm btn-primary w-100">
+                <button type="submit" class="btn btn-sm btn-primary w-100" title="{{ t('btn.filter') }}">
                     <i class="bi bi-funnel"></i>
                 </button>
                 {% if has_filters %}
-                <a href="{{ url_for('dashboard.index') }}" class="btn btn-sm btn-outline-secondary w-100" title="Clear filters">
+                <a href="{{ url_for('dashboard.index') }}" class="btn btn-sm btn-outline-secondary w-100" title="{{ t('btn.clear_filters') }}">
                     <i class="bi bi-x-lg"></i>
                 </a>
                 {% endif %}
@@ -84,7 +84,7 @@
                         </div>
                     </div>
                     <div>
-                        <p class="text-muted small mb-0">ករណីសរុប / Total Cases</p>
+                        <p class="text-muted small mb-0">{{ t('dashboard.stat_total_cases') }}</p>
                         <h3 class="fw-bold mb-0">{{ summary.total_cases }}</h3>
                     </div>
                 </div>
@@ -101,7 +101,7 @@
                         </div>
                     </div>
                     <div>
-                        <p class="text-muted small mb-0">រង់ចាំពិនិត្យ / Pending</p>
+                        <p class="text-muted small mb-0">{{ t('dashboard.stat_pending_cases') }}</p>
                         <h3 class="fw-bold mb-0">{{ summary.pending_reviews }}</h3>
                     </div>
                 </div>
@@ -118,7 +118,7 @@
                         </div>
                     </div>
                     <div>
-                        <p class="text-muted small mb-0">បានបញ្ជាក់ / Confirmed</p>
+                        <p class="text-muted small mb-0">{{ t('dashboard.stat_confirmed_cases') }}</p>
                         <h3 class="fw-bold mb-0">{{ summary.confirmed_cases }}</h3>
                     </div>
                 </div>
@@ -135,7 +135,7 @@
                         </div>
                     </div>
                     <div>
-                        <p class="text-muted small mb-0">បានបដិសេធ / Rejected</p>
+                        <p class="text-muted small mb-0">{{ t('dashboard.stat_rejected_cases') }}</p>
                         <h3 class="fw-bold mb-0">{{ summary.rejected_cases }}</h3>
                     </div>
                 </div>
@@ -152,7 +152,7 @@
                         </div>
                     </div>
                     <div>
-                        <p class="text-muted small mb-0">ខែនេះ / This Month</p>
+                        <p class="text-muted small mb-0">{{ t('home.this_week') }}</p>
                         <h3 class="fw-bold mb-0">{{ summary.cases_this_month }}</h3>
                     </div>
                 </div>
@@ -167,8 +167,8 @@
         <div class="card border-0 shadow-sm h-100">
             <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
                 <div>
-                    <h6 class="fw-bold mb-0">និន្នាការជំងឺ / Disease Trend</h6>
-                    <small class="text-muted">Diagnosis cases over time</small>
+                    <h6 class="fw-bold mb-0">{{ t('dashboard.cases_over_time') }}</h6>
+                    <small class="text-muted">{{ t('dashboard.subtitle') }}</small>
                 </div>
                 <span class="badge bg-primary bg-opacity-10 text-primary">
                     <i class="bi bi-graph-up me-1"></i>{{ cases_by_day|length }} days
@@ -182,8 +182,8 @@
     <div class="col-lg-4">
         <div class="card border-0 shadow-sm h-100">
             <div class="card-header bg-white border-0 py-3">
-                <h6 class="fw-bold mb-0">ស្ថានភាពករណី / Case Status</h6>
-                <small class="text-muted">Pending / Confirmed / Rejected</small>
+                <h6 class="fw-bold mb-0">{{ t('dashboard.filter_status') }}</h6>
+                <small class="text-muted">{{ t('status.pending') }} / {{ t('status.confirmed') }} / {{ t('status.rejected') }}</small>
             </div>
             <div class="card-body d-flex align-items-center justify-content-center">
                 <canvas id="statusChart" style="max-height: 240px;"></canvas>
@@ -197,8 +197,8 @@
     <div class="col-lg-7">
         <div class="card border-0 shadow-sm h-100">
             <div class="card-header bg-white border-0 py-3">
-                <h6 class="fw-bold mb-0">ជំងឺញឹកញាប់ / Top Diseases</h6>
-                <small class="text-muted">Most frequently diagnosed with share of cases</small>
+                <h6 class="fw-bold mb-0">{{ t('dashboard.disease_distribution') }}</h6>
+                <small class="text-muted">{{ t('dashboard.subtitle') }}</small>
             </div>
             <div class="card-body">
                 {% if top_diseases %}
@@ -208,7 +208,7 @@
                         <span class="small fw-medium">
                             {{ d.name }}
                             {% if d.is_dangerous %}
-                            <i class="bi bi-exclamation-triangle-fill text-danger ms-1" title="Severe disease"></i>
+                            <i class="bi bi-exclamation-triangle-fill text-danger ms-1" title="{{ t('severity.high') }}"></i>
                             {% endif %}
                         </span>
                         <span class="small text-muted">
@@ -225,7 +225,7 @@
                 {% else %}
                 <div class="text-center py-4">
                     <i class="bi bi-bar-chart text-muted display-6 d-block mb-2"></i>
-                    <p class="text-muted small mb-0">មិនទាន់មានទិន្នន័យ / No diagnosis data yet</p>
+                    <p class="text-muted small mb-0">{{ t('home.empty_cases_desc') }}</p>
                 </div>
                 {% endif %}
             </div>
@@ -234,28 +234,28 @@
     <div class="col-lg-5">
         <div class="card border-0 shadow-sm h-100">
             <div class="card-header bg-white border-0 py-3">
-                <h6 class="fw-bold mb-0">ចំណែកតាមស្ថានភាព / Status Breakdown</h6>
-                <small class="text-muted">Counts by review status</small>
+                <h6 class="fw-bold mb-0">{{ t('dashboard.filter_status') }}</h6>
+                <small class="text-muted">{{ t('cases.subtitle') }}</small>
             </div>
             <div class="card-body d-flex flex-column justify-content-center">
                 <div class="d-flex align-items-center justify-content-between mb-3">
                     <span class="d-flex align-items-center">
                         <span class="badge status-badge status-pending me-2">&nbsp;</span>
-                        <span class="small">រង់ចាំពិនិត្យ / Pending</span>
+                        <span class="small">{{ t('status.pending') }}</span>
                     </span>
                     <span class="fw-bold">{{ status_breakdown.pending }}</span>
                 </div>
                 <div class="d-flex align-items-center justify-content-between mb-3">
                     <span class="d-flex align-items-center">
                         <span class="badge status-badge status-confirmed me-2">&nbsp;</span>
-                        <span class="small">បានបញ្ជាក់ / Confirmed</span>
+                        <span class="small">{{ t('status.confirmed') }}</span>
                     </span>
                     <span class="fw-bold">{{ status_breakdown.confirmed }}</span>
                 </div>
                 <div class="d-flex align-items-center justify-content-between">
                     <span class="d-flex align-items-center">
                         <span class="badge status-badge status-rejected me-2">&nbsp;</span>
-                        <span class="small">បានបដិសេធ / Rejected</span>
+                        <span class="small">{{ t('status.rejected') }}</span>
                     </span>
                     <span class="fw-bold">{{ status_breakdown.rejected }}</span>
                 </div>
@@ -271,24 +271,24 @@
             <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
                 <div>
                     <h6 class="fw-bold mb-0 text-danger">
-                        <i class="bi bi-shield-exclamation me-1"></i>ករណីប្រថុយខ្ពស់ / High-Risk Cases
+                        <i class="bi bi-shield-exclamation me-1"></i>{{ t('severity.critical') }} - {{ t('cases.title') }}
                     </h6>
-                    <small class="text-muted">Many sick/dead birds, severe disease, or low confidence</small>
+                    <small class="text-muted">{{ t('diag.step1_desc') }}</small>
                 </div>
                 <a href="{{ url_for('expert_system.cases_index') }}" class="btn btn-sm btn-outline-danger">
-                    View All <i class="bi bi-arrow-right ms-1"></i>
+                    {{ t('btn.view_all') }} <i class="bi bi-arrow-right ms-1"></i>
                 </a>
             </div>
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
                     <thead>
                         <tr class="bg-light">
-                            <th class="ps-4 py-3 small fw-bold text-muted">Date</th>
-                            <th class="py-3 small fw-bold text-muted">User</th>
-                            <th class="py-3 small fw-bold text-muted">Disease</th>
-                            <th class="py-3 small fw-bold text-muted">Confidence</th>
-                            <th class="py-3 small fw-bold text-muted">Risk Factors</th>
-                            <th class="py-3 small fw-bold text-muted">Status</th>
+                            <th class="ps-4 py-3 small fw-bold text-muted">{{ t('cases.col_date') }}</th>
+                            <th class="py-3 small fw-bold text-muted">{{ t('nav.users') }}</th>
+                            <th class="py-3 small fw-bold text-muted">{{ t('cases.col_disease') }}</th>
+                            <th class="py-3 small fw-bold text-muted">{{ t('cases.col_confidence') }}</th>
+                            <th class="py-3 small fw-bold text-muted">{{ t('diag.notes') }}</th>
+                            <th class="py-3 small fw-bold text-muted">{{ t('cases.col_status') }}</th>
                             <th class="pe-4 py-3 small fw-bold text-muted text-end"></th>
                         </tr>
                     </thead>
@@ -323,15 +323,17 @@
                             <td>
                                 {% for reason in item.reasons %}
                                 <span class="badge rounded-pill bg-{{ reason.color }} bg-opacity-10 text-{{ reason.color }} border mb-1" title="{{ reason.label_en }}">
-                                    <i class="bi {{ reason.icon }} me-1"></i>{{ reason.label_km }}
+                                    <i class="bi {{ reason.icon }} me-1"></i>{% if current_lang == 'en' %}{{ reason.label_en }}{% else %}{{ reason.label_km }}{% endif %}
                                 </span>
                                 {% endfor %}
                             </td>
                             <td>
-                                <span class="badge rounded-pill status-badge status-{{ case.status }}">{{ case.status_label_km }}</span>
+                                <span class="badge rounded-pill status-badge status-{{ case.status }}">
+                                    {{ get_translated_option('status', case.status) }}
+                                </span>
                             </td>
                             <td class="pe-4 text-end">
-                                <a href="{{ url_for('expert_system.cases_detail', case_id=case.id) }}" class="btn btn-sm btn-outline-primary">
+                                <a href="{{ url_for('expert_system.cases_detail', case_id=case.id) }}" class="btn btn-sm btn-outline-primary" title="{{ t('btn.detail') }}">
                                     <i class="bi bi-eye"></i>
                                 </a>
                             </td>
@@ -340,7 +342,7 @@
                         <tr>
                             <td colspan="7" class="text-center text-muted py-5">
                                 <i class="bi bi-shield-check display-6 d-block mb-2 text-success opacity-50"></i>
-                                <p class="mb-0">គ្មានករណីប្រថុយខ្ពស់ / No high-risk cases</p>
+                                <p class="mb-0">{{ t('cases.no_cases_found') }}</p>
                             </td>
                         </tr>
                         {% endfor %}
@@ -357,22 +359,22 @@
         <div class="card border-0 shadow-sm">
             <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
                 <div>
-                    <h6 class="fw-bold mb-0">ករណីថ្មីៗ / Recent Cases</h6>
-                    <small class="text-muted">Latest diagnosis activity</small>
+                    <h6 class="fw-bold mb-0">{{ t('dashboard.recent_diagnoses_table') }}</h6>
+                    <small class="text-muted">{{ t('cases.subtitle') }}</small>
                 </div>
                 <a href="{{ url_for('expert_system.cases_index') }}" class="btn btn-sm btn-outline-primary">
-                    View All <i class="bi bi-arrow-right ms-1"></i>
+                    {{ t('btn.view_all') }} <i class="bi bi-arrow-right ms-1"></i>
                 </a>
             </div>
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
                     <thead>
                         <tr class="bg-light">
-                            <th class="ps-4 py-3 small fw-bold text-muted">Date</th>
-                            <th class="py-3 small fw-bold text-muted">User</th>
-                            <th class="py-3 small fw-bold text-muted">Disease</th>
-                            <th class="py-3 small fw-bold text-muted">Confidence</th>
-                            <th class="pe-4 py-3 small fw-bold text-muted">Status</th>
+                            <th class="ps-4 py-3 small fw-bold text-muted">{{ t('cases.col_date') }}</th>
+                            <th class="py-3 small fw-bold text-muted">{{ t('nav.users') }}</th>
+                            <th class="py-3 small fw-bold text-muted">{{ t('cases.col_disease') }}</th>
+                            <th class="py-3 small fw-bold text-muted">{{ t('cases.col_confidence') }}</th>
+                            <th class="pe-4 py-3 small fw-bold text-muted">{{ t('cases.col_status') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -403,14 +405,16 @@
                                 {% endif %}
                             </td>
                             <td class="pe-4">
-                                <span class="badge rounded-pill status-badge status-{{ case.status }}">{{ case.status_label_km }}</span>
+                                <span class="badge rounded-pill status-badge status-{{ case.status }}">
+                                    {{ get_translated_option('status', case.status) }}
+                                </span>
                             </td>
                         </tr>
                         {% else %}
                         <tr>
                             <td colspan="5" class="text-center text-muted py-5">
                                 <i class="bi bi-inbox display-6 d-block mb-2 opacity-50"></i>
-                                <p class="mb-0">មិនទាន់មានករណី / No cases yet</p>
+                                <p class="mb-0">{{ t('cases.no_cases_found') }}</p>
                             </td>
                         </tr>
                         {% endfor %}

@@ -6,14 +6,14 @@
 {% block app_main_class %}no-sidebar full-width{% endblock %}
 
 {% block app_navbar %}
-<header class="app-navbar diagnosis-navbar px-3 px-lg-4 py-2 border-bottom bg-white shadow-xs">
+<header class="app-navbar diagnosis-navbar px-3 px-lg-4 py-2 border-bottom shadow-xs">
     <div class="d-flex align-items-center justify-content-between w-100 max-w-container">
         <!-- Brand -->
         <a href="{{ url_for('dashboard.index') if current_user.is_authenticated and current_user.has_permission('view_dashboard') else url_for('user_home.index') if current_user.is_authenticated else url_for('expert_system.diagnose') }}" class="d-flex align-items-center gap-2 text-decoration-none">
             <img src="{{ url_for('static', filename='images/favicon.svg') }}" alt="IDNS" style="height: 32px; width: 32px;">
             <div class="d-flex flex-column">
-                <span class="fw-bold text-dark fs-5 line-height-1">IDNS</span>
-                <span class="text-primary small fw-semibold d-none d-sm-inline">Chicken Diagnosis System</span>
+                <span class="fw-bold text-dark fs-5 line-height-1">{{ t('brand.title') }}</span>
+                <span class="text-primary small fw-semibold d-none d-sm-inline">{{ t('brand.subtitle') }}</span>
             </div>
         </a>
 
@@ -21,33 +21,68 @@
         <div class="global-stepper d-none d-md-flex align-items-center gap-2">
             <div class="g-step {% if step == '1' %}active{% elif step in ['2', '3'] %}completed{% endif %}">
                 <span class="g-num">{% if step in ['2', '3'] %}<i class="bi bi-check-lg"></i>{% else %}1{% endif %}</span>
-                <span class="g-text">ព័ត៌មានរុញ</span>
+                <span class="g-text">{{ t('diag.step1_nav') }}</span>
             </div>
             <div class="g-line {% if step in ['2', '3'] %}completed{% endif %}"></div>
             <div class="g-step {% if step == '2' %}active{% elif step == '3' %}completed{% endif %}">
                 <span class="g-num">{% if step == '3' %}<i class="bi bi-check-lg"></i>{% else %}2{% endif %}</span>
-                <span class="g-text">រោគសញ្ញា</span>
+                <span class="g-text">{{ t('diag.step2_nav') }}</span>
             </div>
             <div class="g-line {% if step == '3' %}completed{% endif %}"></div>
             <div class="g-step {% if step == '3' %}active{% endif %}">
                 <span class="g-num">3</span>
-                <span class="g-text">លទ្ធផល</span>
+                <span class="g-text">{{ t('diag.step3_nav') }}</span>
             </div>
         </div>
 
         <!-- Right Side Nav -->
         <div class="d-flex align-items-center gap-2">
+            <!-- Language Switcher Dropdown -->
+            <div class="dropdown">
+                <button class="btn btn-sm btn-outline-secondary dropdown-toggle d-flex align-items-center gap-1.5 rounded-pill px-2.5 py-1" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="{{ t('nav.language') }}">
+                    <span class="fs-6">{{ LANGUAGES[current_lang].flag }}</span>
+                    <span class="fw-bold small">{{ LANGUAGES[current_lang].short }}</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 py-1" style="min-width: 170px;">
+                    <li>
+                        <a class="dropdown-item d-flex align-items-center justify-content-between py-2 {% if current_lang == 'km' %}active fw-bold{% endif %}" href="{{ url_for('set_language', lang='km') }}">
+                            <span class="d-flex align-items-center gap-2"><span>🇰🇭</span> <span>ភាសាខ្មែរ (Khmer)</span></span>
+                            {% if current_lang == 'km' %}<i class="bi bi-check-lg ms-2"></i>{% endif %}
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item d-flex align-items-center justify-content-between py-2 {% if current_lang == 'en' %}active fw-bold{% endif %}" href="{{ url_for('set_language', lang='en') }}">
+                            <span class="d-flex align-items-center gap-2"><span>🇬🇧</span> <span>English</span></span>
+                            {% if current_lang == 'en' %}<i class="bi bi-check-lg ms-2"></i>{% endif %}
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Theme Toggle Button -->
+            <button class="btn btn-sm btn-outline-secondary theme-toggle-btn rounded-pill px-2.5 py-1 d-flex align-items-center justify-content-center"
+                    id="themeToggleBtnDiagnose"
+                    type="button"
+                    onclick="toggleTheme()"
+                    data-title-light="{{ t('theme.switch_light') }}"
+                    data-title-dark="{{ t('theme.switch_dark') }}"
+                    title="{{ t('theme.switch_dark') }}"
+                    aria-label="{{ t('theme.switch_dark') }}"
+                    style="cursor: pointer;">
+                <i class="bi bi-moon-stars-fill text-secondary" style="pointer-events: none;"></i>
+            </button>
+
             {% if current_user.is_authenticated %}
                 <a href="{{ url_for('dashboard.index') if current_user.has_permission('view_dashboard') else url_for('user_home.index') }}" class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1 rounded-pill px-3">
                     <i class="bi bi-house-door"></i>
-                    <span class="d-none d-sm-inline">ទំព័រដើម</span>
+                    <span class="d-none d-sm-inline">{{ t('nav.home') }}</span>
                 </a>
             {% else %}
                 <a href="{{ url_for('auth.login') }}" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-semibold">
-                    <i class="bi bi-box-arrow-in-right me-1"></i>ចូលគណនី
+                    <i class="bi bi-box-arrow-in-right me-1"></i>{{ t('nav.login') }}
                 </a>
                 <a href="{{ url_for('auth.register') }}" class="btn btn-sm btn-primary rounded-pill px-3 fw-semibold d-none d-sm-inline-flex">
-                    <i class="bi bi-person-plus me-1"></i>ចុះឈ្មោះ
+                    <i class="bi bi-person-plus me-1"></i>{{ t('nav.register') }}
                 </a>
             {% endif %}
         </div>
@@ -714,6 +749,194 @@
         font-size: 1.75rem;
         margin-bottom: 1rem;
         box-shadow: 0 8px 20px rgba(5, 150, 105, 0.15);
+    }
+
+    /* ── Dark Mode Overrides for Diagnosis Wizard ── */
+    [data-theme="dark"] .diagnosis-navbar {
+        background: var(--bg-navbar) !important;
+        border-color: var(--border-color) !important;
+    }
+
+    [data-theme="dark"] .substep-tracker {
+        background: var(--bg-card);
+        border-color: var(--border-color);
+        box-shadow: var(--shadow-sm);
+    }
+
+    [data-theme="dark"] .substep-pill {
+        background: #0f172a;
+        border-color: var(--border-color);
+        color: var(--text-secondary);
+    }
+
+    [data-theme="dark"] .substep-pill:hover {
+        background: rgba(5, 150, 105, 0.15);
+        border-color: var(--primary-border);
+        color: #34d399;
+    }
+
+    [data-theme="dark"] .substep-pill.active {
+        background: rgba(5, 150, 105, 0.22);
+        border-color: var(--primary);
+        color: #34d399;
+    }
+
+    [data-theme="dark"] .substep-pill.completed {
+        background: var(--bg-card);
+        border-color: var(--border-color);
+        color: var(--text-main);
+    }
+
+    [data-theme="dark"] .substep-pill .pill-badge {
+        background: #1e293b;
+        border-color: var(--border-color);
+        color: var(--text-muted);
+    }
+
+    [data-theme="dark"] .substep-pill.active .pill-badge {
+        background: var(--primary);
+        color: #ffffff;
+    }
+
+    [data-theme="dark"] .substep-pill.completed .pill-badge {
+        background: rgba(5, 150, 105, 0.25);
+        border-color: var(--primary-border);
+        color: #34d399;
+    }
+
+    [data-theme="dark"] .diagnosis-form-card {
+        background: var(--bg-card);
+        border-color: var(--border-color);
+    }
+
+    [data-theme="dark"] .diagnosis-form-card .card-header {
+        background-color: var(--bg-card) !important;
+        border-color: var(--border-color) !important;
+    }
+
+    [data-theme="dark"] .diagnosis-field label {
+        color: var(--text-main);
+    }
+
+    [data-theme="dark"] .diagnosis-control {
+        background-color: #0f172a;
+        border-color: var(--border-color);
+        color: var(--text-main);
+    }
+
+    [data-theme="dark"] .diagnosis-control:focus {
+        background-color: #0f172a;
+        border-color: var(--primary);
+    }
+
+    [data-theme="dark"] .diagnosis-choice-group {
+        background: #0f172a;
+        border-color: var(--border-color);
+    }
+
+    [data-theme="dark"] .diagnosis-choice-group .btn-check + label {
+        color: var(--text-secondary);
+    }
+
+    [data-theme="dark"] .photo-category-chip {
+        background: #0f172a;
+        border-color: var(--border-color);
+        color: var(--text-secondary);
+    }
+
+    [data-theme="dark"] .photo-dropzone {
+        background: #0f172a;
+        border-color: var(--border-color);
+    }
+
+    [data-theme="dark"] .photo-dropzone:hover {
+        background: rgba(5, 150, 105, 0.12);
+    }
+
+    [data-theme="dark"] .photo-dropzone-icon {
+        background: #1e293b;
+        color: var(--primary);
+    }
+
+    [data-theme="dark"] .category-substep-tab {
+        background: #0f172a;
+        border-color: var(--border-color);
+        color: var(--text-secondary);
+    }
+
+    [data-theme="dark"] .category-substep-tab:hover {
+        background: rgba(5, 150, 105, 0.15);
+        color: #34d399;
+    }
+
+    [data-theme="dark"] .symptom-card {
+        background: var(--bg-card);
+        border-color: var(--border-color);
+        color: var(--text-main);
+    }
+
+    [data-theme="dark"] .symptom-card:hover {
+        background: #1e293b;
+        border-color: var(--primary-border);
+    }
+
+    [data-theme="dark"] .btn-check:checked + .symptom-card {
+        background: rgba(5, 150, 105, 0.18);
+        border-color: var(--primary) !important;
+    }
+
+    [data-theme="dark"] .symptom-search-input {
+        background: #0f172a;
+        border-color: var(--border-color);
+        color: var(--text-main);
+    }
+
+    [data-theme="dark"] .symptom-search-input:focus {
+        background: #0f172a;
+        border-color: var(--primary);
+    }
+
+    [data-theme="dark"] .symptom-suggestions {
+        background: var(--bg-card);
+        border-color: var(--border-color);
+        color: var(--text-main);
+    }
+
+    [data-theme="dark"] .symptom-tags {
+        background: #0f172a;
+        border-color: var(--border-color);
+    }
+
+    [data-theme="dark"] .symptom-tag {
+        background: rgba(5, 150, 105, 0.2);
+        border-color: var(--primary-border);
+        color: #34d399;
+    }
+
+    [data-theme="dark"] .symptom-tag button {
+        background: rgba(5, 150, 105, 0.3);
+        color: #34d399;
+    }
+
+    [data-theme="dark"] .symptom-illness-item {
+        background: var(--bg-card);
+        border-color: var(--border-color);
+        color: var(--text-main);
+    }
+
+    [data-theme="dark"] .diagnosis-teaser-box {
+        background: linear-gradient(135deg, rgba(5, 150, 105, 0.18) 0%, rgba(13, 148, 136, 0.12) 100%);
+        border-color: var(--primary-border);
+    }
+
+    [data-theme="dark"] .diagnosis-unlock-overlay {
+        background: rgba(9, 13, 22, 0.82);
+    }
+
+    [data-theme="dark"] .diagnosis-unlock-card {
+        background: var(--bg-card);
+        border-color: var(--border-color);
+        color: var(--text-main);
     }
 </style>
 {% endblock %}

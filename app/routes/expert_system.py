@@ -485,17 +485,23 @@ def cases_message(case_id: int):
     if not (is_reviewer or is_owner):
         abort(403)
 
-    body = request.form.get("body", "").strip()
+    wants_json = request.accept_mimetypes.best == "application/json" or \
+        request.headers.get("X-Requested-With") == "XMLHttpRequest" or \
+        request.is_json
+
+    payload = request.get_json(silent=True) or request.form
+    body = (payload.get("body") or "").strip()
     if not body:
-        flash("សូមបញ្ចូលសាររបស់អ្នក។", "warning")
-        return redirect(url_for("expert_system.cases_detail", case_id=case_id))
+        if wants_json:
+            return jsonify({"ok": False, "error": "សូមបញ្ចូលសាររបស់អ្នក។"}), 400
+        return redirect(url_for("expert_system.cases_detail", case_id=case_id, _anchor="followUpConversation"))
     if len(body) > 2000:
         body = body[:2000]
 
-    CaseMessageService.add_message(case, current_user.id, body, is_doctor=is_reviewer)
+    msg = CaseMessageService.add_message(case, current_user.id, body, is_doctor=is_reviewer)
     AuditService.log("COMMENT", "Case", case.id, "Follow-up message posted")
 
-    detail_link = url_for("expert_system.cases_detail", case_id=case.id)
+    detail_link = url_for("expert_system.cases_detail", case_id=case.id, _anchor="followUpConversation")
     if is_reviewer:
         # Doctor replied -> notify the farmer who owns the case.
         if case.user_id and case.user_id != current_user.id:
@@ -519,8 +525,21 @@ def cases_message(case_id: int):
         else:
             NotificationService.notify_doctors_new_case(case)
 
-    flash("សាររបស់អ្នកត្រូវបានផ្ញើ។", "success")
-    return redirect(url_for("expert_system.cases_detail", case_id=case_id))
+    if wants_json:
+        author_name = current_user.full_name or current_user.username or "អ្នកប្រើ"
+        return jsonify({
+            "ok": True,
+            "message": {
+                "id": msg.id,
+                "body": msg.body,
+                "author_name": author_name,
+                "is_doctor": msg.is_doctor,
+                "created_at": msg.created_at.strftime('%d/%m/%Y %H:%M') if msg.created_at else "",
+                "is_mine": True,
+            }
+        })
+
+    return redirect(url_for("expert_system.cases_detail", case_id=case_id, _anchor="followUpConversation"))
 
 
 @expert_system_bp.route("/cases/<int:case_id>/follow-up", methods=["POST"])

@@ -2,24 +2,24 @@
 
 {% block title %}{{ disease.name }}{% endblock %}
 {% block page_title %}{{ disease.name }}{% endblock %}
-{% block page_subtitle %}ព័ត៌មានលម្អិតអំពីជំងឺ / Disease details{% endblock %}
+{% block page_subtitle %}{{ t('lib.subtitle') }}{% endblock %}
 
 {% block content %}
 <!-- Back + management actions -->
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
     <a href="{{ url_for('expert_system.library_index') }}" class="btn btn-sm btn-outline-secondary">
-        <i class="bi bi-arrow-left me-1"></i>ត្រឡប់ទៅបណ្ណាល័យ
+        <i class="bi bi-arrow-left me-1"></i>{{ t('btn.back') }}
     </a>
     {% if can_manage %}
     <div class="btn-group btn-group-sm">
         <a href="{{ url_for('expert_system.diseases_edit', disease_id=disease.id) }}" class="btn btn-outline-primary">
-            <i class="bi bi-pencil me-1"></i>កែប្រែ
+            <i class="bi bi-pencil me-1"></i>{{ t('btn.edit') }}
         </a>
         <a href="{{ url_for('expert_system.diseases_edit', disease_id=disease.id) }}#stepsContainer" class="btn btn-outline-primary">
-            <i class="bi bi-list-check me-1"></i>ជំហានព្យាបាល
+            <i class="bi bi-list-check me-1"></i>{{ t('diag.treatment_guide') }}
         </a>
         <a href="{{ url_for('expert_system.diseases_delete', disease_id=disease.id) }}" class="btn btn-outline-danger">
-            <i class="bi bi-trash me-1"></i>លុប
+            <i class="bi bi-trash me-1"></i>{{ t('btn.delete') }}
         </a>
     </div>
     {% endif %}

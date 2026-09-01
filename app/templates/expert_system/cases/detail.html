@@ -1,14 +1,14 @@
 {% extends "layouts/base.html" %}
 
-{% block title %}ព័ត៌មានលម្អិត{% endblock %}
-{% block page_title %}របាយការណ៍រោគវិនិច្ឆ័យ{% endblock %}
-{% block page_subtitle %}ករណី #{{ case.id }} • {{ case.status_label_km }}{% endblock %}
+{% block title %}{{ t('case_detail.title', id=case.id) }}{% endblock %}
+{% block page_title %}{{ t('cases.title') }}{% endblock %}
+{% block page_subtitle %}{{ t('cases.col_id') }} #{{ case.id }} • {{ get_translated_option('status', case.status) }}{% endblock %}
 
 {% block extra_styles %}
 <style>
     /* ── Enhanced Treatment Action Hub ── */
     .treatment-card-wrapper {
-        background: #ffffff;
+        background: var(--bg-card);
         border: 1px solid var(--border-color);
         border-radius: var(--radius);
         overflow: hidden;
@@ -39,7 +39,7 @@
     .treatment-step-card {
         border: 1.5px solid var(--border-color);
         border-radius: 0.75rem;
-        background: #ffffff;
+        background: var(--bg-card);
         padding: 0.85rem 1rem;
         transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         cursor: pointer;
@@ -649,43 +649,43 @@
         </div>
 
         {# ── Follow-up conversation ────────────────────────────────── #}
-        <div class="card border-0 shadow-sm mt-4">
+        <div class="card border-0 shadow-sm mt-4" id="followUpConversation">
             <div class="card-header bg-white py-3">
                 <h5 class="mb-0 fw-bold"><i class="bi bi-chat-dots me-2 text-primary"></i>ការសន្ទនាតាមដាន</h5>
             </div>
             <div class="card-body">
-                {% if case.messages %}
-                <div class="d-flex flex-column gap-3 mb-4">
-                    {% for msg in case.messages %}
-                    {% set mine = msg.author_id == current_user.id %}
-                    <div class="d-flex {% if mine %}justify-content-end{% endif %}">
-                        <div class="p-3 rounded-3 {% if msg.is_doctor %}bg-primary bg-opacity-10 border border-primary border-opacity-10{% else %}bg-light border{% endif %}" style="max-width: 80%;">
-                            <div class="d-flex align-items-center gap-2 mb-1">
-                                <span class="fw-bold small">
-                                    {% if msg.is_doctor %}<i class="bi bi-patch-check-fill text-primary"></i> {% endif %}
-                                    {{ msg.author.full_name if msg.author else 'អ្នកប្រើ' }}
-                                </span>
-                                {% if msg.is_doctor %}<span class="badge bg-primary">វេជ្ជបណ្ឌិត</span>{% endif %}
-                                <span class="text-muted small ms-auto">{{ msg.created_at.strftime('%d/%m/%Y %H:%M') }}</span>
+                <div class="d-flex flex-column gap-3 mb-4" id="caseMessagesContainer">
+                    {% if case.messages %}
+                        {% for msg in case.messages %}
+                        {% set mine = msg.author_id == current_user.id %}
+                        <div class="d-flex {% if mine %}justify-content-end{% endif %}">
+                            <div class="p-3 rounded-3 {% if msg.is_doctor %}bg-primary bg-opacity-10 border border-primary border-opacity-10{% else %}bg-light border{% endif %}" style="max-width: 80%;">
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <span class="fw-bold small">
+                                        {% if msg.is_doctor %}<i class="bi bi-patch-check-fill text-primary"></i> {% endif %}
+                                        {{ msg.author.full_name if msg.author else 'អ្នកប្រើ' }}
+                                    </span>
+                                    {% if msg.is_doctor %}<span class="badge bg-primary">វេជ្ជបណ្ឌិត</span>{% endif %}
+                                    <span class="text-muted small ms-auto">{{ msg.created_at.strftime('%d/%m/%Y %H:%M') }}</span>
+                                </div>
+                                <div class="mb-0" style="white-space: pre-wrap;">{{ msg.body }}</div>
                             </div>
-                            <div class="mb-0" style="white-space: pre-wrap;">{{ msg.body }}</div>
                         </div>
-                    </div>
-                    {% endfor %}
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted text-center py-3 mb-3" id="noMessagesPlaceholder"><i class="bi bi-chat-square-text me-1"></i> មិនទាន់មានសារនៅឡើយទេ។ ចាប់ផ្តើមការសន្ទនា។</p>
+                    {% endif %}
                 </div>
-                {% else %}
-                <p class="text-muted text-center py-3 mb-3"><i class="bi bi-chat-square-text me-1"></i> មិនទាន់មានសារនៅឡើយទេ។ ចាប់ផ្តើមការសន្ទនា។</p>
-                {% endif %}
 
                 {% if case.user_id == current_user.id or is_reviewer %}
-                <form method="POST" action="{{ url_for('expert_system.cases_message', case_id=case.id) }}">
+                <form method="POST" action="{{ url_for('expert_system.cases_message', case_id=case.id) }}" id="caseMessageForm">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <div class="mb-2">
-                        <textarea name="body" class="form-control" rows="2" maxlength="2000"
+                        <textarea name="body" id="caseMessageBody" class="form-control" rows="2" maxlength="2000"
                                   placeholder="{% if is_reviewer %}សរសេរមតិ ឬសំណួរបន្ថែម...{% else %}សួរសំណួរបន្ថែមទៅវេជ្ជបណ្ឌិត...{% endif %}" required></textarea>
                     </div>
                     <div class="text-end">
-                        <button type="submit" class="btn btn-primary btn-sm px-4">
+                        <button type="submit" class="btn btn-primary btn-sm px-4" id="caseMessageSubmitBtn">
                             <i class="bi bi-send me-1"></i> ផ្ញើ
                         </button>
                     </div>
@@ -834,6 +834,111 @@ document.addEventListener('DOMContentLoaded', function() {
                     box.disabled = false;
                 }
             });
+        });
+    }
+
+    // ── Follow-up messages AJAX ─────────────────────────────────
+    const msgForm = document.getElementById('caseMessageForm');
+    const msgBody = document.getElementById('caseMessageBody');
+    const msgSubmitBtn = document.getElementById('caseMessageSubmitBtn');
+    const msgContainer = document.getElementById('caseMessagesContainer');
+
+    function appendMessageBubble(msg) {
+        if (!msgContainer) return;
+        const placeholder = document.getElementById('noMessagesPlaceholder');
+        if (placeholder) placeholder.remove();
+
+        const row = document.createElement('div');
+        row.className = 'd-flex ' + (msg.is_mine ? 'justify-content-end' : '');
+
+        const bubble = document.createElement('div');
+        bubble.className = 'p-3 rounded-3 ' + (msg.is_doctor ? 'bg-primary bg-opacity-10 border border-primary border-opacity-10' : 'bg-light border');
+        bubble.style.maxWidth = '80%';
+
+        const header = document.createElement('div');
+        header.className = 'd-flex align-items-center gap-2 mb-1';
+
+        const authorSpan = document.createElement('span');
+        authorSpan.className = 'fw-bold small';
+        if (msg.is_doctor) {
+            const docIcon = document.createElement('i');
+            docIcon.className = 'bi bi-patch-check-fill text-primary me-1';
+            authorSpan.appendChild(docIcon);
+        }
+        authorSpan.appendChild(document.createTextNode(msg.author_name || 'អ្នកប្រើ'));
+        header.appendChild(authorSpan);
+
+        if (msg.is_doctor) {
+            const badge = document.createElement('span');
+            badge.className = 'badge bg-primary';
+            badge.textContent = 'វេជ្ជបណ្ឌិត';
+            header.appendChild(badge);
+        }
+
+        const timeSpan = document.createElement('span');
+        timeSpan.className = 'text-muted small ms-auto';
+        timeSpan.textContent = msg.created_at || '';
+        header.appendChild(timeSpan);
+
+        const bodyDiv = document.createElement('div');
+        bodyDiv.className = 'mb-0';
+        bodyDiv.style.whiteSpace = 'pre-wrap';
+        bodyDiv.textContent = msg.body || '';
+
+        bubble.appendChild(header);
+        bubble.appendChild(bodyDiv);
+        row.appendChild(bubble);
+
+        msgContainer.appendChild(row);
+    }
+
+    if (msgForm && msgBody && msgSubmitBtn) {
+        msgForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const text = msgBody.value.trim();
+            if (!text) return;
+
+            const originalBtnContent = msgSubmitBtn.innerHTML;
+            msgSubmitBtn.disabled = true;
+            msgSubmitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> ផ្ញើ...';
+
+            try {
+                const csrfToken = msgForm.querySelector('input[name="csrf_token"]')?.value || '';
+                const formData = new FormData(msgForm);
+                const res = await fetch(msgForm.action, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: formData
+                });
+
+                if (!res.ok) {
+                    const errData = await res.json().catch(() => ({}));
+                    throw new Error(errData.error || 'Server error');
+                }
+
+                const data = await res.json();
+                if (data.ok && data.message) {
+                    appendMessageBubble(data.message);
+                    msgBody.value = '';
+                    msgBody.focus();
+                }
+            } catch (err) {
+                console.error('Error sending message:', err);
+                alert('មិនអាចផ្ញើសារបានទេ។ សូមព្យាយាមម្តងទៀត។');
+            } finally {
+                msgSubmitBtn.disabled = false;
+                msgSubmitBtn.innerHTML = originalBtnContent;
+            }
+        });
+
+        msgBody.addEventListener('keydown', function(e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                e.preventDefault();
+                msgForm.requestSubmit();
+            }
         });
     }
 
