@@ -557,6 +557,38 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "km": "អត្រាបញ្ជាក់",
         "en": "Confirmation Rate",
     },
+    "dashboard.resolution_rate": {
+        "km": "អត្រាសម្រេចករណី",
+        "en": "Resolution Rate",
+    },
+    "dashboard.triage_queue": {
+        "km": "ជួររង់ចាំពិនិត្យ",
+        "en": "Live Triage Queue",
+    },
+    "dashboard.review_needed": {
+        "km": "ត្រូវការពិនិត្យ",
+        "en": "Needs Review",
+    },
+    "dashboard.verified_cases": {
+        "km": "ផ្ទៀងផ្ទាត់ដោយពេទ្យ",
+        "en": "Clinically Verified",
+    },
+    "dashboard.dismissed_cases": {
+        "km": "បានបដិសេធ",
+        "en": "Dismissed Cases",
+    },
+    "dashboard.status_health": {
+        "km": "ស្ថានភាពករណី និងការវិភាគ",
+        "en": "Case Status & Triage Center",
+    },
+    "dashboard.view_filtered": {
+        "km": "មើលបញ្ជីករណី",
+        "en": "View Cases",
+    },
+    "dashboard.efficiency_title": {
+        "km": "ប្រសិទ្ធភាពនៃការដោះស្រាយករណី",
+        "en": "Resolution Efficiency",
+    },
     "dashboard.disease_distribution": {
         "km": "ការចែកចាយជំងឺដែលបានរកឃើញ",
         "en": "Disease Distribution",
@@ -568,6 +600,110 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     "dashboard.recent_diagnoses_table": {
         "km": "ករណីវិភាគចុងក្រោយ",
         "en": "Recent Diagnosis Records",
+    },
+    "dashboard.sick_vs_dead_title": {
+        "km": "មាន់ឈឺ ធៀបនឹង មាន់ងាប់",
+        "en": "Sick vs Dead Birds",
+    },
+    "dashboard.sick_vs_dead_subtitle": {
+        "km": "កំណត់រដូវកាលដែលមានអត្រាងាប់ខ្ពស់ និងការផ្ទុះជំងឺ",
+        "en": "Identifies peak seasonal mortality & outbreaks",
+    },
+    "dashboard.sick_birds": {
+        "km": "មាន់ឈឺ",
+        "en": "Sick Birds",
+    },
+    "dashboard.dead_birds": {
+        "km": "មាន់ងាប់",
+        "en": "Dead Birds",
+    },
+    "dashboard.peak_mortality": {
+        "km": "ខែផ្ទុះខ្លាំងបំផុត",
+        "en": "Peak Outbreak",
+    },
+    "dashboard.mortality_rate": {
+        "km": "អត្រាងាប់",
+        "en": "Mortality Rate",
+    },
+    "dashboard.birds_impacted": {
+        "km": "មាន់រងផលប៉ះពាល់",
+        "en": "Birds Impacted",
+    },
+    "dashboard.period_this_year": {
+        "km": "ឆ្នាំនេះ",
+        "en": "This Year",
+    },
+    "dashboard.provincial_hotspots": {
+        "km": "ការផ្ទុះជំងឺតាមតំបន់ និងខេត្ត",
+        "en": "Regional Outbreak Hotspots",
+    },
+    "dashboard.provincial_hotspots_sub": {
+        "km": "ការចែកចាយករណីតាមខេត្ត ជំងឺចម្បង និងអត្រាងាប់ទូទាំងប្រទេសកម្ពុជា",
+        "en": "Geographic case distribution, dominant diseases & mortality across Cambodia",
+    },
+    "dashboard.dominant_disease": {
+        "km": "ជំងឺចម្បង",
+        "en": "Dominant Disease",
+    },
+    "dashboard.risk_level": {
+        "km": "កម្រិតហានិភ័យ",
+        "en": "Risk Level",
+    },
+    "dashboard.provincial_chart": {
+        "km": "ការចែកចាយតាមខេត្ត",
+        "en": "Provincial Outbreak Distribution",
+    },
+    "diag.province": {
+        "km": "ខេត្ត/រាជធានី",
+        "en": "Province",
+    },
+    "diag.select_province": {
+        "km": "ជ្រើសរើសខេត្ត/រាជធានី",
+        "en": "Select Province",
+    },
+    "diag.district": {
+        "km": "ស្រុក/ខណ្ឌ/ក្រុង",
+        "en": "District",
+    },
+    "diag.select_district": {
+        "km": "ជ្រើសរើសស្រុក/ខណ្ឌ/ក្រុង",
+        "en": "Select District",
+    },
+    "diag.commune": {
+        "km": "ឃុំ/សង្កាត់/ភូមិ",
+        "en": "Commune / Village",
+    },
+    "diag.commune_ph": {
+        "km": "ឧ. សង្កាត់ស្ទឹងមានជ័យ ឬ ភូមិ១",
+        "en": "e.g. Sangkat Steung Meanchey or Village 1",
+    },
+    "diag.farm_type": {
+        "km": "ប្រភេទកសិដ្ឋាន",
+        "en": "Farm Type",
+    },
+    "diag.select_farm_type": {
+        "km": "ជ្រើសរើសប្រភេទកសិដ្ឋាន",
+        "en": "Select Farm Type",
+    },
+    "diag.farm_scale": {
+        "km": "ទំហំកសិដ្ឋាន",
+        "en": "Farm Scale",
+    },
+    "diag.select_farm_scale": {
+        "km": "ជ្រើសរើសទំហំកសិដ្ឋាន",
+        "en": "Select Farm Scale",
+    },
+    "diag.use_gps": {
+        "km": "ប្រើ GPS",
+        "en": "Use GPS",
+    },
+    "diag.use_gps_title": {
+        "km": "កំណត់ទីតាំងបច្ចុប្បន្នតាមរយៈ GPS",
+        "en": "Detect current location via device GPS",
+    },
+    "diag.gps_error": {
+        "km": "មិនអាចទាញយកទីតាំង GPS បានទេ",
+        "en": "Unable to retrieve GPS location",
     },
 
     # ── Diagnosis Wizard: Common & Stepper ────────────────────────────
@@ -1651,6 +1787,14 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "km": "រកមិនឃើញជំងឺដែលត្រូវនឹងលក្ខខណ្ឌស្វែងរកទេ។",
         "en": "No diseases match your search criteria.",
     },
+    "diseases.delete_title": {
+        "km": "លុបជំងឺ",
+        "en": "Delete Disease",
+    },
+    "diseases.delete_confirm": {
+        "km": "តើអ្នកប្រាកដថាចង់លុប {name} ទេ?",
+        "en": "Are you sure you want to delete {name}?",
+    },
     "btn.add_disease": {
         "km": "បន្ថែមជំងឺ",
         "en": "Add Disease",
@@ -1828,6 +1972,40 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     "btn.add_category": {
         "km": "បន្ថែមប្រភេទ",
         "en": "Add Category",
+    },
+
+    # ── Notifications ────────────────────────────────────────────────
+    "notif.title": {
+        "km": "ការជូនដំណឹង",
+        "en": "Notifications",
+    },
+    "notif.subtitle": {
+        "km": "តាមដានរាល់បច្ចុប្បន្នភាព និងសកម្មភាពក្នុងប្រព័ន្ធ។",
+        "en": "Stay updated on system activity.",
+    },
+    "notif.unread_count": {
+        "km": "មិនទាន់អាន {count}",
+        "en": "{count} unread",
+    },
+    "notif.mark_all_read": {
+        "km": "សម្គាល់ថាបានអានទាំងអស់",
+        "en": "Mark all as read",
+    },
+    "notif.mark_read": {
+        "km": "សម្គាល់ថាបានអាន",
+        "en": "Mark as read",
+    },
+    "notif.new_badge": {
+        "km": "ថ្មី",
+        "en": "New",
+    },
+    "notif.no_notifications": {
+        "km": "មិនមានការជូនដំណឹងទេ",
+        "en": "No notifications",
+    },
+    "notif.all_caught_up": {
+        "km": "អ្នកបានពិនិត្យមើលគ្រប់ការជូនដំណឹងអស់ហើយ!",
+        "en": "You're all caught up!",
     },
 
     # ── Auth & Account ───────────────────────────────────────────────

@@ -229,14 +229,32 @@
                 </div>
                 {% endif %}
 
-                {% if case.flock_size or case.bird_age or case.breed or case.location %}
+                {% if case.flock_size or case.bird_age or case.breed or case.location or case.province %}
                 <div class="p-4 border-bottom">
                     <h6 class="fw-bold text-uppercase text-muted small mb-3"><i class="bi bi-house-heart me-2"></i>{{ t('case_detail.farm_info') }}</h6>
                     <div class="row g-2 small">
                         {% if case.flock_size %}<div class="col-md-3"><strong>{{ t('case_detail.flock_size') }}:</strong> {{ case.flock_size }}</div>{% endif %}
                         {% if case.bird_age %}<div class="col-md-3"><strong>{{ t('case_detail.bird_age') }}:</strong> {{ case.bird_age }}</div>{% endif %}
                         {% if case.breed %}<div class="col-md-3"><strong>{{ t('case_detail.breed') }}:</strong> {{ case.breed }}</div>{% endif %}
-                        {% if case.location %}<div class="col-md-3"><strong>{{ t('case_detail.location') }}:</strong> {{ case.location }}</div>{% endif %}
+                        {% if case.province %}
+                        <div class="col-md-3">
+                            <strong>{{ t('diag.province') }}:</strong> 
+                            <span class="badge bg-light text-dark border">{{ case.province }}{% if case.district %}, {{ case.district }}{% endif %}</span>
+                            {% if case.latitude and case.longitude %}
+                            <a href="https://maps.google.com/?q={{ case.latitude }},{{ case.longitude }}" target="_blank" class="ms-1 text-primary text-decoration-none" title="GPS Map">
+                                <i class="bi bi-geo-alt-fill"></i>
+                            </a>
+                            {% endif %}
+                        </div>
+                        {% elif case.location %}
+                        <div class="col-md-3"><strong>{{ t('case_detail.location') }}:</strong> {{ case.location }}</div>
+                        {% endif %}
+                        {% if case.farm_type %}
+                        <div class="col-md-3"><strong>{{ t('diag.farm_type') }}:</strong> <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25">{{ case.farm_type | replace('_', ' ') | title }}</span></div>
+                        {% endif %}
+                        {% if case.farm_scale %}
+                        <div class="col-md-3"><strong>{{ t('diag.farm_scale') }}:</strong> <span class="badge bg-secondary bg-opacity-10 text-secondary border">{{ case.farm_scale }}</span></div>
+                        {% endif %}
                     </div>
                     {% if case.notes %}<p class="small text-muted mt-2 mb-0">{{ case.notes }}</p>{% endif %}
                 </div>

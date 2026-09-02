@@ -357,10 +357,18 @@ a:hover {
     border: 1px solid transparent;
 }
 
+.navbar-icon i {
+    transition: transform 0.15s ease;
+}
+
 .navbar-icon:hover {
-    background: #f1f5f9;
+    background: rgba(16, 185, 129, 0.08);
     color: var(--primary);
-    border-color: var(--border-color);
+    border-color: rgba(16, 185, 129, 0.2);
+}
+
+.navbar-icon:hover i {
+    transform: scale(1.08);
 }
 
 .navbar-icon.active {
@@ -1359,9 +1367,13 @@ a:hover {
 }
 
 [data-theme="dark"] .navbar-icon:hover {
-    background: #1e293b;
+    background: rgba(52, 211, 153, 0.12);
     color: #34d399;
-    border-color: var(--border-color);
+    border-color: rgba(52, 211, 153, 0.25);
+}
+
+[data-theme="dark"] .icon-badge {
+    border-color: var(--bg-card, #111c2e);
 }
 
 [data-theme="dark"] .navbar-icon.active {

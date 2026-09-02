@@ -36,6 +36,13 @@ def migrate_schema() -> None:
         "reset_token_expires": "TIMESTAMP",
         "oauth_provider": "VARCHAR(50)",
         "oauth_id": "VARCHAR(255)",
+        "province": "VARCHAR(80)",
+        "district": "VARCHAR(80)",
+        "commune": "VARCHAR(80)",
+        "latitude": "DOUBLE PRECISION",
+        "longitude": "DOUBLE PRECISION",
+        "farm_type": "VARCHAR(50)",
+        "farm_scale": "VARCHAR(50)",
     }
     if inspector.has_table("tbl_users"):
         for col, col_type in user_new_cols.items():
@@ -51,6 +58,13 @@ def migrate_schema() -> None:
         "bird_age": "VARCHAR(80)",
         "breed": "VARCHAR(80)",
         "location": "VARCHAR(120)",
+        "province": "VARCHAR(80)",
+        "district": "VARCHAR(80)",
+        "commune": "VARCHAR(80)",
+        "latitude": "DOUBLE PRECISION",
+        "longitude": "DOUBLE PRECISION",
+        "farm_type": "VARCHAR(50)",
+        "farm_scale": "VARCHAR(50)",
         "notes": "TEXT",
         "status": "VARCHAR(20) DEFAULT 'pending'",
         "reviewed_by_id": "INTEGER REFERENCES tbl_users(id)",
@@ -85,6 +99,23 @@ def migrate_schema() -> None:
         db.session.execute(text(sql))
     if alterations:
         db.session.commit()
+
+    # ── Normalize legacy location strings in tbl_cases ─────────
+    inspector = inspect(db.engine)
+    if inspector.has_table("tbl_cases") and _column_exists(inspector, "tbl_cases", "province"):
+        from app.data.cambodia_geography import normalize_legacy_location
+        unmigrated = db.session.execute(
+            text("SELECT id, location FROM tbl_cases WHERE province IS NULL")
+        ).fetchall()
+        for row in unmigrated:
+            case_id, raw_loc = row[0], row[1]
+            prov, dist = normalize_legacy_location(raw_loc)
+            db.session.execute(
+                text("UPDATE tbl_cases SET province = :prov, district = :dist WHERE id = :id"),
+                {"prov": prov, "dist": dist, "id": case_id}
+            )
+        if unmigrated:
+            db.session.commit()
 
 
 def _table_exists(inspector, table: str) -> bool:

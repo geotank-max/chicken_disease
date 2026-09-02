@@ -1042,13 +1042,85 @@
                                         <input type="text" name="breed" class="form-control diagnosis-control" placeholder="{{ t('diag.breed_ph') }}" value="{{ flock_data.breed or '' }}" required>
                                     </div>
                                 </div>
+                                <!-- Farm Type -->
                                 <div class="col-md-6 diagnosis-field">
-                                    <label class="form-label">{{ t('diag.location') }} <span class="text-danger">*</span></label>
+                                    <label class="form-label">{{ t('diag.farm_type') }} <span class="text-danger">*</span></label>
                                     <div class="diagnosis-control-shell">
-                                        <span class="diagnosis-control-icon"><i class="bi bi-geo-alt"></i></span>
-                                        <input type="text" name="location" class="form-control diagnosis-control" placeholder="{{ t('diag.location_ph') }}" value="{{ flock_data.location or '' }}" required>
+                                        <span class="diagnosis-control-icon"><i class="bi bi-house-door"></i></span>
+                                        <select name="farm_type" id="farmTypeSelect" class="form-select diagnosis-control" required>
+                                            <option value="">{{ t('diag.select_farm_type') }}</option>
+                                            {% for ft in farm_types %}
+                                            <option value="{{ ft.code }}" {% if flock_data.farm_type == ft.code %}selected{% endif %}>
+                                                {{ ft.name_km }} ({{ ft.name_en }})
+                                            </option>
+                                            {% endfor %}
+                                        </select>
                                     </div>
                                 </div>
+
+                                <!-- Farm Scale -->
+                                <div class="col-md-6 diagnosis-field">
+                                    <label class="form-label">{{ t('diag.farm_scale') }}</label>
+                                    <div class="diagnosis-control-shell">
+                                        <span class="diagnosis-control-icon"><i class="bi bi-bar-chart-steps"></i></span>
+                                        <select name="farm_scale" id="farmScaleSelect" class="form-select diagnosis-control">
+                                            <option value="">{{ t('diag.select_farm_scale') }}</option>
+                                            {% for fs in farm_scales %}
+                                            <option value="{{ fs.code }}" {% if flock_data.farm_scale == fs.code %}selected{% endif %}>
+                                                {{ fs.name_km }} ({{ fs.name_en }})
+                                            </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Province (Select with GPS button) -->
+                                <div class="col-md-6 diagnosis-field">
+                                    <div class="d-flex align-items-center justify-content-between mb-1">
+                                        <label class="form-label mb-0">{{ t('diag.province') }} <span class="text-danger">*</span></label>
+                                        <button type="button" class="btn btn-xs btn-outline-primary rounded-pill px-2 py-0.5 d-inline-flex align-items-center gap-1" id="btnGpsLocation" title="{{ t('diag.use_gps_title') }}" style="font-size: 0.72rem;">
+                                            <i class="bi bi-crosshair"></i>
+                                            <span id="gpsBtnText">{{ t('diag.use_gps') }}</span>
+                                        </button>
+                                    </div>
+                                    <div class="diagnosis-control-shell">
+                                        <span class="diagnosis-control-icon"><i class="bi bi-geo-alt-fill text-primary"></i></span>
+                                        <select name="province" id="provinceSelect" class="form-select diagnosis-control" required>
+                                            <option value="">{{ t('diag.select_province') }}</option>
+                                            {% for p in cambodia_provinces %}
+                                            <option value="{{ p.name_en }}" data-code="{{ p.code }}" data-lat="{{ p.lat }}" data-lng="{{ p.lng }}" {% if flock_data.province == p.name_en %}selected{% endif %}>
+                                                {{ p.name_km }} ({{ p.name_en }})
+                                            </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div id="gpsStatusBadge" class="mt-1 small d-none"></div>
+                                </div>
+
+                                <!-- District (Cascading dropdown) -->
+                                <div class="col-md-6 diagnosis-field">
+                                    <label class="form-label">{{ t('diag.district') }}</label>
+                                    <div class="diagnosis-control-shell">
+                                        <span class="diagnosis-control-icon"><i class="bi bi-pin-map"></i></span>
+                                        <select name="district" id="districtSelect" class="form-select diagnosis-control">
+                                            <option value="">{{ t('diag.select_district') }}</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Commune / Village -->
+                                <div class="col-md-6 diagnosis-field">
+                                    <label class="form-label">{{ t('diag.commune') }}</label>
+                                    <div class="diagnosis-control-shell">
+                                        <span class="diagnosis-control-icon"><i class="bi bi-signpost-2"></i></span>
+                                        <input type="text" name="commune" id="communeInput" class="form-control diagnosis-control" placeholder="{{ t('diag.commune_ph') }}" value="{{ flock_data.commune or '' }}">
+                                    </div>
+                                </div>
+
+                                <!-- Hidden fields for GPS & backward compatibility -->
+                                <input type="hidden" name="latitude" id="latitudeInput" value="{{ flock_data.latitude or '' }}">
+                                <input type="hidden" name="longitude" id="longitudeInput" value="{{ flock_data.longitude or '' }}">
+                                <input type="hidden" name="location" id="locationFallbackInput" value="{{ flock_data.location or '' }}">
                             </div>
                         </div>
                     </div>
@@ -1649,6 +1721,132 @@
 {% if step == '1' %}
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    // ── Cambodia Geography & Cascading District Handler ──────────
+    const provincesData = {{ cambodia_provinces | tojson }};
+    const currentDistrict = {{ (flock_data.district or '') | tojson }};
+    const provinceSelect = document.getElementById('provinceSelect');
+    const districtSelect = document.getElementById('districtSelect');
+    const communeInput = document.getElementById('communeInput');
+    const latInput = document.getElementById('latitudeInput');
+    const lngInput = document.getElementById('longitudeInput');
+    const locFallbackInput = document.getElementById('locationFallbackInput');
+    const btnGps = document.getElementById('btnGpsLocation');
+    const gpsStatusBadge = document.getElementById('gpsStatusBadge');
+    const flockSizeInput = document.querySelector('input[name="flock_size"]');
+    const farmScaleSelect = document.getElementById('farmScaleSelect');
+
+    function updateDistrictOptions(selectedProvinceName, preselectedDistrict) {
+        if (!districtSelect) return;
+        districtSelect.innerHTML = '<option value="">{{ t("diag.select_district") }}</option>';
+        if (!selectedProvinceName) return;
+
+        const prov = provincesData.find(p => p.name_en === selectedProvinceName || p.code === selectedProvinceName);
+        if (prov && prov.districts) {
+            prov.districts.forEach(d => {
+                const opt = document.createElement('option');
+                opt.value = d.name_en;
+                opt.textContent = `${d.name_km} (${d.name_en})`;
+                if (preselectedDistrict && (preselectedDistrict === d.name_en || preselectedDistrict === d.name_km)) {
+                    opt.selected = true;
+                }
+                districtSelect.appendChild(opt);
+            });
+        }
+    }
+
+    function syncLocationFallback() {
+        const prov = provinceSelect ? provinceSelect.value : '';
+        const dist = districtSelect ? districtSelect.value : '';
+        const parts = [dist, prov].filter(Boolean);
+        if (locFallbackInput) {
+            locFallbackInput.value = parts.join(', ');
+        }
+    }
+
+    if (provinceSelect) {
+        provinceSelect.addEventListener('change', function () {
+            updateDistrictOptions(this.value, null);
+            syncLocationFallback();
+        });
+        if (provinceSelect.value) {
+            updateDistrictOptions(provinceSelect.value, currentDistrict);
+        }
+    }
+
+    if (districtSelect) {
+        districtSelect.addEventListener('change', syncLocationFallback);
+    }
+
+    // Auto-hint farm scale based on flock size
+    if (flockSizeInput && farmScaleSelect) {
+        flockSizeInput.addEventListener('input', function() {
+            const size = parseInt(this.value, 10);
+            if (!isNaN(size) && !farmScaleSelect.value) {
+                if (size < 50) farmScaleSelect.value = '<50';
+                else if (size <= 200) farmScaleSelect.value = '50-200';
+                else if (size <= 1000) farmScaleSelect.value = '201-1000';
+                else farmScaleSelect.value = '>1000';
+            }
+        });
+    }
+
+    // GPS Geolocation Handler
+    if (btnGps && navigator.geolocation) {
+        btnGps.addEventListener('click', function () {
+            const btnText = document.getElementById('gpsBtnText');
+            if (btnText) btnText.textContent = '...';
+            btnGps.disabled = true;
+
+            navigator.geolocation.getCurrentPosition(
+                function (pos) {
+                    btnGps.disabled = false;
+                    if (btnText) btnText.textContent = "{{ t('diag.use_gps') }}";
+                    const lat = pos.coords.latitude;
+                    const lng = pos.coords.longitude;
+                    if (latInput) latInput.value = lat.toFixed(6);
+                    if (lngInput) lngInput.value = lng.toFixed(6);
+
+                    // Haversine distance lookup for nearest province
+                    let nearestProv = null;
+                    let minDist = Infinity;
+                    provincesData.forEach(p => {
+                        const dLat = (p.lat - lat) * Math.PI / 180;
+                        const dLng = (p.lng - lng) * Math.PI / 180;
+                        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                                  Math.cos(lat * Math.PI / 180) * Math.cos(p.lat * Math.PI / 180) *
+                                  Math.sin(dLng/2) * Math.sin(dLng/2);
+                        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+                        const d = 6371 * c;
+                        if (d < minDist) {
+                            minDist = d;
+                            nearestProv = p;
+                        }
+                    });
+
+                    if (nearestProv && provinceSelect) {
+                        provinceSelect.value = nearestProv.name_en;
+                        updateDistrictOptions(nearestProv.name_en, null);
+                        syncLocationFallback();
+                    }
+
+                    if (gpsStatusBadge) {
+                        gpsStatusBadge.className = 'mt-1 small text-success d-inline-flex align-items-center gap-1';
+                        gpsStatusBadge.innerHTML = `<i class="bi bi-geo-alt-fill"></i> <span>📍 ${lat.toFixed(4)}°, ${lng.toFixed(4)}° (${nearestProv ? nearestProv.name_km : ''})</span>`;
+                    }
+                },
+                function (err) {
+                    btnGps.disabled = false;
+                    if (btnText) btnText.textContent = "{{ t('diag.use_gps') }}";
+                    if (gpsStatusBadge) {
+                        gpsStatusBadge.className = 'mt-1 small text-warning d-inline-flex align-items-center gap-1';
+                        gpsStatusBadge.innerHTML = `<i class="bi bi-exclamation-triangle"></i> <span>{{ t('diag.gps_error') }}</span>`;
+                    }
+                },
+                { timeout: 8000, enableHighAccuracy: true }
+            );
+        });
+    }
+
     const panes = Array.from(document.querySelectorAll('.substep-pane'));
     const pills = Array.from(document.querySelectorAll('.substep-pill'));
     const progressBar = document.getElementById('step1ProgressBar');

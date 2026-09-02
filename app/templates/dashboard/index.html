@@ -4,6 +4,145 @@
 {% block page_title %}{{ t('nav.dashboard') }}{% endblock %}
 {% block page_subtitle %}{{ t('dashboard.subtitle') }}{% endblock %}
 
+{% block extra_styles %}
+<style>
+    /* ── Advanced Status KPI Cards ── */
+    .status-kpi-card {
+        background: var(--bg-card, #ffffff);
+        border: 1px solid var(--border-color, #e2e8f0);
+        border-radius: 14px;
+        position: relative;
+        overflow: hidden;
+        transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.22s ease, border-color 0.22s ease;
+    }
+    .status-kpi-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 24px -6px rgba(0, 0, 0, 0.08);
+    }
+    .status-kpi-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3.5px;
+    }
+    .status-kpi-card.kpi-total::before { background: linear-gradient(90deg, #3b82f6, #6366f1); }
+    .status-kpi-card.kpi-pending::before { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+    .status-kpi-card.kpi-confirmed::before { background: linear-gradient(90deg, #10b981, #34d399); }
+    .status-kpi-card.kpi-rejected::before { background: linear-gradient(90deg, #ef4444, #f87171); }
+    .status-kpi-card.kpi-accuracy::before { background: linear-gradient(90deg, #06b6d4, #3b82f6); }
+
+    .stat-icon-wrapper {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        flex-shrink: 0;
+    }
+
+    .pulse-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: inline-block;
+        position: relative;
+    }
+    .pulse-dot.pulse-amber {
+        background-color: #f59e0b;
+        box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);
+        animation: pulse-ring-amber 1.8s infinite cubic-bezier(0.66, 0, 0, 1);
+    }
+    @keyframes pulse-ring-amber {
+        0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); }
+        70% { box-shadow: 0 0 0 8px rgba(245, 158, 11, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+    }
+
+    /* ── Status Telemetry & Donut ── */
+    .donut-chart-container {
+        position: relative;
+        width: 100%;
+        max-width: 240px;
+        height: 220px;
+        margin: 0 auto;
+    }
+    .donut-center-metric {
+        pointer-events: none;
+        user-select: none;
+    }
+    .donut-center-metric .kpi-number {
+        font-size: 1.95rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+    }
+
+    /* ── Multi-segment distribution bar ── */
+    .status-distribution-bar {
+        height: 10px;
+        border-radius: 999px;
+        background: var(--bg-hover, #f1f5f9);
+        overflow: hidden;
+        display: flex;
+    }
+    .distribution-segment {
+        height: 100%;
+        transition: width 0.6s ease;
+    }
+
+    /* ── Action Rows ── */
+    .status-action-row {
+        border-radius: 12px;
+        border: 1px solid var(--border-color, #e2e8f0);
+        background: var(--bg-card, #ffffff);
+        padding: 0.75rem 0.9rem;
+        transition: all 0.18s ease;
+    }
+    .status-action-row:hover {
+        border-color: var(--primary-border, #cbd5e1);
+        transform: translateX(2px);
+    }
+    [data-theme="dark"] .status-action-row:hover {
+        background-color: rgba(255, 255, 255, 0.03);
+    }
+
+    /* ── Refined Badges ── */
+    .badge-soft-warning {
+        background-color: rgba(245, 158, 11, 0.12);
+        color: #d97706;
+        border: 1px solid rgba(245, 158, 11, 0.25);
+    }
+    .badge-soft-success {
+        background-color: rgba(16, 185, 129, 0.12);
+        color: #059669;
+        border: 1px solid rgba(16, 185, 129, 0.25);
+    }
+    .badge-soft-danger {
+        background-color: rgba(239, 68, 68, 0.12);
+        color: #dc2626;
+        border: 1px solid rgba(239, 68, 68, 0.25);
+    }
+    .badge-soft-primary {
+        background-color: rgba(59, 130, 246, 0.12);
+        color: #2563eb;
+        border: 1px solid rgba(59, 130, 246, 0.25);
+    }
+    .badge-soft-info {
+        background-color: rgba(6, 182, 212, 0.12);
+        color: #0891b2;
+        border: 1px solid rgba(6, 182, 212, 0.25);
+    }
+    [data-theme="dark"] .badge-soft-warning { color: #fbbf24; }
+    [data-theme="dark"] .badge-soft-success { color: #34d399; }
+    [data-theme="dark"] .badge-soft-danger { color: #f87171; }
+    [data-theme="dark"] .badge-soft-primary { color: #60a5fa; }
+    [data-theme="dark"] .badge-soft-info { color: #38bdf8; }
+</style>
+{% endblock %}
+
 {% block content %}
 <!-- Welcome Banner -->
 <div class="card border-0 mb-4 banner-emerald overflow-hidden">
@@ -75,124 +214,362 @@
 <!-- Summary Stat Cards -->
 <div class="row g-3 mb-4">
     <div class="col-6 col-lg">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-body p-3">
-                <div class="d-flex align-items-center">
-                    <div class="flex-shrink-0 me-3">
-                        <div class="stat-icon bg-primary bg-opacity-10 text-primary">
-                            <i class="bi bi-clipboard-data"></i>
-                        </div>
+        <div class="status-kpi-card kpi-total h-100 p-3 shadow-sm d-flex flex-column justify-content-between">
+            <div>
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-muted small fw-semibold text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.03em;">{{ t('dashboard.stat_total_cases') }}</span>
+                    <span class="badge badge-soft-primary rounded-pill px-2 py-0.5" style="font-size: 0.7rem;">{{ t('status.all') }}</span>
+                </div>
+                <div class="d-flex align-items-center justify-content-between">
+                    <h3 class="fw-bold mb-0 text-dark">{{ summary.total_cases }}</h3>
+                    <div class="stat-icon-wrapper bg-primary bg-opacity-10 text-primary">
+                        <i class="bi bi-clipboard2-data-fill"></i>
                     </div>
-                    <div>
-                        <p class="text-muted small mb-0">{{ t('dashboard.stat_total_cases') }}</p>
-                        <h3 class="fw-bold mb-0">{{ summary.total_cases }}</h3>
-                    </div>
+                </div>
+            </div>
+            <div class="mt-3">
+                <div class="d-flex justify-content-between text-muted small mb-1" style="font-size: 0.72rem;">
+                    <span>{{ summary.cases_this_month }} {{ t('home.this_week')|lower }}</span>
+                    <span>100%</span>
+                </div>
+                <div class="progress" style="height: 4px;">
+                    <div class="progress-bar bg-primary" role="progressbar" style="width: 100%;"></div>
                 </div>
             </div>
         </div>
     </div>
     <div class="col-6 col-lg">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-body p-3">
-                <div class="d-flex align-items-center">
-                    <div class="flex-shrink-0 me-3">
-                        <div class="stat-icon bg-warning bg-opacity-10 text-warning">
-                            <i class="bi bi-hourglass-split"></i>
-                        </div>
+        <div class="status-kpi-card kpi-pending h-100 p-3 shadow-sm d-flex flex-column justify-content-between">
+            <div>
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-muted small fw-semibold text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.03em;">{{ t('dashboard.stat_pending_cases') }}</span>
+                    <span class="badge badge-soft-warning rounded-pill px-2 py-0.5 d-inline-flex align-items-center" style="font-size: 0.7rem;">
+                        <span class="pulse-dot pulse-amber me-1"></span>{{ summary.pending_percent }}%
+                    </span>
+                </div>
+                <div class="d-flex align-items-center justify-content-between">
+                    <h3 class="fw-bold mb-0 text-warning">{{ summary.pending_reviews }}</h3>
+                    <div class="stat-icon-wrapper bg-warning bg-opacity-10 text-warning">
+                        <i class="bi bi-hourglass-split"></i>
                     </div>
-                    <div>
-                        <p class="text-muted small mb-0">{{ t('dashboard.stat_pending_cases') }}</p>
-                        <h3 class="fw-bold mb-0">{{ summary.pending_reviews }}</h3>
-                    </div>
+                </div>
+            </div>
+            <div class="mt-3">
+                <div class="d-flex justify-content-between text-muted small mb-1" style="font-size: 0.72rem;">
+                    <a href="{{ url_for('expert_system.cases_index', status='pending') }}" class="text-warning text-decoration-none fw-semibold">
+                        {{ t('dashboard.review_needed') }} <i class="bi bi-arrow-right-short"></i>
+                    </a>
+                    <span>{{ summary.pending_percent }}%</span>
+                </div>
+                <div class="progress" style="height: 4px;">
+                    <div class="progress-bar bg-warning" role="progressbar" style="width: {{ summary.pending_percent }}%;"></div>
                 </div>
             </div>
         </div>
     </div>
     <div class="col-6 col-lg">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-body p-3">
-                <div class="d-flex align-items-center">
-                    <div class="flex-shrink-0 me-3">
-                        <div class="stat-icon bg-success bg-opacity-10 text-success">
-                            <i class="bi bi-check2-circle"></i>
-                        </div>
+        <div class="status-kpi-card kpi-confirmed h-100 p-3 shadow-sm d-flex flex-column justify-content-between">
+            <div>
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-muted small fw-semibold text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.03em;">{{ t('dashboard.stat_confirmed_cases') }}</span>
+                    <span class="badge badge-soft-success rounded-pill px-2 py-0.5" style="font-size: 0.7rem;">
+                        <i class="bi bi-check2 me-0.5"></i>{{ summary.confirmed_percent }}%
+                    </span>
+                </div>
+                <div class="d-flex align-items-center justify-content-between">
+                    <h3 class="fw-bold mb-0 text-success">{{ summary.confirmed_cases }}</h3>
+                    <div class="stat-icon-wrapper bg-success bg-opacity-10 text-success">
+                        <i class="bi bi-patch-check-fill"></i>
                     </div>
-                    <div>
-                        <p class="text-muted small mb-0">{{ t('dashboard.stat_confirmed_cases') }}</p>
-                        <h3 class="fw-bold mb-0">{{ summary.confirmed_cases }}</h3>
-                    </div>
+                </div>
+            </div>
+            <div class="mt-3">
+                <div class="d-flex justify-content-between text-muted small mb-1" style="font-size: 0.72rem;">
+                    <a href="{{ url_for('expert_system.cases_index', status='confirmed') }}" class="text-success text-decoration-none fw-semibold">
+                        {{ t('dashboard.view_filtered') }} <i class="bi bi-arrow-right-short"></i>
+                    </a>
+                    <span>{{ summary.confirmed_percent }}%</span>
+                </div>
+                <div class="progress" style="height: 4px;">
+                    <div class="progress-bar bg-success" role="progressbar" style="width: {{ summary.confirmed_percent }}%;"></div>
                 </div>
             </div>
         </div>
     </div>
     <div class="col-6 col-lg">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-body p-3">
-                <div class="d-flex align-items-center">
-                    <div class="flex-shrink-0 me-3">
-                        <div class="stat-icon bg-danger bg-opacity-10 text-danger">
-                            <i class="bi bi-x-circle"></i>
-                        </div>
+        <div class="status-kpi-card kpi-rejected h-100 p-3 shadow-sm d-flex flex-column justify-content-between">
+            <div>
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-muted small fw-semibold text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.03em;">{{ t('dashboard.stat_rejected_cases') }}</span>
+                    <span class="badge badge-soft-danger rounded-pill px-2 py-0.5" style="font-size: 0.7rem;">{{ summary.rejected_percent }}%</span>
+                </div>
+                <div class="d-flex align-items-center justify-content-between">
+                    <h3 class="fw-bold mb-0 text-danger">{{ summary.rejected_cases }}</h3>
+                    <div class="stat-icon-wrapper bg-danger bg-opacity-10 text-danger">
+                        <i class="bi bi-x-circle-fill"></i>
                     </div>
-                    <div>
-                        <p class="text-muted small mb-0">{{ t('dashboard.stat_rejected_cases') }}</p>
-                        <h3 class="fw-bold mb-0">{{ summary.rejected_cases }}</h3>
-                    </div>
+                </div>
+            </div>
+            <div class="mt-3">
+                <div class="d-flex justify-content-between text-muted small mb-1" style="font-size: 0.72rem;">
+                    <a href="{{ url_for('expert_system.cases_index', status='rejected') }}" class="text-danger text-decoration-none fw-semibold">
+                        {{ t('dashboard.view_filtered') }} <i class="bi bi-arrow-right-short"></i>
+                    </a>
+                    <span>{{ summary.rejected_percent }}%</span>
+                </div>
+                <div class="progress" style="height: 4px;">
+                    <div class="progress-bar bg-danger" role="progressbar" style="width: {{ summary.rejected_percent }}%;"></div>
                 </div>
             </div>
         </div>
     </div>
     <div class="col-6 col-lg">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-body p-3">
-                <div class="d-flex align-items-center">
-                    <div class="flex-shrink-0 me-3">
-                        <div class="stat-icon bg-info bg-opacity-10 text-info">
-                            <i class="bi bi-calendar-month"></i>
-                        </div>
+        <div class="status-kpi-card kpi-accuracy h-100 p-3 shadow-sm d-flex flex-column justify-content-between">
+            <div>
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-muted small fw-semibold text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.03em;">{{ t('dashboard.stat_accuracy') }}</span>
+                    <span class="badge badge-soft-info rounded-pill px-2 py-0.5" style="font-size: 0.7rem;">
+                        <i class="bi bi-shield-check me-0.5"></i>KPI
+                    </span>
+                </div>
+                <div class="d-flex align-items-center justify-content-between">
+                    <h3 class="fw-bold mb-0 text-info">{{ summary.confirmation_rate }}%</h3>
+                    <div class="stat-icon-wrapper bg-info bg-opacity-10 text-info">
+                        <i class="bi bi-graph-up-arrow"></i>
                     </div>
-                    <div>
-                        <p class="text-muted small mb-0">{{ t('home.this_week') }}</p>
-                        <h3 class="fw-bold mb-0">{{ summary.cases_this_month }}</h3>
-                    </div>
+                </div>
+            </div>
+            <div class="mt-3">
+                <div class="d-flex justify-content-between text-muted small mb-1" style="font-size: 0.72rem;">
+                    <span>{{ t('dashboard.resolution_rate') }}</span>
+                    <span class="fw-semibold text-dark">{{ summary.resolution_rate }}%</span>
+                </div>
+                <div class="progress" style="height: 4px;">
+                    <div class="progress-bar bg-info" role="progressbar" style="width: {{ summary.confirmation_rate }}%;"></div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Charts Row: Trend + Status Breakdown -->
+<!-- Charts Row: Trend + Callout Donut Chart (matching user reference image) -->
 <div class="row g-4 mb-4">
-    <div class="col-lg-8">
+    <div class="col-lg-7">
         <div class="card border-0 shadow-sm h-100">
             <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
                 <div>
                     <h6 class="fw-bold mb-0">{{ t('dashboard.cases_over_time') }}</h6>
                     <small class="text-muted">{{ t('dashboard.subtitle') }}</small>
                 </div>
-                <span class="badge bg-primary bg-opacity-10 text-primary">
-                    <i class="bi bi-graph-up me-1"></i>{{ cases_by_day|length }} days
+                <span class="badge badge-soft-primary rounded-pill px-2.5 py-1">
+                    <i class="bi bi-graph-up me-1"></i>{{ cases_by_day|length }} {{ t('home.this_week')|lower }}
                 </span>
             </div>
             <div class="card-body pt-0">
-                <canvas id="casesChart" height="90"></canvas>
+                <canvas id="casesChart" height="110"></canvas>
             </div>
         </div>
     </div>
-    <div class="col-lg-4">
+    <div class="col-lg-5">
+        <!-- Callout Leader Line Donut Chart (matching user reference image) -->
         <div class="card border-0 shadow-sm h-100">
-            <div class="card-header bg-white border-0 py-3">
-                <h6 class="fw-bold mb-0">{{ t('dashboard.filter_status') }}</h6>
-                <small class="text-muted">{{ t('status.pending') }} / {{ t('status.confirmed') }} / {{ t('status.rejected') }}</small>
+            <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="fw-bold mb-0" id="pieChartTitle">Case count by Status</h6>
+                    <small class="text-muted" id="pieChartSubtitle">{{ t('dashboard.subtitle') }}</small>
+                </div>
+                <div class="btn-group btn-group-sm p-0.5 bg-light rounded-pill border" role="group">
+                    <button type="button" class="btn btn-sm btn-white rounded-pill px-2.5 py-0.5 fw-semibold shadow-none active" id="btnToggleStatus" style="font-size: 0.72rem;">
+                        {{ t('dashboard.filter_status') }}
+                    </button>
+                    <button type="button" class="btn btn-sm btn-transparent rounded-pill px-2.5 py-0.5 fw-semibold text-muted shadow-none" id="btnToggleDisease" style="font-size: 0.72rem;">
+                        {{ t('nav.diseases') }}
+                    </button>
+                </div>
             </div>
-            <div class="card-body d-flex align-items-center justify-content-center">
-                <canvas id="statusChart" style="max-height: 240px;"></canvas>
+            <div class="card-body d-flex flex-column align-items-center justify-content-center p-2">
+                <div class="w-100 position-relative" style="min-height: 250px;">
+                    <canvas id="statusChart"></canvas>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Top Diseases + Status Legend Row -->
+<!-- Sick vs Dead Birds: Seasonal Mortality & Outbreak Identification (Matching User Reference Image) -->
+<div class="row g-4 mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-0 pt-4 pb-2 px-4 d-flex flex-wrap justify-content-between align-items-start gap-2">
+                <div>
+                    <h5 class="fw-bold mb-1 text-dark">{{ t('dashboard.sick_vs_dead_title') }}</h5>
+                    <p class="text-muted small mb-0">{{ t('dashboard.sick_vs_dead_subtitle') }}</p>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <select id="mortalityPeriodSelect" class="form-select form-select-sm border bg-light rounded-pill px-3 py-1 fw-semibold text-dark shadow-none" style="font-size: 0.8rem; cursor: pointer;">
+                        <option value="all" selected>{{ t('dashboard.period_this_year') }} ({{ seasonal_mortality.year }})</option>
+                        <option value="outbreak_only">Peak Outbreak Months</option>
+                        <option value="last_6">Last 6 Months</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="card-body px-4 pt-2 pb-4">
+                <!-- Headline KPI Metric & Legend Row (matching user reference image) -->
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3 pt-1">
+                    <div class="d-flex flex-wrap align-items-baseline gap-2">
+                        <span class="display-6 fw-bold text-dark lh-1" id="statTotalImpacted">{{ seasonal_mortality.total_impacted }}</span>
+                        <span class="text-muted fw-bold fs-6 text-uppercase" style="letter-spacing: 0.04em;">{{ t('dashboard.birds_impacted') }}</span>
+                        
+                        <span class="badge badge-soft-danger rounded-pill px-2.5 py-1 small fs-6 ms-1" id="statMortalityRate" title="{{ t('dashboard.mortality_rate') }}">
+                            <i class="bi bi-activity me-1"></i>{{ seasonal_mortality.mortality_rate }}% {{ t('dashboard.mortality_rate') }}
+                        </span>
+
+                        {% if seasonal_mortality.peak_month %}
+                        <span class="badge badge-soft-warning rounded-pill px-2.5 py-1 small ms-1" id="statPeakBadge">
+                            <i class="bi bi-exclamation-triangle-fill me-1"></i>{{ t('dashboard.peak_mortality') }}: {{ seasonal_mortality.peak_month }} ({{ seasonal_mortality.peak_dead }} deaths)
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Legend Dots (matching reference image) -->
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <span style="width: 11px; height: 11px; border-radius: 50%; background-color: #10b981; display: inline-block;"></span>
+                            <span class="small text-muted fw-semibold">{{ t('dashboard.sick_birds') }}</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span style="width: 11px; height: 11px; border-radius: 50%; background-color: #064e3b; display: inline-block;"></span>
+                            <span class="small text-muted fw-semibold">{{ t('dashboard.dead_birds') }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stacked Bar Chart -->
+                <div class="position-relative" style="height: 250px; width: 100%;">
+                    <canvas id="seasonalMortalityChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Regional Outbreak Hotspots (Provinces) Row -->
+<div class="row g-4 mb-4">
+    <!-- Ranked Provincial Hotspots Telemetry Table -->
+    <div class="col-lg-7">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-0 py-3 px-4 d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="fw-bold mb-0 text-dark">
+                        <i class="bi bi-geo-alt-fill text-danger me-1"></i> {{ t('dashboard.provincial_hotspots') }}
+                    </h6>
+                    <small class="text-muted">{{ t('dashboard.provincial_hotspots_sub') }}</small>
+                </div>
+                <span class="badge bg-light text-dark border px-2.5 py-1 small">
+                    {{ provincial_cases | length }} {{ t('diag.province') }}
+                </span>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0" style="font-size: 0.875rem;">
+                    <thead class="table-light text-muted text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.05em;">
+                        <tr>
+                            <th class="ps-4 py-2.5">{{ t('diag.province') }}</th>
+                            <th class="py-2.5">{{ t('cases.title') }}</th>
+                            <th class="py-2.5">{{ t('dashboard.dominant_disease') }}</th>
+                            <th class="py-2.5">{{ t('dashboard.mortality_rate') }}</th>
+                            <th class="pe-4 py-2.5 text-end">{{ t('dashboard.risk_level') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for prov in provincial_cases %}
+                        <tr>
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary" style="width: 28px; height: 28px; font-size: 0.75rem; font-weight: bold;">
+                                        {{ loop.index }}
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold text-dark">{{ prov.province_km }}</div>
+                                        <div class="small text-muted" style="font-size: 0.75rem;">{{ prov.province }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="fw-bold text-dark">{{ prov.cases }}</span>
+                                    <span class="text-muted small">({{ prov.percent }}%)</span>
+                                </div>
+                                <div class="progress mt-1" style="height: 4px; width: 85px;">
+                                    <div class="progress-bar bg-primary" role="progressbar" style="width: {{ prov.percent }}%;"></div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark border text-truncate" style="max-width: 140px;" title="{{ prov.dominant_disease }}">
+                                    <i class="bi bi-virus text-danger me-1"></i>{{ prov.dominant_disease }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="fw-semibold {% if prov.mortality_rate >= 30 %}text-danger{% elif prov.mortality_rate >= 20 %}text-warning{% else %}text-dark{% endif %}">
+                                    {{ prov.mortality_rate }}%
+                                </div>
+                                <div class="small text-muted" style="font-size: 0.72rem;">{{ prov.dead_birds }} / {{ prov.impacted_birds }} birds</div>
+                            </td>
+                            <td class="pe-4 text-end">
+                                {% if prov.risk_level == 'critical' %}
+                                <span class="badge badge-soft-danger rounded-pill px-2 py-1 small">
+                                    <i class="bi bi-exclamation-triangle-fill me-1"></i>{{ prov.risk_label_en }}
+                                </span>
+                                {% elif prov.risk_level == 'high' %}
+                                <span class="badge badge-soft-warning rounded-pill px-2 py-1 small">
+                                    <i class="bi bi-exclamation-circle-fill me-1"></i>{{ prov.risk_label_en }}
+                                </span>
+                                {% elif prov.risk_level == 'moderate' %}
+                                <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 rounded-pill px-2 py-1 small">
+                                    {{ prov.risk_label_en }}
+                                </span>
+                                {% else %}
+                                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-2 py-1 small">
+                                    {{ prov.risk_label_en }}
+                                </span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-4">
+                                <i class="bi bi-geo-alt display-6 d-block mb-2 opacity-50"></i>
+                                <p class="mb-0 small">{{ t('cases.no_cases_found') }}</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Regional Distribution Bar Chart -->
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-0 py-3 px-4 d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="fw-bold mb-0 text-dark">
+                        <i class="bi bi-bar-chart-fill text-primary me-1"></i> {{ t('dashboard.provincial_chart') }}
+                    </h6>
+                    <small class="text-muted">{{ t('cases.title') }} by Province</small>
+                </div>
+            </div>
+            <div class="card-body p-3 d-flex flex-column justify-content-center">
+                <div class="position-relative" style="height: 280px; width: 100%;">
+                    <canvas id="provincialChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Top Diseases + Clinical Triage & Status Center Row -->
 <div class="row g-4 mb-4">
     <div class="col-lg-7">
         <div class="card border-0 shadow-sm h-100">
@@ -233,31 +610,120 @@
     </div>
     <div class="col-lg-5">
         <div class="card border-0 shadow-sm h-100">
-            <div class="card-header bg-white border-0 py-3">
-                <h6 class="fw-bold mb-0">{{ t('dashboard.filter_status') }}</h6>
-                <small class="text-muted">{{ t('cases.subtitle') }}</small>
+            <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="fw-bold mb-0">{{ t('dashboard.status_health') }}</h6>
+                    <small class="text-muted">{{ t('dashboard.subtitle') }}</small>
+                </div>
+                {% if status_breakdown.pending > 0 %}
+                <span class="badge badge-soft-warning rounded-pill px-2.5 py-1 small d-inline-flex align-items-center">
+                    <span class="pulse-dot pulse-amber me-1.5"></span>
+                    {{ status_breakdown.pending }} {{ t('dashboard.review_needed') }}
+                </span>
+                {% else %}
+                <span class="badge badge-soft-success rounded-pill px-2.5 py-1 small">
+                    <i class="bi bi-check-all me-1"></i>All Caught Up
+                </span>
+                {% endif %}
             </div>
-            <div class="card-body d-flex flex-column justify-content-center">
-                <div class="d-flex align-items-center justify-content-between mb-3">
-                    <span class="d-flex align-items-center">
-                        <span class="badge status-badge status-pending me-2">&nbsp;</span>
-                        <span class="small">{{ t('status.pending') }}</span>
-                    </span>
-                    <span class="fw-bold">{{ status_breakdown.pending }}</span>
+            <div class="card-body d-flex flex-column justify-content-between">
+                <!-- Stacked Distribution Bar -->
+                <div>
+                    <div class="d-flex justify-content-between align-items-center mb-1.5">
+                        <span class="small fw-semibold text-muted text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.04em;">
+                            {{ t('dashboard.filter_status') }} ({{ status_breakdown.total }})
+                        </span>
+                        <span class="small text-muted">
+                            <span class="text-success fw-bold">{{ status_breakdown.confirmed_pct }}%</span> · 
+                            <span class="text-warning fw-bold">{{ status_breakdown.pending_pct }}%</span> · 
+                            <span class="text-danger fw-bold">{{ status_breakdown.rejected_pct }}%</span>
+                        </span>
+                    </div>
+                    <div class="status-distribution-bar mb-3.5">
+                        <div class="distribution-segment bg-success" style="width: {{ status_breakdown.confirmed_pct }}%;" title="{{ t('status.confirmed') }}: {{ status_breakdown.confirmed }} ({{ status_breakdown.confirmed_pct }}%)"></div>
+                        <div class="distribution-segment bg-warning" style="width: {{ status_breakdown.pending_pct }}%;" title="{{ t('status.pending') }}: {{ status_breakdown.pending }} ({{ status_breakdown.pending_pct }}%)"></div>
+                        <div class="distribution-segment bg-danger" style="width: {{ status_breakdown.rejected_pct }}%;" title="{{ t('status.rejected') }}: {{ status_breakdown.rejected }} ({{ status_breakdown.rejected_pct }}%)"></div>
+                    </div>
+
+                    <!-- 3 Action Rows -->
+                    <div class="d-flex flex-column gap-2.5 mb-3">
+                        <!-- Confirmed Item -->
+                        <div class="status-action-row d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center gap-2.5">
+                                <div class="stat-icon-wrapper bg-success bg-opacity-10 text-success" style="width: 38px; height: 38px; font-size: 1.1rem;">
+                                    <i class="bi bi-patch-check-fill"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-semibold small lh-sm">{{ t('status.confirmed') }}</div>
+                                    <div class="text-muted" style="font-size: 0.72rem;">{{ status_breakdown.confirmed_pct }}% · {{ t('dashboard.verified_cases') }}</div>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="fw-bold fs-6 text-success">{{ status_breakdown.confirmed }}</span>
+                                <a href="{{ url_for('expert_system.cases_index', status='confirmed') }}" class="btn btn-sm btn-outline-success rounded-pill px-2.5 py-0.5 small" style="font-size: 0.72rem;">
+                                    {{ t('dashboard.view_filtered') }} <i class="bi bi-arrow-right"></i>
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Pending Item -->
+                        <div class="status-action-row d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center gap-2.5">
+                                <div class="stat-icon-wrapper bg-warning bg-opacity-10 text-warning" style="width: 38px; height: 38px; font-size: 1.1rem;">
+                                    <i class="bi bi-hourglass-split"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-semibold small lh-sm d-flex align-items-center gap-1.5">
+                                        {{ t('status.pending') }}
+                                        {% if status_breakdown.pending > 0 %}<span class="pulse-dot pulse-amber"></span>{% endif %}
+                                    </div>
+                                    <div class="text-muted" style="font-size: 0.72rem;">{{ status_breakdown.pending_pct }}% · {{ t('dashboard.triage_queue') }}</div>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="fw-bold fs-6 text-warning">{{ status_breakdown.pending }}</span>
+                                <a href="{{ url_for('expert_system.cases_index', status='pending') }}" class="btn btn-sm btn-outline-warning rounded-pill px-2.5 py-0.5 small fw-semibold" style="font-size: 0.72rem;">
+                                    {{ t('dashboard.review_needed') }} <i class="bi bi-arrow-right"></i>
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Rejected Item -->
+                        <div class="status-action-row d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center gap-2.5">
+                                <div class="stat-icon-wrapper bg-danger bg-opacity-10 text-danger" style="width: 38px; height: 38px; font-size: 1.1rem;">
+                                    <i class="bi bi-x-circle-fill"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-semibold small lh-sm">{{ t('status.rejected') }}</div>
+                                    <div class="text-muted" style="font-size: 0.72rem;">{{ status_breakdown.rejected_pct }}% · {{ t('dashboard.dismissed_cases') }}</div>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="fw-bold fs-6 text-danger">{{ status_breakdown.rejected }}</span>
+                                <a href="{{ url_for('expert_system.cases_index', status='rejected') }}" class="btn btn-sm btn-outline-danger rounded-pill px-2.5 py-0.5 small" style="font-size: 0.72rem;">
+                                    {{ t('dashboard.view_filtered') }} <i class="bi bi-arrow-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="d-flex align-items-center justify-content-between mb-3">
-                    <span class="d-flex align-items-center">
-                        <span class="badge status-badge status-confirmed me-2">&nbsp;</span>
-                        <span class="small">{{ t('status.confirmed') }}</span>
-                    </span>
-                    <span class="fw-bold">{{ status_breakdown.confirmed }}</span>
-                </div>
-                <div class="d-flex align-items-center justify-content-between">
-                    <span class="d-flex align-items-center">
-                        <span class="badge status-badge status-rejected me-2">&nbsp;</span>
-                        <span class="small">{{ t('status.rejected') }}</span>
-                    </span>
-                    <span class="fw-bold">{{ status_breakdown.rejected }}</span>
+
+                <!-- Efficiency / Telemetry Meter Footer -->
+                <div class="p-2.5 rounded-3 bg-light border mt-auto">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="small fw-semibold text-muted d-flex align-items-center gap-1">
+                            <i class="bi bi-speedometer text-primary"></i> {{ t('dashboard.efficiency_title') }}
+                        </span>
+                        <span class="small fw-bold text-primary">{{ status_breakdown.resolution_rate }}%</span>
+                    </div>
+                    <div class="progress" style="height: 6px;">
+                        <div class="progress-bar bg-primary" role="progressbar" style="width: {{ status_breakdown.resolution_rate }}%;" aria-valuenow="{{ status_breakdown.resolution_rate }}" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mt-1 text-muted" style="font-size: 0.7rem;">
+                        <span>{{ status_breakdown.resolved }}/{{ status_breakdown.total }} {{ t('status.confirmed') }} + {{ t('status.rejected') }}</span>
+                        <span>{{ status_breakdown.confirmation_rate }}% {{ t('dashboard.stat_accuracy') }}</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -329,6 +795,13 @@
                             </td>
                             <td>
                                 <span class="badge rounded-pill status-badge status-{{ case.status }}">
+                                    {% if case.status == 'confirmed' %}
+                                    <i class="bi bi-check-circle-fill me-1"></i>
+                                    {% elif case.status == 'pending' %}
+                                    <i class="bi bi-hourglass-split me-1"></i>
+                                    {% elif case.status == 'rejected' %}
+                                    <i class="bi bi-x-circle-fill me-1"></i>
+                                    {% endif %}
                                     {{ get_translated_option('status', case.status) }}
                                 </span>
                             </td>
@@ -406,6 +879,13 @@
                             </td>
                             <td class="pe-4">
                                 <span class="badge rounded-pill status-badge status-{{ case.status }}">
+                                    {% if case.status == 'confirmed' %}
+                                    <i class="bi bi-check-circle-fill me-1"></i>
+                                    {% elif case.status == 'pending' %}
+                                    <i class="bi bi-hourglass-split me-1"></i>
+                                    {% elif case.status == 'rejected' %}
+                                    <i class="bi bi-x-circle-fill me-1"></i>
+                                    {% endif %}
                                     {{ get_translated_option('status', case.status) }}
                                 </span>
                             </td>
@@ -432,8 +912,11 @@
 document.addEventListener('DOMContentLoaded', function() {
     const casesData = {{ cases_by_day | tojson }};
     const statusData = {{ status_breakdown | tojson }};
+    const diseaseData = {{ top_diseases | tojson }};
+    const seasonalMortalityData = {{ seasonal_mortality | tojson }};
+    const provincialData = {{ provincial_cases | tojson }};
 
-    // Disease Trend Line Chart
+    // ── 1. Disease Trend Line Chart ──────────────────────────────────────
     const casesCanvas = document.getElementById('casesChart');
     if (casesCanvas) {
         new Chart(casesCanvas, {
@@ -483,36 +966,413 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Status Doughnut Chart
-    const statusLabels = { pending: 'Pending', confirmed: 'Confirmed', rejected: 'Rejected' };
-    const statusColors = { pending: '#f59e0b', confirmed: '#10b981', rejected: '#ef4444' };
-    const sKeys = Object.keys(statusData).filter(k => statusData[k] > 0);
-    const statusCanvas = document.getElementById('statusChart');
+    // ── 2. Callout Leader Lines Plugin for Donut Chart ───────────────────
+    const doughnutLeaderLinesPlugin = {
+        id: 'doughnutLeaderLinesPlugin',
+        afterDraw(chart) {
+            if (chart.config.type !== 'doughnut') return;
+            const { ctx } = chart;
+            const meta = chart.getDatasetMeta(0);
+            if (!meta || !meta.data || !meta.data.length) return;
 
-    if (statusCanvas && sKeys.length) {
-        new Chart(statusCanvas, {
+            const dataset = chart.data.datasets[0];
+            const data = dataset.data;
+            const total = data.reduce((acc, v) => acc + (Number(v) || 0), 0);
+            if (!total) return;
+
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            const lineColor = isDark ? 'rgba(148, 163, 184, 0.75)' : 'rgba(100, 116, 139, 0.65)';
+            const textColor = isDark ? '#f1f5f9' : '#1e293b';
+
+            ctx.save();
+            ctx.font = '500 11px Inter, "Noto Sans Khmer", -apple-system, sans-serif';
+
+            meta.data.forEach((element, index) => {
+                const val = Number(data[index]);
+                if (!val || val <= 0) return;
+
+                const label = chart.data.labels[index] || '';
+
+                // Midpoint angle of arc
+                const angle = (element.startAngle + element.endAngle) / 2;
+                const cos = Math.cos(angle);
+                const sin = Math.sin(angle);
+
+                const r = element.outerRadius;
+                const cx = element.x;
+                const cy = element.y;
+
+                // Point 1: On the outer perimeter of the donut slice
+                const x1 = cx + cos * r;
+                const y1 = cy + sin * r;
+
+                // Point 2: Diagonal elbow knee
+                const kneeDist = 13;
+                const x2 = cx + cos * (r + kneeDist);
+                const y2 = cy + sin * (r + kneeDist);
+
+                // Point 3: Horizontal line tip
+                const isRight = cos >= 0;
+                const horizLen = 14;
+                const x3 = isRight ? x2 + horizLen : x2 - horizLen;
+                const y3 = y2;
+
+                // Draw connector line with elbow bend
+                ctx.beginPath();
+                ctx.lineWidth = 1.25;
+                ctx.strokeStyle = lineColor;
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x2, y2);
+                ctx.lineTo(x3, y3);
+                ctx.stroke();
+
+                // Tiny anchor dot at the slice edge
+                ctx.beginPath();
+                ctx.arc(x1, y1, 1.8, 0, 2 * Math.PI);
+                ctx.fillStyle = lineColor;
+                ctx.fill();
+
+                // Text label positioning
+                ctx.textBaseline = 'middle';
+                ctx.textAlign = isRight ? 'left' : 'right';
+                const textX = isRight ? x3 + 5 : x3 - 5;
+
+                ctx.fillStyle = textColor;
+                ctx.fillText(label, textX, y3);
+            });
+
+            ctx.restore();
+        }
+    };
+
+    Chart.register(doughnutLeaderLinesPlugin);
+
+    // ── 3. Status / Disease Callout Donut Chart ───────────────────────────
+    const statusCanvas = document.getElementById('statusChart');
+    let donutChartInstance = null;
+
+    // Palette matching reference image (Teal, Coral Red, Dark Slate, Amber Gold, Sky Blue)
+    const colorPalette = ['#00bfa5', '#ff5757', '#334155', '#f59e0b', '#38bdf8', '#8b5cf6', '#10b981'];
+
+    function getStatusDataset() {
+        const statusMap = [
+            { key: 'confirmed', label: 'Confirmed', color: '#00bfa5' },
+            { key: 'pending', label: 'Pending', color: '#f59e0b' },
+            { key: 'rejected', label: 'Rejected', color: '#ff5757' }
+        ];
+        const active = statusMap.filter(s => (statusData[s.key] || 0) > 0);
+        return {
+            labels: active.map(s => s.label),
+            data: active.map(s => statusData[s.key]),
+            colors: active.map(s => s.color)
+        };
+    }
+
+    function getDiseaseDataset() {
+        const active = (diseaseData || []).filter(d => (d.count || 0) > 0).slice(0, 5);
+        return {
+            labels: active.map(d => d.name),
+            data: active.map(d => d.count),
+            colors: active.map((_, i) => colorPalette[i % colorPalette.length])
+        };
+    }
+
+    function renderDonutChart(type) {
+        const isStatus = type === 'status';
+        const dataset = isStatus ? getStatusDataset() : getDiseaseDataset();
+
+        if (!dataset.data.length) {
+            if (donutChartInstance) donutChartInstance.destroy();
+            statusCanvas.parentElement.innerHTML =
+                '<div class="text-center py-4"><i class="bi bi-pie-chart text-muted display-6 d-block mb-2"></i>' +
+                '<p class="text-muted small mb-0">មិនទាន់មានទិន្នន័យ / No data yet</p></div>';
+            return;
+        }
+
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        const borderColor = isDark ? '#1e293b' : '#ffffff';
+
+        if (donutChartInstance) {
+            donutChartInstance.destroy();
+        }
+
+        donutChartInstance = new Chart(statusCanvas, {
             type: 'doughnut',
             data: {
-                labels: sKeys.map(k => statusLabels[k] || k),
+                labels: dataset.labels,
                 datasets: [{
-                    data: sKeys.map(k => statusData[k]),
-                    backgroundColor: sKeys.map(k => statusColors[k] || '#6b7280'),
-                    borderWidth: 0,
-                    hoverOffset: 8,
+                    data: dataset.data,
+                    backgroundColor: dataset.colors,
+                    borderColor: borderColor,
+                    borderWidth: 2,
+                    hoverOffset: 6,
                 }]
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
                 cutout: '65%',
+                layout: {
+                    padding: {
+                        top: 25,
+                        bottom: 25,
+                        left: 75,
+                        right: 75
+                    }
+                },
                 plugins: {
-                    legend: { position: 'bottom', labels: { padding: 16, usePointStyle: true, pointStyle: 'circle' } }
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#1f2937',
+                        titleFont: { size: 12 },
+                        bodyFont: { size: 12, weight: 'bold' },
+                        padding: 10,
+                        cornerRadius: 8,
+                        callbacks: {
+                            label: function(ctx) {
+                                const sum = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                                const val = ctx.raw || 0;
+                                const pct = sum > 0 ? ((val / sum) * 100).toFixed(1) : 0;
+                                return ` ${ctx.label}: ${val} (${pct}%)`;
+                            }
+                        }
+                    }
                 }
             }
         });
-    } else if (statusCanvas) {
-        statusCanvas.parentElement.innerHTML =
-            '<div class="text-center py-4"><i class="bi bi-pie-chart text-muted display-6 d-block mb-2"></i>' +
-            '<p class="text-muted small mb-0">មិនទាន់មានទិន្នន័យ / No data yet</p></div>';
+    }
+
+    if (statusCanvas) {
+        renderDonutChart('status');
+
+        const btnStatus = document.getElementById('btnToggleStatus');
+        const btnDisease = document.getElementById('btnToggleDisease');
+        const titleElem = document.getElementById('pieChartTitle');
+
+        if (btnStatus && btnDisease) {
+            btnStatus.addEventListener('click', function() {
+                btnStatus.classList.add('btn-white', 'active');
+                btnStatus.classList.remove('btn-transparent', 'text-muted');
+                btnDisease.classList.remove('btn-white', 'active');
+                btnDisease.classList.add('btn-transparent', 'text-muted');
+                if (titleElem) titleElem.textContent = 'Case count by Status';
+                renderDonutChart('status');
+            });
+
+            btnDisease.addEventListener('click', function() {
+                btnDisease.classList.add('btn-white', 'active');
+                btnDisease.classList.remove('btn-transparent', 'text-muted');
+                btnStatus.classList.remove('btn-white', 'active');
+                btnStatus.classList.add('btn-transparent', 'text-muted');
+                if (titleElem) titleElem.textContent = 'Case count by Disease';
+                renderDonutChart('disease');
+            });
+        }
+
+        window.addEventListener('themeChanged', function() {
+            if (donutChartInstance) {
+                const currentType = btnDisease && btnDisease.classList.contains('active') ? 'disease' : 'status';
+                renderDonutChart(currentType);
+            }
+        });
+    }
+
+    // ── 4. Sick vs Dead Birds: Seasonal Mortality & Outbreak Chart ────────
+    const seasonalCanvas = document.getElementById('seasonalMortalityChart');
+    const seasonalRawData = seasonalMortalityData.monthly_data || [];
+    let seasonalChartInstance = null;
+
+    function renderSeasonalChart(filterMode) {
+        if (!seasonalCanvas || !seasonalRawData.length) return;
+
+        let filtered = seasonalRawData;
+        if (filterMode === 'outbreak_only') {
+            const outbreaks = seasonalRawData.filter(d => d.total > 0);
+            filtered = outbreaks.length ? outbreaks : seasonalRawData;
+        } else if (filterMode === 'last_6') {
+            filtered = seasonalRawData.slice(6);
+        }
+
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        const gridColor = isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.05)';
+        const tickColor = isDark ? '#94a3b8' : '#64748b';
+        // Palette matching the theme: Vibrant Emerald (Sick) and Deep Forest Emerald / Slate (Dead)
+        const sickColor = isDark ? '#34d399' : '#10b981';
+        const deadColor = isDark ? '#064e3b' : '#064e3b';
+
+        if (seasonalChartInstance) {
+            seasonalChartInstance.destroy();
+        }
+
+        seasonalChartInstance = new Chart(seasonalCanvas, {
+            type: 'bar',
+            data: {
+                labels: filtered.map(d => d.month),
+                datasets: [
+                    {
+                        label: 'Sick Birds',
+                        data: filtered.map(d => d.sick),
+                        backgroundColor: sickColor,
+                        stack: 'birds',
+                        barPercentage: 0.38,
+                        borderRadius: 0,
+                    },
+                    {
+                        label: 'Dead Birds',
+                        data: filtered.map(d => d.dead),
+                        backgroundColor: deadColor,
+                        stack: 'birds',
+                        barPercentage: 0.38,
+                        borderRadius: { topLeft: 4, topRight: 4, bottomLeft: 0, bottomRight: 0 },
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        stacked: true,
+                        grid: { display: false },
+                        ticks: { color: tickColor, font: { size: 11, weight: '600' } }
+                    },
+                    y: {
+                        stacked: true,
+                        beginAtZero: true,
+                        grid: { color: gridColor, drawBorder: false },
+                        ticks: { color: tickColor, font: { size: 11 }, stepSize: 20 }
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#1f2937',
+                        titleFont: { size: 12 },
+                        bodyFont: { size: 12 },
+                        padding: 10,
+                        cornerRadius: 8,
+                        callbacks: {
+                            afterTitle: function(items) {
+                                const idx = items[0].dataIndex;
+                                const item = filtered[idx];
+                                const rate = item.total > 0 ? ((item.dead / item.total) * 100).toFixed(1) : '0';
+                                return `Total: ${item.total} birds · Mortality: ${rate}%`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    if (seasonalCanvas) {
+        renderSeasonalChart('all');
+
+        const periodSelect = document.getElementById('mortalityPeriodSelect');
+        if (periodSelect) {
+            periodSelect.addEventListener('change', function() {
+                renderSeasonalChart(this.value);
+            });
+        }
+
+        window.addEventListener('themeChanged', function() {
+            if (seasonalChartInstance) {
+                const mode = periodSelect ? periodSelect.value : 'all';
+                renderSeasonalChart(mode);
+            }
+        });
+    }
+
+    // ── 5. Regional Outbreak Distribution (Provincial Bar Chart) ──────────
+    const provincialCanvas = document.getElementById('provincialChart');
+    let provincialChartInstance = null;
+
+    function renderProvincialChart() {
+        if (!provincialCanvas || !provincialData.length) {
+            if (provincialCanvas) {
+                provincialCanvas.parentElement.innerHTML =
+                    '<div class="text-center py-5 text-muted"><i class="bi bi-geo-alt display-6 d-block mb-2 opacity-50"></i><p class="mb-0 small">{{ t("cases.no_cases_found") }}</p></div>';
+            }
+            return;
+        }
+
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        const gridColor = isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.05)';
+        const tickColor = isDark ? '#94a3b8' : '#64748b';
+
+        // Cohesive theme palette (Emerald, Teal, Cyan, Sky, Violet)
+        const barColors = [
+            '#059669', '#10b981', '#06b6d4', '#0284c7',
+            '#6366f1', '#8b5cf6', '#d946ef', '#f43f5e'
+        ];
+
+        if (provincialChartInstance) {
+            provincialChartInstance.destroy();
+        }
+
+        provincialChartInstance = new Chart(provincialCanvas, {
+            type: 'bar',
+            data: {
+                labels: provincialData.map(p => p.province_km || p.province),
+                datasets: [{
+                    label: 'Cases',
+                    data: provincialData.map(p => p.cases),
+                    backgroundColor: provincialData.map((_, i) => barColors[i % barColors.length]),
+                    borderRadius: 6,
+                    barPercentage: 0.55,
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        grid: { color: gridColor, drawBorder: false },
+                        ticks: { color: tickColor, font: { size: 11 }, stepSize: 2 }
+                    },
+                    y: {
+                        grid: { display: false },
+                        ticks: { color: tickColor, font: { size: 11, weight: '500' } }
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#1f2937',
+                        titleFont: { size: 12 },
+                        bodyFont: { size: 12 },
+                        padding: 10,
+                        cornerRadius: 8,
+                        callbacks: {
+                            title: function(items) {
+                                const idx = items[0].dataIndex;
+                                const p = provincialData[idx];
+                                return `${p.province_km} (${p.province})`;
+                            },
+                            label: function(ctx) {
+                                const idx = ctx.dataIndex;
+                                const p = provincialData[idx];
+                                return ` Cases: ${p.cases} (${p.percent}%)`;
+                            },
+                            afterLabel: function(ctx) {
+                                const idx = ctx.dataIndex;
+                                const p = provincialData[idx];
+                                return ` Dominant: ${p.dominant_disease}\n Mortality: ${p.mortality_rate}% (${p.dead_birds}/${p.impacted_birds} dead)\n Risk: ${p.risk_label_en}`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    if (provincialCanvas) {
+        renderProvincialChart();
+        window.addEventListener('themeChanged', function() {
+            if (provincialChartInstance) renderProvincialChart();
+        });
     }
 });
 </script>

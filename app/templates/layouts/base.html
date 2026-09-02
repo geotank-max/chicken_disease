@@ -397,12 +397,41 @@
                 overlay.classList.toggle('active');
             });
         }
-        if (overlay) {
-            overlay.addEventListener('click', () => {
-                sidebar.classList.remove('open');
-                overlay.classList.remove('active');
+        // Global Notification Badge Updater
+        window.updateNavbarNotifBadge = function (count) {
+            const notifLinks = document.querySelectorAll('a[href*="/notifications"]');
+            notifLinks.forEach(link => {
+                if (link.classList.contains('navbar-icon')) {
+                    let badge = link.querySelector('.icon-badge');
+                    if (count > 0) {
+                        if (!badge) {
+                            badge = document.createElement('span');
+                            badge.className = 'icon-badge';
+                            link.appendChild(badge);
+                        }
+                        badge.textContent = count;
+                    } else if (badge) {
+                        badge.remove();
+                    }
+                }
             });
-        }
+        };
+
+        // Automatically sync badge when returning via browser back/forward cache (bfcache)
+        window.addEventListener('pageshow', function (e) {
+            {% if current_user.is_authenticated %}
+            fetch("{{ url_for('notifications.api_unread_count') }}", {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(res => res.ok ? res.json() : null)
+            .then(data => {
+                if (data && typeof data.count === 'number') {
+                    window.updateNavbarNotifBadge(data.count);
+                }
+            })
+            .catch(() => {});
+            {% endif %}
+        });
     </script>
     {% block extra_scripts %}{% endblock %}
 </body>

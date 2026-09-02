@@ -30,6 +30,15 @@ class UserTable(UserMixin, db.Model):
     reset_token_hash = db.Column(db.String(255), nullable=True)
     reset_token_expires = db.Column(db.DateTime, nullable=True)
     
+    # Farmer Geographic & Farm Profile Defaults
+    province = db.Column(db.String(80), nullable=True)
+    district = db.Column(db.String(80), nullable=True)
+    commune = db.Column(db.String(80), nullable=True)
+    latitude = db.Column(db.Float, nullable=True)
+    longitude = db.Column(db.Float, nullable=True)
+    farm_type = db.Column(db.String(50), nullable=True)
+    farm_scale = db.Column(db.String(50), nullable=True)
+    
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
     

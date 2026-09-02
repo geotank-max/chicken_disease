@@ -124,6 +124,11 @@ class Disease(db.Model):
         cascade="all, delete-orphan",
         order_by="TreatmentStep.position",
     )
+    possible_diagnoses = db.relationship(
+        "CaseDiagnosis",
+        back_populates="disease",
+        cascade="all, delete-orphan",
+    )
 
     @property
     def has_structured_steps(self) -> bool:
@@ -205,6 +210,14 @@ class Case(db.Model):
     bird_age = db.Column(db.String(80))
     breed = db.Column(db.String(80))
     location = db.Column(db.String(120))
+    # ── Structured Geographic & Farm Location ─────────────────────────────
+    province = db.Column(db.String(80))
+    district = db.Column(db.String(80))
+    commune = db.Column(db.String(80))
+    latitude = db.Column(db.Float)
+    longitude = db.Column(db.Float)
+    farm_type = db.Column(db.String(50))
+    farm_scale = db.Column(db.String(50))
     notes = db.Column(db.Text)
     status = db.Column(db.String(20), default=CASE_STATUS_PENDING, nullable=False)
     reviewed_by_id = db.Column(db.Integer, db.ForeignKey("tbl_users.id"))
@@ -521,7 +534,7 @@ class CaseDiagnosis(db.Model):
 
     id = db.Column(db.Integer, db.Sequence("seq_case_diagnoses_id"), primary_key=True)
     case_id = db.Column(db.Integer, db.ForeignKey("tbl_cases.id", ondelete="CASCADE"), nullable=False)
-    disease_id = db.Column(db.Integer, db.ForeignKey("tbl_diseases.id"), nullable=False)
+    disease_id = db.Column(db.Integer, db.ForeignKey("tbl_diseases.id", ondelete="CASCADE"), nullable=False)
     rule_id = db.Column(db.Integer, db.ForeignKey("tbl_rules.id", ondelete="SET NULL"), nullable=True)
     confidence = db.Column(db.Float, nullable=False)
     matched_symptom_count = db.Column(db.Integer, default=0, nullable=False)
@@ -530,7 +543,7 @@ class CaseDiagnosis(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
     case = db.relationship("Case", back_populates="possible_diagnoses")
-    disease = db.relationship("Disease")
+    disease = db.relationship("Disease", back_populates="possible_diagnoses")
     rule = db.relationship("Rule")
 
     @property

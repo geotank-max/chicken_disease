@@ -40,6 +40,10 @@ from app.models.expert_system import (
     YES_NO_OPTIONS, VACCINATION_OPTIONS, COOP_CONDITION_OPTIONS, INTAKE_LEVEL_OPTIONS,
     YES_NO_LABELS, VACCINATION_LABELS, COOP_CONDITION_LABELS, INTAKE_LEVEL_LABELS,
 )
+from app.data.cambodia_geography import (
+    CAMBODIA_PROVINCES, FARM_TYPES, FARM_SCALES,
+    get_province_by_key, get_districts_by_province, normalize_legacy_location,
+)
 
 expert_system_bp = Blueprint("expert_system", __name__, url_prefix="/expert-system")
 
@@ -57,6 +61,14 @@ def _parse_int_field(form_data, key, lo=0, hi=1_000_000):
     return max(lo, min(hi, val))
 
 
+def _parse_float_field(form_data, key):
+    raw = form_data.get(key, "").strip()
+    try:
+        return float(raw) if raw else None
+    except (ValueError, TypeError):
+        return None
+
+
 def _parse_choice(form_data, key, allowed):
     """Return the submitted value only if it's in `allowed`, else None."""
     val = form_data.get(key, "").strip()
@@ -64,11 +76,25 @@ def _parse_choice(form_data, key, allowed):
 
 
 def _parse_flock_data(form_data):
+    province = form_data.get("province", "").strip()
+    district = form_data.get("district", "").strip()
+    commune = form_data.get("commune", "").strip()
+
+    loc_parts = [p for p in [district, province] if p]
+    location_str = ", ".join(loc_parts) if loc_parts else form_data.get("location", "").strip()
+
     return {
         "flock_size": _parse_int_field(form_data, "flock_size", lo=1),
         "bird_age": form_data.get("bird_age", "").strip(),
         "breed": form_data.get("breed", "").strip(),
-        "location": form_data.get("location", "").strip(),
+        "province": province,
+        "district": district,
+        "commune": commune,
+        "latitude": _parse_float_field(form_data, "latitude"),
+        "longitude": _parse_float_field(form_data, "longitude"),
+        "farm_type": form_data.get("farm_type", "").strip(),
+        "farm_scale": form_data.get("farm_scale", "").strip(),
+        "location": location_str,
         "notes": form_data.get("notes", "").strip(),
         # Extended diagnosis context (all optional)
         "sick_bird_count": _parse_int_field(form_data, "sick_bird_count"),
@@ -218,7 +244,7 @@ def diagnose():
             "flock_size": "ចំនួនមាន់",
             "bird_age": "អាយុ",
             "breed": "ប្រភេទមាន់",
-            "location": "ទីតាំង",
+            "province": "ខេត្ត/រាជធានី",
             "sick_bird_count": "ចំនួនមាន់ឈឺ",
             "dead_bird_count": "ចំនួនមាន់ស្លាប់",
             "symptom_duration": "រយៈពេលមានរោគសញ្ញា",
@@ -307,6 +333,19 @@ def diagnose():
             },
         }
 
+    wizard_flock_data = dict(session.get("diagnosis_wizard", {}))
+    if not wizard_flock_data and current_user.is_authenticated:
+        if getattr(current_user, "province", None):
+            wizard_flock_data.setdefault("province", current_user.province)
+        if getattr(current_user, "district", None):
+            wizard_flock_data.setdefault("district", current_user.district)
+        if getattr(current_user, "commune", None):
+            wizard_flock_data.setdefault("commune", current_user.commune)
+        if getattr(current_user, "farm_type", None):
+            wizard_flock_data.setdefault("farm_type", current_user.farm_type)
+        if getattr(current_user, "farm_scale", None):
+            wizard_flock_data.setdefault("farm_scale", current_user.farm_scale)
+
     return render_template(
         "expert_system/diagnose.html",
         step=step,
@@ -315,7 +354,10 @@ def diagnose():
         symptom_diagnosis_data=symptom_diagnosis_data,
         results=diagnosis_results,
         selected_ids=set(selected_ids),
-        flock_data=session.get("diagnosis_wizard", {}),
+        flock_data=wizard_flock_data,
+        cambodia_provinces=CAMBODIA_PROVINCES,
+        farm_types=FARM_TYPES,
+        farm_scales=FARM_SCALES,
         saved_case=saved_case,
         yes_no_labels=YES_NO_LABELS,
         vaccination_labels=VACCINATION_LABELS,
@@ -1083,10 +1125,16 @@ def diseases_delete(disease_id: int):
         abort(404)
     if request.method == "POST":
         disease_name = disease.name
-        DiseaseService.delete(disease)
-        AuditService.log("DELETE", "Disease", disease_id, f"Deleted disease: {disease_name}")
-        flash("ជំងឺត្រូវបានលុប។", "success")
-        return redirect(url_for("expert_system.diseases_index"))
+        try:
+            DiseaseService.delete(disease)
+            AuditService.log("DELETE", "Disease", disease_id, f"Deleted disease: {disease_name}")
+            flash(f"Disease '{disease_name}' deleted successfully.", "success")
+            return redirect(url_for("expert_system.diseases_index"))
+        except Exception as e:
+            db.session.rollback()
+            current_app.logger.exception("Failed to delete disease %s: %s", disease_id, e)
+            flash(f"Cannot delete disease '{disease_name}': {e}", "danger")
+            return redirect(url_for("expert_system.diseases_index"))
     return render_template(
         "expert_system/diseases/delete_confirm.html",
         disease=disease,

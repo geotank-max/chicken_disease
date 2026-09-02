@@ -1,62 +1,122 @@
 {% extends "layouts/base.html" %}
-{% block title %}Notifications{% endblock %}
-{% block page_title %}Notifications{% endblock %}
-{% block page_subtitle %}Stay updated on system activity.{% endblock %}
+{% block title %}{{ t('notif.title') }}{% endblock %}
+{% block page_title %}{{ t('notif.title') }}{% endblock %}
+{% block page_subtitle %}{{ t('notif.subtitle') }}{% endblock %}
 
 {% block extra_styles %}
 <style>
-    /* Unread items stand out via a clean accent bar, not a full blue wash,
-       so category icons stay readable even when many items are unread. */
+    /* Clean, non-glaring theme-aware notification items */
     .notif-item {
         border-left: 3px solid transparent;
-        transition: background-color .12s ease;
+        transition: background-color .15s ease, border-color .15s ease;
+        background-color: var(--bg-card, #ffffff);
+        color: var(--text-primary);
+        text-decoration: none;
     }
     .notif-unread {
-        border-left-color: var(--primary);
-        background-color: #fff;
+        border-left-color: var(--primary, #10b981) !important;
+        background-color: rgba(16, 185, 129, 0.04);
     }
     .notif-unread:hover {
-        background-color: #ecfdf5;
+        background-color: rgba(16, 185, 129, 0.09) !important;
+        color: var(--text-primary);
     }
     .notif-read {
-        background-color: #fbfbfc;
+        background-color: transparent;
+        opacity: .9;
+    }
+    .notif-read:hover {
+        background-color: rgba(0, 0, 0, 0.03) !important;
+        opacity: 1;
+        color: var(--text-primary);
     }
     .notif-read .bi {
-        opacity: .55;
+        opacity: .6;
     }
     .notif-new-pill {
         font-size: .625rem;
         font-weight: 600;
         letter-spacing: .02em;
-        padding: .15em .5em;
+        padding: .18em .55em;
         text-transform: uppercase;
+    }
+    .notif-title {
+        color: var(--text-primary, #1e293b);
+        transition: color .15s ease;
+    }
+    .notif-msg {
+        color: var(--text-muted, #64748b);
+        transition: color .15s ease;
+    }
+    .mark-single-read-btn {
+        transition: transform .12s ease, background-color .15s ease;
+    }
+    .mark-single-read-btn:hover {
+        transform: scale(1.15);
+    }
+
+    /* Dark mode overrides: soft, comfortable emerald tint, zero glare */
+    [data-theme="dark"] .notif-item {
+        background-color: var(--bg-card, #111c2e) !important;
+        border-color: var(--border-color, rgba(255, 255, 255, 0.08)) !important;
+        color: var(--text-primary, #f1f5f9) !important;
+    }
+    [data-theme="dark"] .notif-unread {
+        border-left-color: #34d399 !important;
+        background-color: rgba(16, 185, 129, 0.08) !important;
+    }
+    [data-theme="dark"] .notif-unread:hover {
+        background-color: rgba(16, 185, 129, 0.16) !important;
+    }
+    [data-theme="dark"] .notif-read {
+        background-color: transparent !important;
+        opacity: .82;
+    }
+    [data-theme="dark"] .notif-read:hover {
+        background-color: rgba(255, 255, 255, 0.05) !important;
+        opacity: 1;
+    }
+    [data-theme="dark"] .notif-title {
+        color: #f1f5f9 !important;
+    }
+    [data-theme="dark"] .notif-title.is-read {
+        color: #94a3b8 !important;
+    }
+    [data-theme="dark"] .notif-msg {
+        color: #cbd5e1 !important;
+    }
+    [data-theme="dark"] .notif-msg.is-read {
+        color: #64748b !important;
     }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2">
-        {{ notifications|selectattr('is_read', 'false')|list|length }} unread
+    <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2" id="notifPageUnreadCount">
+        {{ t('notif.unread_count', count=(notifications|selectattr('is_read', 'false')|list|length)) }}
     </span>
     {% if notifications %}
-    <form method="post" action="{{ url_for('notifications.mark_all_read') }}">
+    <form method="post" id="markAllReadForm" action="{{ url_for('notifications.mark_all_read') }}">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <button type="submit" class="btn btn-sm btn-outline-secondary">
-            <i class="bi bi-check-all me-1"></i> Mark all as read
+            <i class="bi bi-check-all me-1"></i> {{ t('notif.mark_all_read') }}
         </button>
     </form>
     {% endif %}
 </div>
 
 {% if notifications %}
-<div class="card border-0 shadow-sm">
+<div class="card border-0 shadow-sm overflow-hidden">
     <div class="list-group list-group-flush">
         {% for n in notifications %}
-        <a href="{{ url_for('notifications.mark_read', notif_id=n.id) }}"
-           class="list-group-item list-group-item-action py-3 px-4 notif-item {% if not n.is_read %}notif-unread{% else %}notif-read{% endif %}">
+        <div class="list-group-item list-group-item-action py-3 px-4 notif-item {% if not n.is_read %}notif-unread{% else %}notif-read{% endif %}"
+             data-notif-id="{{ n.id }}"
+             data-read-url="{{ url_for('notifications.mark_read', notif_id=n.id) }}">
             <div class="d-flex justify-content-between align-items-start">
-                <div class="d-flex align-items-start">
+                <a href="{{ url_for('notifications.mark_read', notif_id=n.id) }}"
+                   class="d-flex align-items-start text-decoration-none flex-grow-1 notif-link"
+                   data-notif-id="{{ n.id }}">
                     <div class="me-3 mt-1">
                         {% if n.category == 'disease' %}
                         <i class="bi bi-virus text-danger fs-5"></i>
@@ -70,21 +130,30 @@
                     </div>
                     <div>
                         <div class="d-flex align-items-center gap-2">
-                            <span class="{% if not n.is_read %}fw-semibold text-dark{% else %}fw-normal text-muted{% endif %}">{{ n.title }}</span>
+                            <span class="notif-title {% if not n.is_read %}fw-semibold{% else %}fw-normal is-read{% endif %}">{{ n.title }}</span>
                             {% if not n.is_read %}
-                            <span class="badge rounded-pill bg-primary text-white notif-new-pill">New</span>
+                            <span class="badge rounded-pill bg-primary text-white notif-new-pill">{{ t('notif.new_badge') }}</span>
                             {% endif %}
                         </div>
                         {% if n.message %}
-                        <small class="{% if not n.is_read %}text-secondary{% else %}text-muted{% endif %}">{{ n.message }}</small>
+                        <small class="d-block notif-msg mt-0.5 {% if not n.is_read %}{% else %}is-read{% endif %}">{{ n.message }}</small>
                         {% endif %}
                     </div>
-                </div>
-                <div class="text-end ms-3">
+                </a>
+                <div class="d-flex align-items-center gap-2 ms-3 flex-shrink-0">
                     <small class="text-muted text-nowrap">{{ n.created_at.strftime('%d/%m %H:%M') }}</small>
+                    {% if not n.is_read %}
+                    <button type="button"
+                            class="btn btn-sm btn-outline-success border-0 p-1 mark-single-read-btn"
+                            data-notif-id="{{ n.id }}"
+                            title="{{ t('notif.mark_read') }}"
+                            aria-label="{{ t('notif.mark_read') }}">
+                        <i class="bi bi-check2-circle fs-5"></i>
+                    </button>
+                    {% endif %}
                 </div>
             </div>
-        </a>
+        </div>
         {% endfor %}
     </div>
 </div>
@@ -92,9 +161,130 @@
 <div class="card border-0 shadow-sm text-center py-5">
     <div class="card-body">
         <i class="bi bi-bell-slash text-muted display-4 d-block mb-3"></i>
-        <h5 class="fw-bold">No notifications</h5>
-        <p class="text-muted mb-0">You're all caught up!</p>
+        <h5 class="fw-bold">{{ t('notif.no_notifications') }}</h5>
+        <p class="text-muted mb-0">{{ t('notif.all_caught_up') }}</p>
     </div>
 </div>
 {% endif %}
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
+    const unreadCountBadge = document.getElementById('notifPageUnreadCount');
+    const markAllForm = document.getElementById('markAllReadForm');
+
+    function updatePageCount(count) {
+        if (unreadCountBadge) {
+            const currentLang = "{{ current_lang }}";
+            unreadCountBadge.textContent = currentLang === 'km' ? `មិនទាន់អាន ${count}` : `${count} unread`;
+        }
+        if (window.updateNavbarNotifBadge) {
+            window.updateNavbarNotifBadge(count);
+        }
+    }
+
+    // Handle single mark as read check button
+    document.querySelectorAll('.mark-single-read-btn').forEach(btn => {
+        btn.addEventListener('click', async function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const notifId = this.dataset.notifId;
+            const notifRow = this.closest('.notif-item');
+            this.disabled = true;
+
+            try {
+                const res = await fetch(`/notifications/${notifId}/read`, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': csrf,
+                    }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (notifRow) {
+                        notifRow.classList.remove('notif-unread');
+                        notifRow.classList.add('notif-read');
+                        const newPill = notifRow.querySelector('.notif-new-pill');
+                        if (newPill) newPill.remove();
+                        const titleSpan = notifRow.querySelector('.notif-title');
+                        if (titleSpan) {
+                            titleSpan.classList.remove('fw-semibold');
+                            titleSpan.classList.add('fw-normal', 'is-read');
+                        }
+                        const msgSpan = notifRow.querySelector('.notif-msg');
+                        if (msgSpan) msgSpan.classList.add('is-read');
+                    }
+                    this.remove();
+                    updatePageCount(data.count);
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        });
+    });
+
+    // Handle mark all as read form via AJAX
+    if (markAllForm) {
+        markAllForm.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const submitBtn = markAllForm.querySelector('button[type="submit"]');
+            if (submitBtn) submitBtn.disabled = true;
+
+            try {
+                const res = await fetch(markAllForm.action, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': csrf,
+                    }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    document.querySelectorAll('.notif-item.notif-unread').forEach(row => {
+                        row.classList.remove('notif-unread');
+                        row.classList.add('notif-read');
+                        const newPill = row.querySelector('.notif-new-pill');
+                        if (newPill) newPill.remove();
+                        const titleSpan = row.querySelector('.notif-title');
+                        if (titleSpan) {
+                            titleSpan.classList.remove('fw-semibold');
+                            titleSpan.classList.add('fw-normal', 'is-read');
+                        }
+                        const msgSpan = row.querySelector('.notif-msg');
+                        if (msgSpan) msgSpan.classList.add('is-read');
+                    });
+                    document.querySelectorAll('.mark-single-read-btn').forEach(b => b.remove());
+                    updatePageCount(0);
+                }
+            } catch (err) {
+                markAllForm.submit();
+            } finally {
+                if (submitBtn) submitBtn.disabled = false;
+            }
+        });
+    }
+
+    // When clicking an unread notification link directly:
+    document.querySelectorAll('.notif-link').forEach(link => {
+        link.addEventListener('click', function () {
+            const notifRow = this.closest('.notif-item');
+            if (notifRow && notifRow.classList.contains('notif-unread')) {
+                // Optimistically update count in navbar badge immediately
+                const badge = document.querySelector('.navbar-icon .icon-badge');
+                if (badge) {
+                    const currentCount = parseInt(badge.textContent.trim(), 10) || 0;
+                    if (currentCount > 1) {
+                        badge.textContent = currentCount - 1;
+                    } else {
+                        badge.remove();
+                    }
+                }
+            }
+        });
+    });
+});
+</script>
 {% endblock %}

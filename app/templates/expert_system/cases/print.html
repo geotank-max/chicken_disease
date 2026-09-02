@@ -147,14 +147,21 @@
     </div>
     {% endif %}
 
-    {% if case.flock_size or case.bird_age or case.breed or case.location %}
+    {% if case.flock_size or case.bird_age or case.breed or case.location or case.province %}
     <div class="section">
-        <div class="label">Flock Information</div>
+        <div class="label">Flock &amp; Farm Information</div>
         <table class="info">
             {% if case.flock_size %}<tr><td class="lbl">Flock Size:</td><td>{{ case.flock_size }} birds</td></tr>{% endif %}
             {% if case.bird_age %}<tr><td class="lbl">Bird Age:</td><td>{{ case.bird_age }}</td></tr>{% endif %}
             {% if case.breed %}<tr><td class="lbl">Breed:</td><td>{{ case.breed }}</td></tr>{% endif %}
-            {% if case.location %}<tr><td class="lbl">Location:</td><td>{{ case.location }}</td></tr>{% endif %}
+            {% if case.province %}
+            <tr><td class="lbl">Province:</td><td>{{ case.province }}{% if case.district %}, {{ case.district }}{% endif %}{% if case.commune %}, {{ case.commune }}{% endif %}</td></tr>
+            {% elif case.location %}
+            <tr><td class="lbl">Location:</td><td>{{ case.location }}</td></tr>
+            {% endif %}
+            {% if case.farm_type %}<tr><td class="lbl">Farm Type:</td><td>{{ case.farm_type | replace('_', ' ') | title }}</td></tr>{% endif %}
+            {% if case.farm_scale %}<tr><td class="lbl">Farm Scale:</td><td>{{ case.farm_scale }} birds</td></tr>{% endif %}
+            {% if case.latitude and case.longitude %}<tr><td class="lbl">GPS Coordinates:</td><td>{{ case.latitude }}, {{ case.longitude }}</td></tr>{% endif %}
         </table>
         {% if case.notes %}<p><em>Notes: {{ case.notes }}</em></p>{% endif %}
     </div>

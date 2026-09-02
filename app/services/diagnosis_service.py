@@ -114,6 +114,14 @@ class DiagnosisService:
             bird_age=flock_data.get("bird_age") or None,
             breed=flock_data.get("breed") or None,
             location=flock_data.get("location") or None,
+            # Structured geographic and farm context
+            province=flock_data.get("province") or None,
+            district=flock_data.get("district") or None,
+            commune=flock_data.get("commune") or None,
+            latitude=flock_data.get("latitude"),
+            longitude=flock_data.get("longitude"),
+            farm_type=flock_data.get("farm_type") or None,
+            farm_scale=flock_data.get("farm_scale") or None,
             notes=flock_data.get("notes") or None,
             # Extended diagnosis context (all optional)
             sick_bird_count=flock_data.get("sick_bird_count"),
