@@ -78,7 +78,7 @@ def create_app(config_class: type[Config] = Config):
     from app.routes.user_home_routes import user_home_bp
     app.register_blueprint(user_home_bp)
 
-    from app.translations import t, get_current_language, LANGUAGES, get_translated_option
+    from app.translations import t, get_current_language, LANGUAGES, get_translated_option, get_translated_role
 
     # Context processor: inject localization and badges into all templates
     @app.context_processor
@@ -89,6 +89,7 @@ def create_app(config_class: type[Config] = Config):
             "current_lang": get_current_language(),
             "LANGUAGES": LANGUAGES,
             "get_translated_option": get_translated_option,
+            "get_translated_role": get_translated_role,
         }
         if current_user and hasattr(current_user, 'is_authenticated') and current_user.is_authenticated:
             from app.services.notification_service import NotificationService

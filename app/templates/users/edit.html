@@ -1,178 +1,386 @@
 {% extends "layouts/base.html" %}
-{% block title %}Edit User{% endblock %}
-{% block page_title %}Edit User{% endblock %}
-{% block page_subtitle %}Update account details for {{ user.full_name }}{% endblock %}
+
+{% block title %}{{ t('users.edit_title') }}{% endblock %}
+{% block page_title %}{{ t('users.edit_title') }}{% endblock %}
+{% block page_subtitle %}{{ t('users.edit_subtitle', name=user.full_name) }}{% endblock %}
 
 {% block content %}
-<div class="row g-4">
-    <!-- Main Form Column -->
-    <div class="col-lg-8">
-        <form method="post">
-            {{ form.hidden_tag() }}
+<div class="container-fluid px-0">
+    <!-- Breadcrumbs -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0 bg-transparent p-0 small">
+                <li class="breadcrumb-item">
+                    <a href="{{ url_for('dashboard.index') if current_user.has_permission('view_dashboard') else url_for('user_home.index') }}" class="text-decoration-none text-muted">
+                        <i class="bi bi-house-door me-1"></i>{{ t('nav.home') }}
+                    </a>
+                </li>
+                {% if current_user.has_role('Admin') %}
+                <li class="breadcrumb-item">
+                    <a href="{{ url_for('tbl_users.index') }}" class="text-decoration-none text-muted">
+                        {{ t('users.list_title') }}
+                    </a>
+                </li>
+                {% endif %}
+                <li class="breadcrumb-item active fw-medium text-dark" aria-current="page">
+                    {{ t('users.edit_title') }}
+                </li>
+            </ol>
+        </nav>
+        <a href="{{ url_for('tbl_users.index') if current_user.has_role('Admin') else url_for('tbl_users.profile') }}" class="btn btn-sm btn-outline-secondary rounded-pill px-3 shadow-sm d-inline-flex align-items-center">
+            <i class="bi bi-arrow-left me-1.5"></i>{{ t('users.btn_back') }}
+        </a>
+    </div>
 
-            {% if form.errors %}
-            <div class="alert alert-danger alert-dismissible fade show mb-4">
-                <div class="d-flex align-items-center">
-                    <i class="bi bi-exclamation-circle-fill me-2 fs-5"></i>
-                    <div>
-                        <strong>Please fix the following errors:</strong>
-                        <ul class="mb-0 mt-1">
-                        {% for field, errors in form.errors.items() %}
-                            {% for error in errors %}
-                            <li>{{ form[field].label.text }}: {{ error }}</li>
+    <div class="row g-4">
+        <!-- Main Form Column -->
+        <div class="col-lg-8">
+            <form method="post" novalidate autocomplete="off">
+                {{ form.hidden_tag() }}
+
+                {% if form.errors %}
+                <div class="alert alert-danger alert-dismissible fade show mb-4 border-0 shadow-sm rounded-3">
+                    <div class="d-flex align-items-start">
+                        <i class="bi bi-exclamation-triangle-fill text-danger me-2 fs-5 flex-shrink-0 mt-0.5"></i>
+                        <div>
+                            <strong class="d-block mb-1">{{ t('users.fix_errors') }}</strong>
+                            <ul class="mb-0 ps-3 small">
+                            {% for field, errors in form.errors.items() %}
+                                {% for error in errors %}
+                                <li><strong>{{ form[field].label.text if field in form else field }}:</strong> {{ error }}</li>
+                                {% endfor %}
                             {% endfor %}
-                        {% endfor %}
-                        </ul>
-                    </div>
-                </div>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-            {% endif %}
-
-            <!-- Account Information -->
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-header bg-white py-3">
-                    <h5 class="mb-0 fw-bold"><i class="bi bi-person me-2 text-primary"></i>Account Information</h5>
-                </div>
-                <div class="card-body p-4">
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label for="username" class="form-label fw-bold">Username</label>
-                            {{ form.username(class="form-control" + (" is-invalid" if form.username.errors else ""), placeholder="Enter username") }}
-                            {% if form.username.errors %}<div class="invalid-feedback">{{ form.username.errors[0] }}</div>{% endif %}
-                        </div>
-                        <div class="col-md-6">
-                            <label for="email" class="form-label fw-bold">Email</label>
-                            {{ form.email(class="form-control" + (" is-invalid" if form.email.errors else ""), placeholder="user@example.com") }}
-                            {% if form.email.errors %}<div class="invalid-feedback">{{ form.email.errors[0] }}</div>{% endif %}
-                        </div>
-                        <div class="col-12">
-                            <label for="full_name" class="form-label fw-bold">Full Name</label>
-                            {{ form.full_name(class="form-control" + (" is-invalid" if form.full_name.errors else ""), placeholder="Enter full name") }}
-                            {% if form.full_name.errors %}<div class="invalid-feedback">{{ form.full_name.errors[0] }}</div>{% endif %}
+                            </ul>
                         </div>
                     </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
-            </div>
+                {% endif %}
 
-            <!-- Role & Status (Admin only) -->
-            {% if is_admin %}
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-header bg-white py-3">
-                    <h5 class="mb-0 fw-bold"><i class="bi bi-shield-lock me-2 text-primary"></i>Role & Status</h5>
-                </div>
-                <div class="card-body p-4">
-                    <div class="row g-3 align-items-center">
-                        <div class="col-md-6">
-                            <label for="role_id" class="form-label fw-bold">Role</label>
-                            {{ form.role_id(class="form-select" + (" is-invalid" if form.role_id.errors else "")) }}
-                            {% if form.role_id.errors %}<div class="invalid-feedback">{{ form.role_id.errors[0] }}</div>{% endif %}
+                <!-- Account Information -->
+                <div class="card border-0 shadow-sm rounded-3 mb-4 overflow-hidden">
+                    <div class="card-header bg-white py-3 border-bottom">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center me-2.5" style="width: 34px; height: 34px;">
+                                <i class="bi bi-person-badge fs-6"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0 fw-bold text-dark">{{ t('users.account_info') }}</h6>
+                                <small class="text-muted">{{ t('users.account_info_desc') }}</small>
+                            </div>
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold d-block">Account Status</label>
-                            <div class="form-check form-switch mt-2">
-                                {{ form.is_active(class="form-check-input", role="switch", id="is_active") }}
-                                <label class="form-check-label" for="is_active">
-                                    <span class="fw-medium">Active</span>
-                                    <small class="text-muted d-block">Inactive users cannot log in</small>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="username" class="form-label fw-semibold small text-dark mb-1">
+                                    {{ t('users.username') }} <span class="text-danger">*</span>
                                 </label>
+                                <div class="input-group has-validation">
+                                    <span class="input-group-text bg-light text-muted border-end-0">
+                                        <i class="bi bi-person"></i>
+                                    </span>
+                                    <input type="text"
+                                           class="form-control border-start-0 ps-0 {% if form.username.errors %}is-invalid{% endif %}"
+                                           id="username"
+                                           name="username"
+                                           value="{{ form.username.data or '' }}"
+                                           placeholder="{{ t('users.username_placeholder') }}"
+                                           required>
+                                    {% if form.username.errors %}
+                                    <div class="invalid-feedback">{{ form.username.errors[0] }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="email" class="form-label fw-semibold small text-dark mb-1">
+                                    {{ t('users.email') }} <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group has-validation">
+                                    <span class="input-group-text bg-light text-muted border-end-0">
+                                        <i class="bi bi-envelope"></i>
+                                    </span>
+                                    <input type="email"
+                                           class="form-control border-start-0 ps-0 {% if form.email.errors %}is-invalid{% endif %}"
+                                           id="email"
+                                           name="email"
+                                           value="{{ form.email.data or '' }}"
+                                           placeholder="{{ t('users.email_placeholder') }}"
+                                           required>
+                                    {% if form.email.errors %}
+                                    <div class="invalid-feedback">{{ form.email.errors[0] }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <label for="full_name" class="form-label fw-semibold small text-dark mb-1">
+                                    {{ t('users.full_name') }} <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group has-validation">
+                                    <span class="input-group-text bg-light text-muted border-end-0">
+                                        <i class="bi bi-card-text"></i>
+                                    </span>
+                                    <input type="text"
+                                           class="form-control border-start-0 ps-0 {% if form.full_name.errors %}is-invalid{% endif %}"
+                                           id="full_name"
+                                           name="full_name"
+                                           value="{{ form.full_name.data or '' }}"
+                                           placeholder="{{ t('users.full_name_placeholder') }}"
+                                           required>
+                                    {% if form.full_name.errors %}
+                                    <div class="invalid-feedback">{{ form.full_name.errors[0] }}</div>
+                                    {% endif %}
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            {% endif %}
 
-            <!-- Change Password -->
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-header bg-white py-3">
-                    <h5 class="mb-0 fw-bold"><i class="bi bi-key me-2 text-primary"></i>Change Password</h5>
-                </div>
-                <div class="card-body p-4">
-                    <p class="text-muted small mb-3">Leave blank to keep the current password.</p>
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label for="password" class="form-label fw-bold">New Password</label>
-                            {{ form.password(class="form-control" + (" is-invalid" if form.password.errors else ""), placeholder="Enter new password") }}
-                            {% if form.password.errors %}<div class="invalid-feedback">{{ form.password.errors[0] }}</div>{% endif %}
-                        </div>
-                        <div class="col-md-6">
-                            <label for="confirm_password" class="form-label fw-bold">Confirm Password</label>
-                            {{ form.confirm_password(class="form-control" + (" is-invalid" if form.confirm_password.errors else ""), placeholder="Confirm new password") }}
-                            {% if form.confirm_password.errors %}<div class="invalid-feedback">{{ form.confirm_password.errors[0] }}</div>{% endif %}
+                <!-- Role & Status (Admin only) -->
+                {% if is_admin %}
+                <div class="card border-0 shadow-sm rounded-3 mb-4 overflow-hidden">
+                    <div class="card-header bg-white py-3 border-bottom">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-2.5" style="width: 34px; height: 34px;">
+                                <i class="bi bi-shield-lock fs-6"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0 fw-bold text-dark">{{ t('users.role_status') }}</h6>
+                                <small class="text-muted">{{ t('users.role_status_desc') }}</small>
+                            </div>
                         </div>
                     </div>
-                    <div class="mt-3">
-                        <small class="text-muted">
-                            <i class="bi bi-info-circle me-1"></i>
-                            Password must be 8+ characters with uppercase, lowercase, digit, and special character.
-                        </small>
+                    <div class="card-body p-4">
+                        <div class="row g-3 align-items-center">
+                            <div class="col-md-6">
+                                <label for="role_id" class="form-label fw-semibold small text-dark mb-1">
+                                    {{ t('users.role') }}
+                                </label>
+                                <div class="input-group has-validation">
+                                    <span class="input-group-text bg-light text-muted border-end-0">
+                                        <i class="bi bi-person-gear"></i>
+                                    </span>
+                                    <select class="form-select border-start-0 ps-0 {% if form.role_id.errors %}is-invalid{% endif %}"
+                                            id="role_id"
+                                            name="role_id">
+                                        {% for val, label in form.role_id.choices %}
+                                        <option value="{{ val }}" {% if form.role_id.data == val %}selected{% endif %}>
+                                            {{ get_translated_role(label) }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                    {% if form.role_id.errors %}
+                                    <div class="invalid-feedback">{{ form.role_id.errors[0] }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small text-dark mb-1">
+                                    {{ t('users.status') }}
+                                </label>
+                                <div class="p-2.5 px-3 rounded-3 border bg-light-subtle d-flex align-items-center justify-content-between">
+                                    <div>
+                                        <label class="form-check-label fw-semibold small text-dark mb-0 cursor-pointer" for="is_active">
+                                            {{ t('users.active') }}
+                                        </label>
+                                        <small class="text-muted d-block" style="font-size: 0.74rem;">
+                                            {{ t('users.active_desc') }}
+                                        </small>
+                                    </div>
+                                    <div class="form-check form-switch m-0 fs-5">
+                                        <input class="form-check-input cursor-pointer"
+                                               type="checkbox"
+                                               role="switch"
+                                               id="is_active"
+                                               name="is_active"
+                                               value="y"
+                                               {% if form.is_active.data %}checked{% endif %}>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
+                {% endif %}
 
-            <!-- Actions -->
-            <div class="d-flex gap-2 justify-content-between">
-                <a href="{{ url_for('tbl_users.index') if current_user.has_role('Admin') else url_for('tbl_users.profile') }}" class="btn btn-outline-secondary px-4">
-                    <i class="bi bi-arrow-left me-1"></i> Cancel
-                </a>
-                <button type="submit" class="btn btn-primary px-4 fw-bold">
-                    <i class="bi bi-check-lg me-1"></i> Save Changes
-                </button>
-            </div>
-        </form>
-    </div>
-
-    <!-- Sidebar Info -->
-    <div class="col-lg-4">
-        <div class="position-sticky" style="top: 2rem;">
-            <!-- User Card -->
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-body text-center py-4">
-                    <div class="mx-auto mb-3 d-flex align-items-center justify-content-center rounded-circle bg-primary bg-opacity-10" style="width: 72px; height: 72px;">
-                        <span class="fw-bold text-primary fs-3">{{ user.username[0]|upper }}</span>
+                <!-- Change Password -->
+                <div class="card border-0 shadow-sm rounded-3 mb-4 overflow-hidden">
+                    <div class="card-header bg-white py-3 border-bottom">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-warning bg-opacity-15 text-warning-emphasis rounded-circle d-flex align-items-center justify-content-center me-2.5" style="width: 34px; height: 34px;">
+                                <i class="bi bi-key fs-6"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0 fw-bold text-dark">{{ t('users.password_section') }}</h6>
+                                <small class="text-muted">{{ t('users.password_edit_hint') }}</small>
+                            </div>
+                        </div>
                     </div>
-                    <h5 class="fw-bold mb-1">{{ user.full_name }}</h5>
-                    <p class="text-muted small mb-2">@{{ user.username }}</p>
-                    {% if user.roles %}
-                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-3 py-2">
-                        <i class="bi bi-shield-check me-1"></i>{{ user.roles[0].name }}
-                    </span>
-                    {% endif %}
+                    <div class="card-body p-4">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="password" class="form-label fw-semibold small text-dark mb-1">
+                                    {{ t('users.password') }}
+                                </label>
+                                <div class="input-group has-validation">
+                                    <span class="input-group-text bg-light text-muted border-end-0">
+                                        <i class="bi bi-lock"></i>
+                                    </span>
+                                    <input type="password"
+                                           class="form-control border-start-0 border-end-0 ps-0 {% if form.password.errors %}is-invalid{% endif %}"
+                                           id="password"
+                                           name="password"
+                                           placeholder="{{ t('users.password_placeholder') }}"
+                                           autocomplete="new-password">
+                                    <button class="btn btn-outline-secondary border-start-0 toggle-password-btn text-muted"
+                                            type="button"
+                                            data-target="password"
+                                            aria-label="Toggle password visibility">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                    {% if form.password.errors %}
+                                    <div class="invalid-feedback">{{ form.password.errors[0] }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="confirm_password" class="form-label fw-semibold small text-dark mb-1">
+                                    {{ t('users.confirm_password') }}
+                                </label>
+                                <div class="input-group has-validation">
+                                    <span class="input-group-text bg-light text-muted border-end-0">
+                                        <i class="bi bi-shield-lock"></i>
+                                    </span>
+                                    <input type="password"
+                                           class="form-control border-start-0 border-end-0 ps-0 {% if form.confirm_password.errors %}is-invalid{% endif %}"
+                                           id="confirm_password"
+                                           name="confirm_password"
+                                           placeholder="{{ t('users.confirm_password_placeholder') }}"
+                                           autocomplete="new-password">
+                                    <button class="btn btn-outline-secondary border-start-0 toggle-password-btn text-muted"
+                                            type="button"
+                                            data-target="confirm_password"
+                                            aria-label="Toggle confirm password visibility">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                    {% if form.confirm_password.errors %}
+                                    <div class="invalid-feedback">{{ form.confirm_password.errors[0] }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-3 p-2.5 px-3 rounded-3 bg-light border d-flex align-items-start">
+                            <i class="bi bi-info-circle-fill text-primary me-2 flex-shrink-0 mt-0.5"></i>
+                            <small class="text-muted" style="line-height: 1.45;">
+                                {{ t('users.password_hint') }}
+                            </small>
+                        </div>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Account Details -->
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white py-3">
-                    <h6 class="mb-0 fw-bold text-muted">Account Details</h6>
+                <!-- Actions -->
+                <div class="d-flex align-items-center justify-content-between p-3 px-4 bg-white rounded-3 shadow-sm border">
+                    <a href="{{ url_for('tbl_users.index') if current_user.has_role('Admin') else url_for('tbl_users.profile') }}" class="btn btn-outline-secondary rounded-pill px-4">
+                        <i class="bi bi-x-lg me-1.5"></i>{{ t('users.btn_cancel') }}
+                    </a>
+                    <button type="submit" class="btn btn-success rounded-pill px-4 py-2 fw-semibold shadow-sm d-inline-flex align-items-center">
+                        <i class="bi bi-check-lg me-1.5 fs-6"></i>{{ t('users.btn_save') }}
+                    </button>
                 </div>
-                <div class="card-body">
-                    <ul class="list-unstyled mb-0 small">
-                        <li class="d-flex justify-content-between py-2 border-bottom">
-                            <span class="text-muted">User ID</span>
-                            <span class="fw-medium">#{{ user.id }}</span>
-                        </li>
-                        <li class="d-flex justify-content-between py-2 border-bottom">
-                            <span class="text-muted">Email</span>
-                            <span class="fw-medium">{{ user.email }}</span>
-                        </li>
-                        <li class="d-flex justify-content-between py-2 border-bottom">
-                            <span class="text-muted">Status</span>
-                            {% if user.is_active %}
-                            <span class="badge bg-success bg-opacity-10 text-success">Active</span>
-                            {% else %}
-                            <span class="badge bg-danger bg-opacity-10 text-danger">Inactive</span>
-                            {% endif %}
-                        </li>
-                        <li class="d-flex justify-content-between py-2">
-                            <span class="text-muted">Created</span>
-                            <span class="fw-medium">{{ user.created_at.strftime('%d/%m/%Y') if user.created_at else 'N/A' }}</span>
-                        </li>
-                    </ul>
+            </form>
+        </div>
+
+        <!-- Sidebar Info -->
+        <div class="col-lg-4">
+            <div class="position-sticky" style="top: 5.5rem;">
+                <!-- User Card -->
+                <div class="card border-0 shadow-sm rounded-3 mb-4 overflow-hidden">
+                    <div class="card-header bg-white py-3 border-bottom d-flex align-items-center justify-content-between">
+                        <h6 class="mb-0 fw-bold text-dark d-flex align-items-center">
+                            <i class="bi bi-person-badge-fill me-2 text-success"></i>{{ t('users.preview_title') }}
+                        </h6>
+                        {% if user.is_active %}
+                        <span class="badge rounded-pill bg-success-subtle text-success border border-success-subtle px-2.5 py-1">
+                            <i class="bi bi-check-circle-fill me-1"></i>{{ t('status.active') }}
+                        </span>
+                        {% else %}
+                        <span class="badge rounded-pill bg-danger-subtle text-danger border border-danger-subtle px-2.5 py-1">
+                            <i class="bi bi-x-circle-fill me-1"></i>{{ t('status.inactive') }}
+                        </span>
+                        {% endif %}
+                    </div>
+                    <div class="card-body text-center py-4">
+                        <div class="mx-auto mb-3 d-flex align-items-center justify-content-center rounded-circle bg-success bg-opacity-10 text-success fw-bold shadow-sm" style="width: 72px; height: 72px; font-size: 1.85rem;">
+                            {{ user.username[0]|upper if user.username else 'U' }}
+                        </div>
+                        <h5 class="fw-bold mb-1 text-dark">{{ user.full_name }}</h5>
+                        <p class="text-muted small mb-2">@{{ user.username }}</p>
+                        {% if user.roles %}
+                        <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-3 py-1.5 rounded-pill">
+                            <i class="bi bi-shield-fill-check me-1"></i>{{ get_translated_role(user.roles[0].name) }}
+                        </span>
+                        {% endif %}
+
+                        <hr class="my-3 text-muted opacity-25">
+
+                        <div class="small text-start px-2">
+                            <div class="d-flex justify-content-between py-1.5 border-bottom border-light-subtle text-muted">
+                                <span>{{ t('print.case_id') }} #</span>
+                                <span class="fw-medium text-dark">#{{ user.id }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between py-1.5 border-bottom border-light-subtle text-muted">
+                                <span>{{ t('users.email') }}:</span>
+                                <span class="fw-medium text-dark text-truncate ms-2" style="max-width: 170px;">{{ user.email }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between py-1.5 text-muted">
+                                <span>{{ t('print.date_generated') }}:</span>
+                                <span class="fw-medium text-dark">{{ user.created_at.strftime('%d/%m/%Y') if user.created_at else 'N/A' }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Guidelines Card -->
+                <div class="card border-0 shadow-sm rounded-3 overflow-hidden">
+                    <div class="card-header bg-white py-3 border-bottom">
+                        <h6 class="mb-0 fw-bold text-dark d-flex align-items-center">
+                            <i class="bi bi-lightbulb-fill text-warning me-2"></i>{{ t('users.quick_tips') }}
+                        </h6>
+                    </div>
+                    <div class="card-body p-3 small">
+                        <div class="d-flex align-items-start mb-2.5">
+                            <i class="bi bi-shield-check text-primary me-2 flex-shrink-0 mt-0.5"></i>
+                            <span class="text-muted">{{ t('users.tip_role') }}</span>
+                        </div>
+                        <div class="d-flex align-items-start">
+                            <i class="bi bi-lock-fill text-success me-2 flex-shrink-0 mt-0.5"></i>
+                            <span class="text-muted">{{ t('users.tip_security') }}</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Password visibility toggles
+    document.querySelectorAll('.toggle-password-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var targetId = this.getAttribute('data-target');
+            var input = document.getElementById(targetId);
+            if (!input) return;
+            var icon = this.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.className = 'bi bi-eye-slash';
+            } else {
+                input.type = 'password';
+                icon.className = 'bi bi-eye';
+            }
+        });
+    });
+});
+</script>
 {% endblock %}

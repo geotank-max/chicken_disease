@@ -87,8 +87,9 @@
             min-height: 480px;
         }
         .login-brand {
-            flex: 0 0 280px;
-            background: linear-gradient(160deg, #064e3b 0%, #059669 60%, #10b981 100%);
+            flex: 0 0 290px;
+            background: linear-gradient(170deg, rgba(4, 47, 36, 0.82) 0%, rgba(5, 150, 105, 0.72) 50%, rgba(6, 78, 59, 0.88) 100%),
+                        url("{{ url_for('static', filename='images/chicken_farming.jpg') }}") center center / cover no-repeat;
             color: #fff;
             display: flex;
             flex-direction: column;
@@ -100,19 +101,17 @@
         .login-brand::before {
             content: '';
             position: absolute;
-            top: -40%;
-            right: -40%;
-            width: 120%;
-            height: 120%;
-            background: radial-gradient(circle, rgba(255,255,255,0.12) 0%, transparent 60%);
-            border-radius: 50%;
+            inset: 0;
+            background: radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.12) 0%, transparent 65%);
+            pointer-events: none;
         }
-        .brand-content { position: relative; z-index: 1; }
+        .brand-content { position: relative; z-index: 1; text-shadow: 0 1px 4px rgba(0, 0, 0, 0.35); }
         .login-logo {
             width: 54px;
             height: 54px;
             object-fit: contain;
             margin-bottom: 1.5rem;
+            filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.25));
         }
         .login-brand h2 {
             font-size: 1.5rem;
@@ -122,22 +121,32 @@
         }
         .login-brand p {
             font-size: 0.85rem;
-            opacity: 0.9;
+            opacity: 0.95;
             line-height: 1.6;
             margin: 0;
         }
-        .brand-footer { position: relative; z-index: 1; }
-        .brand-footer small { font-size: 0.72rem; opacity: 0.75; }
+        .brand-footer { position: relative; z-index: 1; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35); }
+        .brand-footer small { font-size: 0.72rem; opacity: 0.85; }
 
         .login-form-panel {
             flex: 1;
             display: flex;
             align-items: center;
             padding: 2.5rem;
+            position: relative;
         }
-        .login-form-inner { width: 100%; max-width: 320px; margin: 0 auto; }
+        .login-top-actions {
+            position: absolute;
+            top: 1.25rem;
+            right: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            z-index: 10;
+        }
+        .login-form-inner { width: 100%; max-width: 340px; margin: 0 auto; }
         .login-title { font-size: 1.35rem; font-weight: 700; color: #0f172a; margin-bottom: 0.25rem; }
-        .login-subtitle { font-size: 0.85rem; color: #64748b; margin-bottom: 1.75rem; }
+        .login-subtitle { font-size: 0.85rem; color: #64748b; margin-bottom: 1.5rem; }
 
         .form-group { margin-bottom: 1.25rem; }
         .form-group .form-label {
@@ -226,7 +235,8 @@
             .login-card { flex-direction: column; max-width: 400px; }
             .login-brand { flex: none; padding: 1.75rem; text-align: center; }
             .brand-footer { display: none; }
-            .login-form-panel { padding: 1.75rem; }
+            .login-form-panel { padding: 3.25rem 1.75rem 1.75rem; }
+            .login-top-actions { top: 0.85rem; right: 1rem; }
         }
     </style>
 </head>
@@ -246,36 +256,35 @@
 
         <!-- Right: login form -->
         <div class="login-form-panel">
+            <div class="login-top-actions">
+                <!-- Theme Toggle Button -->
+                <button class="btn btn-sm btn-outline-secondary theme-toggle-btn rounded-pill px-2 py-0.5 d-flex align-items-center justify-content-center"
+                        id="themeToggleBtnLogin"
+                        type="button"
+                        onclick="toggleTheme()"
+                        data-title-light="{{ t('theme.switch_light') }}"
+                        data-title-dark="{{ t('theme.switch_dark') }}"
+                        title="{{ t('theme.switch_dark') }}"
+                        aria-label="{{ t('theme.switch_dark') }}"
+                        style="cursor: pointer;">
+                    <i class="bi bi-moon-stars-fill text-secondary" style="pointer-events: none;"></i>
+                </button>
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle d-flex align-items-center gap-1 rounded-pill px-2 py-0.5" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <span style="font-size:0.85rem;">{{ LANGUAGES[current_lang].flag }}</span>
+                        <span class="fw-bold small" style="font-size:0.75rem;">{{ LANGUAGES[current_lang].short }}</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 py-1" style="min-width:160px;">
+                        <li><a class="dropdown-item d-flex align-items-center justify-content-between py-1.5 {% if current_lang == 'km' %}active fw-bold{% endif %}" href="{{ url_for('set_language', lang='km') }}"><span>🇰🇭 ភាសាខ្មែរ</span>{% if current_lang == 'km' %}<i class="bi bi-check-lg ms-1"></i>{% endif %}</a></li>
+                        <li><a class="dropdown-item d-flex align-items-center justify-content-between py-1.5 {% if current_lang == 'en' %}active fw-bold{% endif %}" href="{{ url_for('set_language', lang='en') }}"><span>🇬🇧 English</span>{% if current_lang == 'en' %}<i class="bi bi-check-lg ms-1"></i>{% endif %}</a></li>
+                    </ul>
+                </div>
+            </div>
+
             <div class="login-form-inner">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <div>
-                        <h3 class="login-title mb-0">{{ t('auth.login_title') }}</h3>
-                        <p class="login-subtitle mb-0">{{ t('auth.login_subtitle') }}</p>
-                    </div>
-                    <div class="d-flex align-items-center gap-1.5">
-                        <!-- Theme Toggle Button -->
-                        <button class="btn btn-sm btn-outline-secondary theme-toggle-btn rounded-pill px-2 py-0.5 d-flex align-items-center justify-content-center"
-                                id="themeToggleBtnLogin"
-                                type="button"
-                                onclick="toggleTheme()"
-                                data-title-light="{{ t('theme.switch_light') }}"
-                                data-title-dark="{{ t('theme.switch_dark') }}"
-                                title="{{ t('theme.switch_dark') }}"
-                                aria-label="{{ t('theme.switch_dark') }}"
-                                style="cursor: pointer;">
-                            <i class="bi bi-moon-stars-fill text-secondary" style="pointer-events: none;"></i>
-                        </button>
-                        <div class="dropdown">
-                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle d-flex align-items-center gap-1 rounded-pill px-2 py-0.5" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <span style="font-size:0.85rem;">{{ LANGUAGES[current_lang].flag }}</span>
-                                <span class="fw-bold small" style="font-size:0.75rem;">{{ LANGUAGES[current_lang].short }}</span>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 py-1" style="min-width:160px;">
-                                <li><a class="dropdown-item d-flex align-items-center justify-content-between py-1.5 {% if current_lang == 'km' %}active fw-bold{% endif %}" href="{{ url_for('set_language', lang='km') }}"><span>🇰🇭 ភាសាខ្មែរ</span>{% if current_lang == 'km' %}<i class="bi bi-check-lg ms-1"></i>{% endif %}</a></li>
-                                <li><a class="dropdown-item d-flex align-items-center justify-content-between py-1.5 {% if current_lang == 'en' %}active fw-bold{% endif %}" href="{{ url_for('set_language', lang='en') }}"><span>🇬🇧 English</span>{% if current_lang == 'en' %}<i class="bi bi-check-lg ms-1"></i>{% endif %}</a></li>
-                            </ul>
-                        </div>
-                    </div>
+                <div class="mb-3">
+                    <h3 class="login-title mb-1">{{ t('auth.login_title') }}</h3>
+                    <p class="login-subtitle mb-0">{{ t('auth.login_subtitle') }}</p>
                 </div>
 
                 {% with messages = get_flashed_messages(with_categories=true) %}

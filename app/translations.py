@@ -2094,6 +2094,188 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "en": "Are you sure you want to log out of your session?",
     },
 
+    # ── User Management ──────────────────────────────────────────────
+    "users.list_title": {
+        "km": "ការគ្រប់គ្រងអ្នកប្រើប្រាស់",
+        "en": "User Management",
+    },
+    "users.list_subtitle": {
+        "km": "បញ្ជីអ្នកប្រើប្រាស់ទាំងអស់ដែលបានចុះឈ្មោះក្នុងប្រព័ន្ធ",
+        "en": "List of all registered users in the system",
+    },
+    "users.create_title": {
+        "km": "បង្កើតអ្នកប្រើប្រាស់",
+        "en": "Create User",
+    },
+    "users.create_subtitle": {
+        "km": "បង្កើតគណនីអ្នកប្រើប្រាស់ថ្មី និងកំណត់តួនាទីក្នុងប្រព័ន្ធ",
+        "en": "Create a new user account and assign system role",
+    },
+    "users.edit_title": {
+        "km": "កែប្រែអ្នកប្រើប្រាស់",
+        "en": "Edit User",
+    },
+    "users.edit_subtitle": {
+        "km": "កែប្រែព័ត៌មានគណនី និងសិទ្ធិប្រើប្រាស់",
+        "en": "Update user account details and permissions",
+    },
+    "users.account_info": {
+        "km": "ព័ត៌មានគណនី",
+        "en": "Account Information",
+    },
+    "users.account_info_desc": {
+        "km": "បញ្ចូលព័ត៌មានសម្គាល់ផ្ទាល់ខ្លួន និងឈ្មោះគណនី",
+        "en": "Enter personal identification and login username",
+    },
+    "users.username": {
+        "km": "ឈ្មោះអ្នកប្រើប្រាស់ (Username)",
+        "en": "Username",
+    },
+    "users.username_placeholder": {
+        "km": "បញ្ចូលឈ្មោះអ្នកប្រើប្រាស់",
+        "en": "Enter username",
+    },
+    "users.username_hint": {
+        "km": "ឈ្មោះគណនីសម្រាប់ចូលប្រព័ន្ធ (យ៉ាងតិច ៣ តួអក្សរ)",
+        "en": "Unique account identifier for login (min 3 characters)",
+    },
+    "users.email": {
+        "km": "អ៊ីមែល (Email)",
+        "en": "Email Address",
+    },
+    "users.email_placeholder": {
+        "km": "user@example.com",
+        "en": "user@example.com",
+    },
+    "users.email_hint": {
+        "km": "ប្រើសម្រាប់ទទួលការជូនដំណឹង និងស្តារពាក្យសម្ងាត់",
+        "en": "Used for notifications and password recovery",
+    },
+    "users.full_name": {
+        "km": "ឈ្មោះពេញ (Full Name)",
+        "en": "Full Name",
+    },
+    "users.full_name_placeholder": {
+        "km": "បញ្ចូលឈ្មោះពេញរបស់អ្នកប្រើប្រាស់",
+        "en": "Enter user full name",
+    },
+    "users.role_status": {
+        "km": "តួនាទី និងស្ថានភាពគណនី",
+        "en": "Role & Account Status",
+    },
+    "users.role_status_desc": {
+        "km": "កំណត់កម្រិតសិទ្ធិ និងភាពសកម្មនៃគណនី",
+        "en": "Configure permission level and account active status",
+    },
+    "users.role": {
+        "km": "តួនាទី (Role)",
+        "en": "Role",
+    },
+    "users.select_role": {
+        "km": "ជ្រើសរើសតួនាទី...",
+        "en": "Select a role...",
+    },
+    "users.role_admin": {
+        "km": "អ្នកគ្រប់គ្រង (Admin)",
+        "en": "Admin",
+    },
+    "users.role_doctor": {
+        "km": "វេជ្ជបណ្ឌិត / ពេទ្យសត្វ (Doctor)",
+        "en": "Doctor / Veterinarian",
+    },
+    "users.role_user": {
+        "km": "អ្នកប្រើប្រាស់ទូទៅ (User)",
+        "en": "Standard User",
+    },
+    "users.status": {
+        "km": "ស្ថានភាពគណនី",
+        "en": "Account Status",
+    },
+    "users.active": {
+        "km": "គណនីសកម្ម (Active)",
+        "en": "Active Account",
+    },
+    "users.active_desc": {
+        "km": "អនុញ្ញាតឱ្យអ្នកប្រើប្រាស់អាចចូលប្រើប្រាស់ប្រព័ន្ធបាន",
+        "en": "Allow user to log in and access system features",
+    },
+    "users.inactive_desc": {
+        "km": "គណនីអសកម្មមិនអាចចូលប្រើប្រាស់ប្រព័ន្ធបានទេ",
+        "en": "Inactive accounts cannot log in to the system",
+    },
+    "users.password_section": {
+        "km": "កំណត់ពាក្យសម្ងាត់",
+        "en": "Password & Security",
+    },
+    "users.password_section_desc": {
+        "km": "កំណត់ពាក្យសម្ងាត់សម្រាប់ការពារសុវត្ថិភាពគណនី",
+        "en": "Set security credentials for this user",
+    },
+    "users.password": {
+        "km": "ពាក្យសម្ងាត់ (Password)",
+        "en": "Password",
+    },
+    "users.password_placeholder": {
+        "km": "បញ្ចូលពាក្យសម្ងាត់រឹងមាំ",
+        "en": "Enter strong password",
+    },
+    "users.confirm_password": {
+        "km": "បញ្ជាក់ពាក្យសម្ងាត់ (Confirm Password)",
+        "en": "Confirm Password",
+    },
+    "users.confirm_password_placeholder": {
+        "km": "បញ្ចូលពាក្យសម្ងាត់ម្តងទៀត",
+        "en": "Confirm password again",
+    },
+    "users.password_hint": {
+        "km": "ពាក្យសម្ងាត់ត្រូវមានយ៉ាងតិច ៨ តួអក្សរ ដោយរួមបញ្ចូលអក្សរធំ (A-Z) អក្សរតូច (a-z) លេខ (0-9) និងនិមិត្តសញ្ញាពិសេស (@$!%*#?&)",
+        "en": "Must be at least 8 characters with uppercase, lowercase, number, and special character",
+    },
+    "users.password_edit_hint": {
+        "km": "ទុកនៅទំនេរ ប្រសិនបើមិនចង់ប្តូរពាក្យសម្ងាត់បច្ចុប្បន្ន។",
+        "en": "Leave blank to keep the current password.",
+    },
+    "users.btn_create": {
+        "km": "រក្សាទុកអ្នកប្រើប្រាស់",
+        "en": "Create User",
+    },
+    "users.btn_save": {
+        "km": "រក្សាទុកការកែប្រែ",
+        "en": "Save Changes",
+    },
+    "users.btn_cancel": {
+        "km": "បោះបង់",
+        "en": "Cancel",
+    },
+    "users.btn_back": {
+        "km": "ត្រឡប់ទៅបញ្ជី",
+        "en": "Back to Users",
+    },
+    "users.preview_title": {
+        "km": "ទិដ្ឋភាពគណនីសង្ខេប",
+        "en": "User Preview",
+    },
+    "users.preview_desc": {
+        "km": "ព័ត៌មានដែលនឹងបង្ហាញក្នុងប្រព័ន្ធ",
+        "en": "Live preview of account badge",
+    },
+    "users.quick_tips": {
+        "km": "ការណែនាំ និងសុវត្ថិភាព",
+        "en": "Guidelines & Security",
+    },
+    "users.tip_role": {
+        "km": "តួនាទី Admin មានសិទ្ធិពេញលេញលើប្រព័ន្ធ។ Doctor មានសិទ្ធិវិភាគ និងពិនិត្យករណីជំងឺ។",
+        "en": "Admin role grants full system control. Doctor role allows diagnosis review and validation.",
+    },
+    "users.tip_security": {
+        "km": "សូមប្រាកដថាបានផ្តល់ពាក្យសម្ងាត់ដែលបានបង្កើតដល់អ្នកប្រើប្រាស់ដោយសុវត្ថិភាព។",
+        "en": "Ensure you securely deliver the initial login credentials to the user.",
+    },
+    "users.fix_errors": {
+        "km": "សូមពិនិត្យ និងកែតម្រូវទិន្នន័យដែលខុសឆ្គងខាងក្រោម៖",
+        "en": "Please check and fix the following form errors:",
+    },
+
     # ── Printable Diagnostic Report ──────────────────────────────────
     "print.report_header": {
         "km": "របាយការណ៍រោគវិនិច្ឆ័យជំងឺមាន់",
@@ -2199,3 +2381,17 @@ def get_translated_option(label_type: str, value: str | None) -> str:
     
     key = key_map.get(label_type, f"opt.{val_str}")
     return t(key, default=str(value))
+
+
+def get_translated_role(role_name: str | None) -> str:
+    """Translate system role names."""
+    if not role_name:
+        return ""
+    val_str = str(role_name).lower()
+    if val_str == "admin":
+        return t("users.role_admin", default="Admin")
+    elif val_str in ("doctor", "veterinarian"):
+        return t("users.role_doctor", default="Doctor")
+    elif val_str in ("user", "farmer"):
+        return t("users.role_user", default="User")
+    return str(role_name)

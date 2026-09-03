@@ -63,7 +63,7 @@ class UserCreateForm(FlaskForm):
         render_kw={"placeholder": "Strong password"},
     )
     confirm_password = PasswordField(
-        "Confirm_password",
+        "Confirm Password",
         validators=[
             DataRequired(),
             EqualTo("password", message="Password must match."),

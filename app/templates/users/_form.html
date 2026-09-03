@@ -1,82 +1,99 @@
 {{ form.hidden_tag() }}
 
 <div class="mb-3">
-  {{ form.username.label(class="form-label") }} {{
-  form.username(class="form-control") }} {% if form.username.errors %}
-  <div class="text-danger small">
-    {% for error in form.username.errors %}
-    <div>{{ error }}</div>
-    {% endfor %}
+  <label for="username" class="form-label fw-semibold small">{{ t('users.username') }} <span class="text-danger">*</span></label>
+  <div class="input-group">
+    <span class="input-group-text bg-light text-muted"><i class="bi bi-person"></i></span>
+    <input type="text" class="form-control {% if form.username.errors %}is-invalid{% endif %}" id="username" name="username" value="{{ form.username.data or '' }}" placeholder="{{ t('users.username_placeholder') }}" required>
+    {% if form.username.errors %}
+    <div class="invalid-feedback">{{ form.username.errors[0] }}</div>
+    {% endif %}
   </div>
-  {% endif %}
 </div>
 
 <div class="mb-3">
-  {{ form.email.label(class="form-label") }} {{ form.email(class="form-control")
-  }} {% if form.email.errors %}
-  <div class="text-danger small">
-    {% for error in form.email.errors %}
-    <div>{{ error }}</div>
-    {% endfor %}
+  <label for="email" class="form-label fw-semibold small">{{ t('users.email') }} <span class="text-danger">*</span></label>
+  <div class="input-group">
+    <span class="input-group-text bg-light text-muted"><i class="bi bi-envelope"></i></span>
+    <input type="email" class="form-control {% if form.email.errors %}is-invalid{% endif %}" id="email" name="email" value="{{ form.email.data or '' }}" placeholder="{{ t('users.email_placeholder') }}" required>
+    {% if form.email.errors %}
+    <div class="invalid-feedback">{{ form.email.errors[0] }}</div>
+    {% endif %}
   </div>
-  {% endif %}
 </div>
 
 <div class="mb-3">
-  {{ form.full_name.label(class="form-label") }} {{
-  form.full_name(class="form-control") }} {% if form.full_name.errors %}
-  <div class="text-danger small">
-    {% for error in form.full_name.errors %}
-    <div>{{ error }}</div>
-    {% endfor %}
+  <label for="full_name" class="form-label fw-semibold small">{{ t('users.full_name') }} <span class="text-danger">*</span></label>
+  <div class="input-group">
+    <span class="input-group-text bg-light text-muted"><i class="bi bi-card-text"></i></span>
+    <input type="text" class="form-control {% if form.full_name.errors %}is-invalid{% endif %}" id="full_name" name="full_name" value="{{ form.full_name.data or '' }}" placeholder="{{ t('users.full_name_placeholder') }}" required>
+    {% if form.full_name.errors %}
+    <div class="invalid-feedback">{{ form.full_name.errors[0] }}</div>
+    {% endif %}
   </div>
-  {% endif %}
-</div>
-
-<div class="form-check mb-3">
-  {{ form.is_active(class="form-check-input") }} {{
-  form.is_active.label(class="form-check-label")}}
-</div>
-
-{# Single role per user #}
-<div class="mb-3">
-  {{ form.role_id.label(class="form-label")}} {{
-  form.role_id(class="form-select") }} {% if form.role_id.errors %}
-  <div class="text-danger small">
-    {% for error in form.role_id.errors %}
-    <div>{{ error }}</div>
-    {% endfor %}
-  </div>
-  {% endif %}
-</div>
-
-{# Password fields (create: required, edit: optional) #}
-<div class="mb-3">
-  {{ form.password.label(class="form-label")}} {{
-  form.password(class="form-control") }} {% if form.password.errors %}
-  <div class="text-danger small">
-    {% for error in form.password.errors %}
-    <div>{{ error }}</div>
-    {% endfor %}
-  </div>
-  {% endif %}
 </div>
 
 <div class="mb-3">
-  {{ form.confirm_password.label(class="form-label")}} {{
-  form.confirm_password(class="form-control") }} {% if
-  form.confirm_password.errors %}
-  <div class="text-danger small">
-    {% for error in form.confirm_password.errors %}
-    <div>{{ error }}</div>
-    {% endfor %}
+  <div class="p-2.5 px-3 rounded-3 border bg-light-subtle d-flex align-items-center justify-content-between">
+    <div>
+      <label class="form-check-label fw-semibold small text-dark mb-0 cursor-pointer" for="is_active">
+        {{ t('users.active') }}
+      </label>
+      <small class="text-muted d-block" style="font-size: 0.74rem;">
+        {{ t('users.active_desc') }}
+      </small>
+    </div>
+    <div class="form-check form-switch m-0 fs-5">
+      <input class="form-check-input cursor-pointer" type="checkbox" role="switch" id="is_active" name="is_active" value="y" {% if form.is_active.data or form.is_active.data is none %}checked{% endif %}>
+    </div>
   </div>
-  {% endif %}
 </div>
 
-<div class="mt-4">
-  {{ form.submit(class="btn btn-primary") }}
-  <a href="{{ url_for('tbl_users.index') }}" class="btn btn-outline-secondary">
-    បោះបង់
+<div class="mb-3">
+  <label for="role_id" class="form-label fw-semibold small">{{ t('users.role') }} <span class="text-danger">*</span></label>
+  <div class="input-group">
+    <span class="input-group-text bg-light text-muted"><i class="bi bi-person-gear"></i></span>
+    <select class="form-select {% if form.role_id.errors %}is-invalid{% endif %}" id="role_id" name="role_id" required>
+      <option value="" disabled {% if not form.role_id.data %}selected{% endif %}>{{ t('users.select_role') }}</option>
+      {% for val, label in form.role_id.choices %}
+      <option value="{{ val }}" {% if form.role_id.data == val %}selected{% endif %}>
+        {{ get_translated_role(label) }}
+      </option>
+      {% endfor %}
+    </select>
+    {% if form.role_id.errors %}
+    <div class="invalid-feedback">{{ form.role_id.errors[0] }}</div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="mb-3">
+  <label for="password" class="form-label fw-semibold small">{{ t('users.password') }} <span class="text-danger">*</span></label>
+  <div class="input-group">
+    <span class="input-group-text bg-light text-muted"><i class="bi bi-lock"></i></span>
+    <input type="password" class="form-control {% if form.password.errors %}is-invalid{% endif %}" id="password" name="password" placeholder="{{ t('users.password_placeholder') }}" required autocomplete="new-password">
+    {% if form.password.errors %}
+    <div class="invalid-feedback">{{ form.password.errors[0] }}</div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="mb-3">
+  <label for="confirm_password" class="form-label fw-semibold small">{{ t('users.confirm_password') }} <span class="text-danger">*</span></label>
+  <div class="input-group">
+    <span class="input-group-text bg-light text-muted"><i class="bi bi-shield-lock"></i></span>
+    <input type="password" class="form-control {% if form.confirm_password.errors %}is-invalid{% endif %}" id="confirm_password" name="confirm_password" placeholder="{{ t('users.confirm_password_placeholder') }}" required autocomplete="new-password">
+    {% if form.confirm_password.errors %}
+    <div class="invalid-feedback">{{ form.confirm_password.errors[0] }}</div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="d-flex align-items-center justify-content-between pt-3 border-top mt-4">
+  <a href="{{ url_for('tbl_users.index') }}" class="btn btn-outline-secondary rounded-pill px-4">
+    <i class="bi bi-x-lg me-1"></i>{{ t('users.btn_cancel') }}
   </a>
+  <button type="submit" class="btn btn-success rounded-pill px-4 py-2 fw-semibold shadow-sm">
+    <i class="bi bi-check-lg me-1"></i>{{ t('users.btn_create') }}
+  </button>
 </div>
