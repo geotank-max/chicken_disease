@@ -39,6 +39,8 @@ def index():
     recent_cases = DashboardService.get_recent_cases(**filters)
     status_breakdown = DashboardService.get_status_breakdown(**filters)
     high_risk_cases = DashboardService.get_high_risk_cases(**filters)
+    seasonal_mortality = DashboardService.get_seasonal_mortality(**filters)
+    provincial_cases = DashboardService.get_cases_by_province(**filters)
 
     diseases = DiseaseService.get_all()
 
@@ -50,6 +52,8 @@ def index():
         recent_cases=recent_cases,
         status_breakdown=status_breakdown,
         high_risk_cases=high_risk_cases,
+        seasonal_mortality=seasonal_mortality,
+        provincial_cases=provincial_cases,
         diseases=diseases,
         filters={
             "date_from": date_from or "",

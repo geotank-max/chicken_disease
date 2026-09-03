@@ -4,7 +4,7 @@ from .role import RoleTable
 from .permission import PermissionTable
 from .expert_system import (
     Category, Symptom, Disease, Rule, Case, CasePhoto, CaseMessage,
-    TreatmentStep, CaseTreatmentProgress,
+    TreatmentStep, CaseTreatmentProgress, CaseDiagnosis,
 )
 from .doctor_application import DoctorApplication
 from .notification import Notification
@@ -22,6 +22,7 @@ __all__ = [
     "CaseMessage",
     "TreatmentStep",
     "CaseTreatmentProgress",
+    "CaseDiagnosis",
     "DoctorApplication",
     "Notification",
 ]

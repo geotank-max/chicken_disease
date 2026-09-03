@@ -1,22 +1,22 @@
 {% extends "layouts/base.html" %}
-{% block title %}ជំងឺ{% endblock %}
-{% block page_title %}គ្រប់គ្រងជំងឺ{% endblock %}
-{% block page_subtitle %}Manage disease knowledge base{% endblock %}
+{% block title %}{{ t('nav.diseases') }}{% endblock %}
+{% block page_title %}{{ t('diseases.manage_title') }}{% endblock %}
+{% block page_subtitle %}{{ t('diseases.manage_desc') }}{% endblock %}
 
 {% block content %}
 <div class="card border-0 shadow-sm">
     <div class="card-body p-4">
         <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
             <div>
-                <h5 class="fw-bold mb-0">ជំងឺ</h5>
-                <small class="text-muted">គ្រប់គ្រងប្រវត្តិរូបជំងឺ និងការព្យាបាល</small>
+                <h5 class="fw-bold mb-0">{{ t('nav.diseases') }}</h5>
+                <small class="text-muted">{{ t('diseases.manage_desc') }}</small>
             </div>
             <div class="d-flex gap-2">
                 <a href="{{ url_for('expert_system.library_index') }}" class="btn btn-outline-secondary">
-                    <i class="bi bi-book me-1"></i>បណ្ណាល័យ
+                    <i class="bi bi-book me-1"></i>{{ t('nav.disease_library') }}
                 </a>
                 <a href="{{ url_for('expert_system.diseases_create') }}" class="btn btn-primary">
-                    <i class="bi bi-plus-lg me-1"></i>បន្ថែមជំងឺ
+                    <i class="bi bi-plus-lg me-1"></i>{{ t('btn.add_disease') }}
                 </a>
             </div>
         </div>
@@ -25,11 +25,11 @@
         <div class="row g-2 align-items-end mb-3">
             <div class="col-12 col-md-5">
                 <input type="text" id="d-search" class="form-control form-control-sm"
-                       placeholder="ស្វែងរកតាមឈ្មោះ ឬ ការពិពណ៌នា...">
+                       placeholder="{{ t('lib.search_ph') }}">
             </div>
             <div class="col-6 col-md-4">
                 <select id="d-category" class="form-select form-select-sm">
-                    <option value="">ប្រភេទទាំងអស់ / All categories</option>
+                    <option value="">{{ t('lib.all_categories') }}</option>
                     {% for c in categories %}
                     <option value="{{ c.name }}">{{ c.name }}</option>
                     {% endfor %}
@@ -37,10 +37,10 @@
             </div>
             <div class="col-6 col-md-3">
                 <select id="d-severity" class="form-select form-select-sm">
-                    <option value="">កម្រិតទាំងអស់ / All severity</option>
-                    <option value="high">ធ្ងន់ធ្ងរ / High</option>
-                    <option value="medium">មធ្យម / Medium</option>
-                    <option value="low">ស្រាល / Low</option>
+                    <option value="">{{ t('status.all') }}</option>
+                    <option value="high">{{ t('severity.high') }}</option>
+                    <option value="medium">{{ t('severity.medium') }}</option>
+                    <option value="low">{{ t('severity.low') }}</option>
                 </select>
             </div>
         </div>
@@ -49,12 +49,12 @@
             <table class="table table-hover align-middle mb-0">
                 <thead>
                     <tr class="bg-light">
-                        <th class="small fw-bold text-muted">ឈ្មោះ</th>
-                        <th class="small fw-bold text-muted">ប្រភេទ</th>
-                        <th class="small fw-bold text-muted">កម្រិត</th>
-                        <th class="small fw-bold text-muted">ការឆ្លង</th>
-                        <th class="small fw-bold text-muted">ការពិពណ៌នា</th>
-                        <th class="text-end small fw-bold text-muted">សកម្មភាព</th>
+                        <th class="small fw-bold text-muted">{{ t('categories.col_name') }}</th>
+                        <th class="small fw-bold text-muted">{{ t('lib.category_label') }}</th>
+                        <th class="small fw-bold text-muted">{{ t('lib.severity') }}</th>
+                        <th class="small fw-bold text-muted">{{ t('lib.contagious') }}</th>
+                        <th class="small fw-bold text-muted">{{ t('lib.description') }}</th>
+                        <th class="text-end small fw-bold text-muted">{{ t('cases.col_actions') }}</th>
                     </tr>
                 </thead>
                 <tbody id="d-tbody">
@@ -71,27 +71,27 @@
                             {% if disease.category %}
                             <span class="badge rounded-pill bg-secondary bg-opacity-10 text-secondary border">{{ disease.category.name }}</span>
                             {% else %}
-                            <span class="text-muted small">គ្មានប្រភេទ</span>
+                            <span class="text-muted small">{{ t('opt.none') }}</span>
                             {% endif %}
                         </td>
                         <td>
                             {% if disease.severity_level %}
-                            <span class="badge rounded-pill bg-{{ disease.severity_color }} bg-opacity-10 text-{{ disease.severity_color }} border">{{ disease.severity_label_km }}</span>
+                            <span class="badge rounded-pill bg-{{ disease.severity_color }} bg-opacity-10 text-{{ disease.severity_color }} border">{{ get_translated_option('severity', disease.severity_level) }}</span>
                             {% else %}
                             <span class="text-muted small">—</span>
                             {% endif %}
                         </td>
                         <td>
                             <span class="badge rounded-pill bg-{{ 'danger' if disease.is_contagious else 'success' }} bg-opacity-10 text-{{ 'danger' if disease.is_contagious else 'success' }} border">
-                                {{ disease.contagious_label_km }}
+                                {{ get_translated_option('contagious', disease.is_contagious) }}
                             </span>
                         </td>
                         <td class="text-muted small">{{ disease.description|truncate(70) }}</td>
                         <td class="text-end">
                             <div class="btn-group btn-group-sm">
-                                <a href="{{ url_for('expert_system.library_detail', disease_id=disease.id) }}" class="btn btn-outline-secondary" title="មើល"><i class="bi bi-eye"></i></a>
-                                <a href="{{ url_for('expert_system.diseases_edit', disease_id=disease.id) }}" class="btn btn-outline-primary" title="កែប្រែ"><i class="bi bi-pencil"></i></a>
-                                <a href="{{ url_for('expert_system.diseases_delete', disease_id=disease.id) }}" class="btn btn-outline-danger" title="លុប"><i class="bi bi-trash"></i></a>
+                                <a href="{{ url_for('expert_system.library_detail', disease_id=disease.id) }}" class="btn btn-outline-secondary" title="{{ t('btn.view') }}"><i class="bi bi-eye"></i></a>
+                                <a href="{{ url_for('expert_system.diseases_edit', disease_id=disease.id) }}" class="btn btn-outline-primary" title="{{ t('btn.edit') }}"><i class="bi bi-pencil"></i></a>
+                                <a href="{{ url_for('expert_system.diseases_delete', disease_id=disease.id) }}" class="btn btn-outline-danger" title="{{ t('btn.delete') }}"><i class="bi bi-trash"></i></a>
                             </div>
                         </td>
                     </tr>
@@ -99,13 +99,13 @@
                     <tr>
                         <td colspan="6" class="text-center text-muted py-5">
                             <i class="bi bi-journal-x display-6 d-block mb-2 opacity-50"></i>
-                            <p class="mb-0">មិនទាន់មានទិន្នន័យជំងឺ</p>
+                            <p class="mb-0">{{ t('diseases.no_diseases') }}</p>
                         </td>
                     </tr>
                     {% endfor %}
                     <tr id="d-empty" class="d-none">
                         <td colspan="6" class="text-center text-muted py-4">
-                            <i class="bi bi-search me-1"></i>រកមិនឃើញជំងឺដែលត្រូវនឹងលក្ខខណ្ឌ
+                            <i class="bi bi-search me-1"></i>{{ t('diseases.no_match') }}
                         </td>
                     </tr>
                 </tbody>

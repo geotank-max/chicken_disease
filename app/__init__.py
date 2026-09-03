@@ -78,20 +78,48 @@ def create_app(config_class: type[Config] = Config):
     from app.routes.user_home_routes import user_home_bp
     app.register_blueprint(user_home_bp)
 
-    # Context processor: inject notification badges into all templates
+    from app.translations import t, get_current_language, LANGUAGES, get_translated_option, get_translated_role
+
+    # Context processor: inject localization and badges into all templates
     @app.context_processor
-    def inject_badges():
+    def inject_i18n_and_badges():
         from flask_login import current_user
-        badges = {}
+        context = {
+            "t": t,
+            "current_lang": get_current_language(),
+            "LANGUAGES": LANGUAGES,
+            "get_translated_option": get_translated_option,
+            "get_translated_role": get_translated_role,
+        }
         if current_user and hasattr(current_user, 'is_authenticated') and current_user.is_authenticated:
             from app.services.notification_service import NotificationService
-            badges["notif_count"] = NotificationService.get_unread_count(current_user.id)
+            context["notif_count"] = NotificationService.get_unread_count(current_user.id)
             if current_user.has_permission("USER_CREATE"):
-                badges["pending_applications"] = NotificationService.get_pending_applications_count()
-                badges["pending_cases"] = NotificationService.get_pending_cases_count()
+                context["pending_applications"] = NotificationService.get_pending_applications_count()
+                context["pending_cases"] = NotificationService.get_pending_cases_count()
             elif current_user.has_permission("review_cases"):
-                badges["pending_cases"] = NotificationService.get_pending_cases_count()
-        return badges
+                context["pending_cases"] = NotificationService.get_pending_cases_count()
+        return context
+
+    app.jinja_env.filters["t"] = t
+
+    @app.route("/set-language/<lang>")
+    def set_language(lang):
+        """Toggle or select active interface language ('km' or 'en')."""
+        if lang in LANGUAGES:
+            session["lang"] = lang
+        
+        referrer = request.referrer
+        # Ensure referrer is a relative or local URL to prevent open redirect
+        if referrer and (referrer.startswith(request.host_url) or referrer.startswith("/")):
+            return redirect(referrer)
+            
+        from flask_login import current_user
+        if current_user and current_user.is_authenticated:
+            if current_user.has_permission("view_dashboard"):
+                return redirect(url_for("dashboard.index"))
+            return redirect(url_for("user_home.index"))
+        return redirect(url_for("expert_system.diagnose"))
 
     # ── Error handlers ────────────────────────────────────────────
     @app.errorhandler(403)
@@ -136,7 +164,13 @@ def create_app(config_class: type[Config] = Config):
 
     @app.route("/")
     def home():
-        return redirect(url_for("auth.login"))
+        from flask_login import current_user
+        if current_user.is_authenticated:
+            if current_user.has_permission("view_dashboard"):
+                return redirect(url_for("dashboard.index"))
+            return redirect(url_for("user_home.index"))
+        return redirect(url_for("expert_system.diagnose", step="1"))
+
 
     with app.app_context():
         from app.models.role import RoleTable

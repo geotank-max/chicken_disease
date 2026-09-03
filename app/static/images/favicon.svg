@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="emeraldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10B981" />
+      <stop offset="100%" stop-color="#047857" />
+    </linearGradient>
+    <linearGradient id="mintGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#A7F3D0" />
+      <stop offset="100%" stop-color="#34D399" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-opacity="0.15" />
+    </filter>
+  </defs>
+
+  <!-- Background Shield/Rounded Tile -->
+  <rect x="2" y="2" width="60" height="60" rx="16" fill="url(#emeraldGrad)" filter="url(#shadow)" />
+  
+  <!-- Subtle Inner Border -->
+  <rect x="3.5" y="3.5" width="57" height="57" rx="14.5" fill="none" stroke="#6EE7B7" stroke-width="1.5" stroke-opacity="0.4" />
+
+  <!-- Veterinary Cross / Health Badge in Mint -->
+  <g transform="translate(38, 10)">
+    <circle cx="9" cy="9" r="10" fill="#FFFFFF" opacity="0.95" />
+    <path d="M7.5 4h3v3.5H14v3h-3.5V14h-3v-3.5H4v-3h3.5z" fill="#059669" />
+  </g>
+
+  <!-- Rooster / Chicken Silhouette Profile -->
+  <g fill="#FFFFFF" transform="translate(6, 12)">
+    <!-- Comb -->
+    <path d="M14 6 C13 2, 17 0, 19 3 C21 0, 25 1, 25 5 C27 4, 30 6, 29 9 C28 10, 24 10, 22 9 Z" fill="url(#mintGrad)" />
+    <!-- Beak -->
+    <path d="M28 14 L37 18 L28 21 Z" fill="#FBBF24" />
+    <!-- Wattle -->
+    <path d="M26 21 C28 24, 25 28, 22 27 C21 26, 22 22, 25 21 Z" fill="#F87171" />
+    <!-- Head & Body Curve -->
+    <path d="M20 7 C26 7, 28 12, 28 16 C28 21, 23 23, 25 29 C27 34, 33 36, 35 41 C30 43, 23 42, 17 38 C12 34, 8 28, 9 20 C9 13, 14 7, 20 7 Z" />
+    <!-- Eye -->
+    <circle cx="23" cy="13" r="1.75" fill="#047857" />
+    <!-- Chest / Wing Details -->
+    <path d="M16 23 C20 25, 23 30, 22 36 C17 34, 13 29, 16 23 Z" fill="url(#mintGrad)" opacity="0.8" />
+  </g>
+</svg>

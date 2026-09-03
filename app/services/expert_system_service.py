@@ -4,7 +4,7 @@ from typing import List, Optional
 from extensions import db
 from app.models.expert_system import (
     Category, Symptom, Disease, Rule, Case, CaseMessage,
-    TreatmentStep, CaseTreatmentProgress,
+    TreatmentStep, CaseTreatmentProgress, CaseDiagnosis,
     CASE_STATUS_CONFIRMED, CASE_STATUS_REJECTED, CASE_STATUS_PENDING,
     FOLLOWUP_STATUSES,
 )
@@ -126,6 +126,30 @@ class DiseaseService:
 
     @staticmethod
     def delete(disease: Disease) -> None:
+        disease_id = disease.id
+
+        # 1. Unlink any cases where this disease was recorded as primary or override diagnosis
+        Case.query.filter_by(disease_id=disease_id).update({"disease_id": None}, synchronize_session=False)
+        Case.query.filter_by(override_disease_id=disease_id).update({"override_disease_id": None}, synchronize_session=False)
+
+        # 2. Delete all inference outcome records (tbl_case_diagnoses) referencing this disease
+        CaseDiagnosis.query.filter_by(disease_id=disease_id).delete(synchronize_session=False)
+
+        # 3. Clean up CaseTreatmentProgress for any treatment steps belonging to this disease
+        step_ids = [step.id for step in disease.treatment_steps]
+        if step_ids:
+            CaseTreatmentProgress.query.filter(
+                CaseTreatmentProgress.step_id.in_(step_ids)
+            ).delete(synchronize_session=False)
+
+        # 4. If any other CaseDiagnosis references rules belonging to this disease, unlink rule_id
+        rule_ids = [rule.id for rule in disease.rules]
+        if rule_ids:
+            CaseDiagnosis.query.filter(
+                CaseDiagnosis.rule_id.in_(rule_ids)
+            ).update({"rule_id": None}, synchronize_session=False)
+
+        # 5. Delete the disease itself (SQLAlchemy cascades will delete rules, rules_symptoms, and treatment_steps)
         db.session.delete(disease)
         db.session.commit()
 

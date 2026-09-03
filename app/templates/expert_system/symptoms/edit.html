@@ -1,15 +1,15 @@
 {% extends "layouts/base.html" %}
 
-{% block title %}កែប្រែរោគសញ្ញា{% endblock %}
-{% block page_title %}កែប្រែរោគសញ្ញា{% endblock %}
-{% block page_subtitle %}ធ្វើបច្ចុប្បន្នភាពព័ត៌មានលម្អិតនៃរោគសញ្ញាដែលមានស្រាប់។{% endblock %}
+{% block title %}{{ t('symptoms.edit_title') }}{% endblock %}
+{% block page_title %}{{ t('symptoms.edit_title') }}{% endblock %}
+{% block page_subtitle %}{{ t('symptoms.manage_desc') }}{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-8 col-lg-6">
         <div class="mb-3">
             <a href="{{ url_for('expert_system.symptoms_index') }}" class="text-decoration-none text-muted">
-                <i class="bi bi-arrow-left me-1"></i> ត្រឡប់ទៅបណ្ណាល័យ
+                <i class="bi bi-arrow-left me-1"></i> {{ t('symptoms.back_to_library') }}
             </a>
         </div>
 
@@ -22,11 +22,11 @@
                         <div class="bg-warning bg-opacity-10 text-warning rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px;">
                             <i class="bi bi-pencil fs-3"></i>
                         </div>
-                        <h4 class="fw-bold">ធ្វើបច្ចុប្បន្នភាពព័ត៌មានលម្អិត</h4>
+                        <h4 class="fw-bold">{{ t('symptoms.update_title') }}</h4>
                     </div>
 
                     <div class="form-floating mb-3">
-                        {{ form.name(class="form-control", placeholder="ឧ. ក្អក") }}
+                        {{ form.name(class="form-control", placeholder=t('symptoms.name_ph')) }}
                         {{ form.name.label }}
                         {% if form.name.errors %}
                             <div class="text-danger small mt-1">{{ form.name.errors[0] }}</div>
@@ -39,7 +39,7 @@
                     </div>
 
                     <div class="form-floating mb-4">
-                        {{ form.description(class="form-control", placeholder="ការពិពណ៌នា", style="height: 100px") }}
+                        {{ form.description(class="form-control", placeholder=t('lib.description'), style="height: 100px") }}
                         {{ form.description.label }}
                         {% if form.description.errors %}
                             <div class="text-danger small mt-1">{{ form.description.errors[0] }}</div>
@@ -48,9 +48,9 @@
 
                     <div class="d-grid gap-2">
                         <button type="submit" class="btn btn-primary py-2 fw-bold">
-                            <i class="bi bi-check-lg me-2"></i>ធ្វើបច្ចុប្បន្នភាពរោគសញ្ញា
+                            <i class="bi bi-check-lg me-2"></i>{{ t('symptoms.update_btn') }}
                         </button>
-                        <a href="{{ url_for('expert_system.symptoms_index') }}" class="btn btn-light py-2">បោះបង់</a>
+                        <a href="{{ url_for('expert_system.symptoms_index') }}" class="btn btn-light py-2">{{ t('btn.cancel') }}</a>
                     </div>
                 </form>
             </div>

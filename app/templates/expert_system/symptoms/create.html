@@ -1,8 +1,8 @@
 {% extends "layouts/base.html" %}
 
-{% block title %}បន្ថែមរោគសញ្ញា{% endblock %}
-{% block page_title %}បន្ថែមរោគសញ្ញាថ្មី{% endblock %}
-{% block page_subtitle %}កំណត់រោគសញ្ញាថ្មីសម្រាប់ប្រព័ន្ធជំនាញ។{% endblock %}
+{% block title %}{{ t('symptoms.create_title') }}{% endblock %}
+{% block page_title %}{{ t('symptoms.create_title') }}{% endblock %}
+{% block page_subtitle %}{{ t('symptoms.manage_desc') }}{% endblock %}
 
 {% block content %}
 <div class="row g-4">
@@ -10,28 +10,28 @@
     <div class="col-lg-7">
         <div class="card border-0 shadow-sm h-100">
             <div class="card-header bg-white py-3">
-                <h5 class="mb-0 fw-bold text-muted">ព័ត៌មានលម្អិតរោគសញ្ញា</h5>
+                <h5 class="mb-0 fw-bold text-muted">{{ t('symptoms.detail_title') }}</h5>
             </div>
             <div class="card-body p-4">
                 <form method="POST" id="symptom-form">
                     {{ form.hidden_tag() }}
 
                     <div class="mb-3">
-                        <label for="name" class="form-label fw-bold">ឈ្មោះរោគសញ្ញា</label>
-                        {{ form.name(class="form-control form-control-lg", placeholder="ឧ. ក្អក", **{"data-preview-target": "#preview-name"}) }}
+                        <label for="name" class="form-label fw-bold">{{ t('symptoms.name_label') }}</label>
+                        {{ form.name(class="form-control form-control-lg", placeholder=t('symptoms.name_ph'), **{"data-preview-target": "#preview-name"}) }}
                         {% if form.name.errors %}
                             <div class="text-danger small mt-1">{{ form.name.errors[0] }}</div>
                         {% endif %}
                     </div>
 
                     <div class="mb-4">
-                        <label class="form-label fw-bold">ប្រភេទ</label>
+                        <label class="form-label fw-bold">{{ t('lib.category_label') }}</label>
                         {{ form.category_id(class="form-select") }}
                     </div>
 
                     <div class="mb-4">
-                        <label for="description" class="form-label fw-bold">ការពិពណ៌នា</label>
-                        {{ form.description(class="form-control", placeholder="ការពន្យល់សង្ខេបអំពីរោគសញ្ញា", style="height: 120px", **{"data-preview-target": "#preview-description"}) }}
+                        <label for="description" class="form-label fw-bold">{{ t('lib.description') }}</label>
+                        {{ form.description(class="form-control", placeholder=t('symptoms.desc_ph'), style="height: 120px", **{"data-preview-target": "#preview-description"}) }}
                         {% if form.description.errors %}
                             <div class="text-danger small mt-1">{{ form.description.errors[0] }}</div>
                         {% endif %}
@@ -39,9 +39,9 @@
 
                     <div class="d-flex gap-2">
                         <button type="submit" class="btn btn-primary py-2 px-4 fw-bold">
-                            <i class="bi bi-save me-2"></i>រក្សាទុករោគសញ្ញា
+                            <i class="bi bi-save me-2"></i>{{ t('symptoms.save_btn') }}
                         </button>
-                        <a href="{{ url_for('expert_system.symptoms_index') }}" class="btn btn-light py-2 px-4">បោះបង់</a>
+                        <a href="{{ url_for('expert_system.symptoms_index') }}" class="btn btn-light py-2 px-4">{{ t('btn.cancel') }}</a>
                     </div>
                 </form>
             </div>
@@ -54,7 +54,7 @@
             <div class="card border-0 shadow-sm bg-light">
                 <div class="card-header bg-transparent py-3">
                     <h6 class="mb-0 fw-bold text-muted text-uppercase small">
-                        <i class="bi bi-eye me-2"></i>មើលជាមុន
+                        <i class="bi bi-eye me-2"></i>{{ t('symptoms.preview') }}
                     </h6>
                 </div>
                 <div class="card-body">
@@ -62,8 +62,8 @@
                         <div class="list-group-item py-3 px-4 border-primary border-2 shadow-sm">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div class="flex-grow-1">
-                                    <h6 id="preview-name" class="fw-bold mb-1 text-dark">ឈ្មោះរោគសញ្ញា</h6>
-                                    <p id="preview-description" class="text-muted mb-0">ការពិពណ៌នារោគសញ្ញានឹងបង្ហាញនៅទីនេះ។</p>
+                                    <h6 id="preview-name" class="fw-bold mb-1 text-dark">{{ t('symptoms.name_label') }}</h6>
+                                    <p id="preview-description" class="text-muted mb-0">{{ t('symptoms.preview_default_desc') }}</p>
                                 </div>
                                 <div class="ms-4">
                                     <div class="btn-group">
@@ -83,6 +83,8 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const form = document.getElementById('symptom-form');
+        const defaultName = "{{ t('symptoms.name_label') }}";
+        const defaultDesc = "{{ t('symptoms.preview_default_desc') }}";
         form.addEventListener('input', function(e) {
             const targetId = e.target.dataset.previewTarget;
             if (targetId) {
@@ -90,8 +92,8 @@
                 if (previewElement) {
                     previewElement.textContent = e.target.value || e.target.placeholder;
                     if (!e.target.value) {
-                         if(targetId === '#preview-name') previewElement.textContent = 'ឈ្មោះរោគសញ្ញា';
-                         if(targetId === '#preview-description') previewElement.textContent = 'ការពិពណ៌នារោគសញ្ញានឹងបង្ហាញនៅទីនេះ។';
+                         if(targetId === '#preview-name') previewElement.textContent = defaultName;
+                         if(targetId === '#preview-description') previewElement.textContent = defaultDesc;
                     }
                 }
             }

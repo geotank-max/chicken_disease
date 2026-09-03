@@ -1,4 +1,7 @@
 import os 
+from dotenv import load_dotenv
+
+load_dotenv()
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
@@ -46,9 +49,11 @@ class Config:
     DB_PORT = os.environ.get("DB_PORT", "5432")
     DB_NAME = os.environ.get("DB_NAME", "chicken_diagnoses")
     
-    # Build database URL from components
+    # Set DATABASE_URL to override (e.g., managed DB in production).
+    # Otherwise build the URL from the individual DB_* components above.
     SQLALCHEMY_DATABASE_URI = (
-        f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+        os.environ.get("DATABASE_URL")
+        or f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
     )
     
     SQLALCHEMY_TRACK_MODIFICATIONS = False

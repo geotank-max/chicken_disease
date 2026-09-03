@@ -124,6 +124,11 @@ class Disease(db.Model):
         cascade="all, delete-orphan",
         order_by="TreatmentStep.position",
     )
+    possible_diagnoses = db.relationship(
+        "CaseDiagnosis",
+        back_populates="disease",
+        cascade="all, delete-orphan",
+    )
 
     @property
     def has_structured_steps(self) -> bool:
@@ -205,6 +210,14 @@ class Case(db.Model):
     bird_age = db.Column(db.String(80))
     breed = db.Column(db.String(80))
     location = db.Column(db.String(120))
+    # ── Structured Geographic & Farm Location ─────────────────────────────
+    province = db.Column(db.String(80))
+    district = db.Column(db.String(80))
+    commune = db.Column(db.String(80))
+    latitude = db.Column(db.Float)
+    longitude = db.Column(db.Float)
+    farm_type = db.Column(db.String(50))
+    farm_scale = db.Column(db.String(50))
     notes = db.Column(db.Text)
     status = db.Column(db.String(20), default=CASE_STATUS_PENDING, nullable=False)
     reviewed_by_id = db.Column(db.Integer, db.ForeignKey("tbl_users.id"))
@@ -244,6 +257,7 @@ class Case(db.Model):
     photos = db.relationship("CasePhoto", back_populates="case", cascade="all, delete-orphan", order_by="CasePhoto.uploaded_at")
     messages = db.relationship("CaseMessage", back_populates="case", cascade="all, delete-orphan", order_by="CaseMessage.created_at")
     treatment_progress_rows = db.relationship("CaseTreatmentProgress", back_populates="case", cascade="all, delete-orphan")
+    possible_diagnoses = db.relationship("CaseDiagnosis", back_populates="case", cascade="all, delete-orphan", order_by="CaseDiagnosis.rank")
 
     @property
     def final_disease(self):
@@ -511,3 +525,43 @@ class CaseTreatmentProgress(db.Model):
 
     def __repr__(self) -> str:
         return f"<CaseTreatmentProgress case={self.case_id} step={self.step_id} done={self.done}>"
+
+
+class CaseDiagnosis(db.Model):
+    """Stores all possible diagnosis outcomes evaluated for a case during inference."""
+
+    __tablename__ = "tbl_case_diagnoses"
+
+    id = db.Column(db.Integer, db.Sequence("seq_case_diagnoses_id"), primary_key=True)
+    case_id = db.Column(db.Integer, db.ForeignKey("tbl_cases.id", ondelete="CASCADE"), nullable=False)
+    disease_id = db.Column(db.Integer, db.ForeignKey("tbl_diseases.id", ondelete="CASCADE"), nullable=False)
+    rule_id = db.Column(db.Integer, db.ForeignKey("tbl_rules.id", ondelete="SET NULL"), nullable=True)
+    confidence = db.Column(db.Float, nullable=False)
+    matched_symptom_count = db.Column(db.Integer, default=0, nullable=False)
+    required_symptom_count = db.Column(db.Integer, default=0, nullable=False)
+    rank = db.Column(db.Integer, default=1, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    case = db.relationship("Case", back_populates="possible_diagnoses")
+    disease = db.relationship("Disease", back_populates="possible_diagnoses")
+    rule = db.relationship("Rule")
+
+    @property
+    def is_primary(self) -> bool:
+        return self.rank == 1
+
+    @property
+    def confidence_level(self) -> str:
+        if self.confidence >= 70:
+            return "high"
+        if self.confidence >= 40:
+            return "medium"
+        return "low"
+
+    @property
+    def confidence_color(self) -> str:
+        colors = {"high": "success", "medium": "warning", "low": "danger"}
+        return colors.get(self.confidence_level, "secondary")
+
+    def __repr__(self) -> str:
+        return f"<CaseDiagnosis case={self.case_id} disease={self.disease_id} rank={self.rank} conf={self.confidence}>"

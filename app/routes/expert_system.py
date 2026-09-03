@@ -40,6 +40,10 @@ from app.models.expert_system import (
     YES_NO_OPTIONS, VACCINATION_OPTIONS, COOP_CONDITION_OPTIONS, INTAKE_LEVEL_OPTIONS,
     YES_NO_LABELS, VACCINATION_LABELS, COOP_CONDITION_LABELS, INTAKE_LEVEL_LABELS,
 )
+from app.data.cambodia_geography import (
+    CAMBODIA_PROVINCES, FARM_TYPES, FARM_SCALES,
+    get_province_by_key, get_districts_by_province, normalize_legacy_location,
+)
 
 expert_system_bp = Blueprint("expert_system", __name__, url_prefix="/expert-system")
 
@@ -57,6 +61,14 @@ def _parse_int_field(form_data, key, lo=0, hi=1_000_000):
     return max(lo, min(hi, val))
 
 
+def _parse_float_field(form_data, key):
+    raw = form_data.get(key, "").strip()
+    try:
+        return float(raw) if raw else None
+    except (ValueError, TypeError):
+        return None
+
+
 def _parse_choice(form_data, key, allowed):
     """Return the submitted value only if it's in `allowed`, else None."""
     val = form_data.get(key, "").strip()
@@ -64,11 +76,25 @@ def _parse_choice(form_data, key, allowed):
 
 
 def _parse_flock_data(form_data):
+    province = form_data.get("province", "").strip()
+    district = form_data.get("district", "").strip()
+    commune = form_data.get("commune", "").strip()
+
+    loc_parts = [p for p in [district, province] if p]
+    location_str = ", ".join(loc_parts) if loc_parts else form_data.get("location", "").strip()
+
     return {
         "flock_size": _parse_int_field(form_data, "flock_size", lo=1),
         "bird_age": form_data.get("bird_age", "").strip(),
         "breed": form_data.get("breed", "").strip(),
-        "location": form_data.get("location", "").strip(),
+        "province": province,
+        "district": district,
+        "commune": commune,
+        "latitude": _parse_float_field(form_data, "latitude"),
+        "longitude": _parse_float_field(form_data, "longitude"),
+        "farm_type": form_data.get("farm_type", "").strip(),
+        "farm_scale": form_data.get("farm_scale", "").strip(),
+        "location": location_str,
         "notes": form_data.get("notes", "").strip(),
         # Extended diagnosis context (all optional)
         "sick_bird_count": _parse_int_field(form_data, "sick_bird_count"),
@@ -164,9 +190,42 @@ def author_rules():
     return redirect(url_for("expert_system.rules_index"))
 
 
+def commit_pending_diagnosis_case(user_id: int):
+    """Finalize and persist a pending diagnosis case from session for the given user."""
+    selected_ids = session.get("diagnosis_symptoms", [])
+    flock_data = session.get("diagnosis_wizard", {})
+    staged_photos = session.get("diagnosis_photos", [])
+    if not selected_ids:
+        return None
+
+    diagnosis_results = DiagnosisService.run_inference(selected_ids)
+    saved_case = DiagnosisService.record_case(
+        user_id,
+        selected_ids,
+        top_result=diagnosis_results[0] if diagnosis_results else None,
+        flock_data=flock_data,
+        diagnosis_results=diagnosis_results,
+    )
+
+    # Commit any staged photos now that we have a case ID
+    if staged_photos and saved_case:
+        _commit_photos_to_case(saved_case.id, staged_photos)
+
+    session.pop("diagnosis_wizard", None)
+    session.pop("diagnosis_symptoms", None)
+    session.pop("diagnosis_photos", None)
+
+    if saved_case and saved_case.disease:
+        AuditService.log("DIAGNOSE", "Case", saved_case.id, f"Diagnosis saved: {saved_case.disease.name}")
+
+    # Notify all doctors/admins about the new pending case
+    if saved_case:
+        NotificationService.notify_doctors_new_case(saved_case)
+
+    return saved_case
+
+
 @expert_system_bp.route("/diagnose", methods=["GET", "POST"])
-@login_required
-@require_permission("run_diagnosis")
 def diagnose():
     step = request.args.get("step", "1")
     if request.method == "POST":
@@ -185,7 +244,7 @@ def diagnose():
             "flock_size": "ចំនួនមាន់",
             "bird_age": "អាយុ",
             "breed": "ប្រភេទមាន់",
-            "location": "ទីតាំង",
+            "province": "ខេត្ត/រាជធានី",
             "sick_bird_count": "ចំនួនមាន់ឈឺ",
             "dead_bird_count": "ចំនួនមាន់ស្លាប់",
             "symptom_duration": "រយៈពេលមានរោគសញ្ញា",
@@ -231,30 +290,14 @@ def diagnose():
             return redirect(url_for("expert_system.diagnose", step="2"))
 
         if request.method == "POST" and request.form.get("action") == "save":
-            diagnosis_results = DiagnosisService.run_inference(selected_ids)
-            saved_case = DiagnosisService.record_case(
-                current_user.id,
-                selected_ids,
-                diagnosis_results[0] if diagnosis_results else None,
-                flock_data=flock_data,
-            )
+            if not current_user.is_authenticated:
+                flash("សូមចូលគណនី ឬចុះឈ្មោះដើម្បីរក្សាទុកករណី។", "info")
+                return redirect(url_for("auth.login"))
 
-            # Commit any staged photos now that we have a case ID
-            staged_photos = session.get("diagnosis_photos", [])
-            if staged_photos:
-                _commit_photos_to_case(saved_case.id, staged_photos)
-
-            session.pop("diagnosis_wizard", None)
-            session.pop("diagnosis_symptoms", None)
-            session.pop("diagnosis_photos", None)
-            if saved_case and saved_case.disease:
-                AuditService.log("DIAGNOSE", "Case", saved_case.id, f"Diagnosis saved: {saved_case.disease.name}")
-
-            # Notify all doctors/admins about the new pending case
-            NotificationService.notify_doctors_new_case(saved_case)
-
-            flash("ករណីត្រូវបានរក្សាទុកដោយជោគជ័យ។", "success")
-            return redirect(url_for("expert_system.cases_detail", case_id=saved_case.id))
+            saved_case = commit_pending_diagnosis_case(current_user.id)
+            if saved_case:
+                flash("ករណីត្រូវបានរក្សាទុកដោយជោគជ័យ។", "success")
+                return redirect(url_for("expert_system.cases_detail", case_id=saved_case.id))
 
         diagnosis_results = DiagnosisService.run_inference(selected_ids)
 
@@ -290,6 +333,19 @@ def diagnose():
             },
         }
 
+    wizard_flock_data = dict(session.get("diagnosis_wizard", {}))
+    if not wizard_flock_data and current_user.is_authenticated:
+        if getattr(current_user, "province", None):
+            wizard_flock_data.setdefault("province", current_user.province)
+        if getattr(current_user, "district", None):
+            wizard_flock_data.setdefault("district", current_user.district)
+        if getattr(current_user, "commune", None):
+            wizard_flock_data.setdefault("commune", current_user.commune)
+        if getattr(current_user, "farm_type", None):
+            wizard_flock_data.setdefault("farm_type", current_user.farm_type)
+        if getattr(current_user, "farm_scale", None):
+            wizard_flock_data.setdefault("farm_scale", current_user.farm_scale)
+
     return render_template(
         "expert_system/diagnose.html",
         step=step,
@@ -298,7 +354,10 @@ def diagnose():
         symptom_diagnosis_data=symptom_diagnosis_data,
         results=diagnosis_results,
         selected_ids=set(selected_ids),
-        flock_data=session.get("diagnosis_wizard", {}),
+        flock_data=wizard_flock_data,
+        cambodia_provinces=CAMBODIA_PROVINCES,
+        farm_types=FARM_TYPES,
+        farm_scales=FARM_SCALES,
         saved_case=saved_case,
         yes_no_labels=YES_NO_LABELS,
         vaccination_labels=VACCINATION_LABELS,
@@ -468,17 +527,23 @@ def cases_message(case_id: int):
     if not (is_reviewer or is_owner):
         abort(403)
 
-    body = request.form.get("body", "").strip()
+    wants_json = request.accept_mimetypes.best == "application/json" or \
+        request.headers.get("X-Requested-With") == "XMLHttpRequest" or \
+        request.is_json
+
+    payload = request.get_json(silent=True) or request.form
+    body = (payload.get("body") or "").strip()
     if not body:
-        flash("សូមបញ្ចូលសាររបស់អ្នក។", "warning")
-        return redirect(url_for("expert_system.cases_detail", case_id=case_id))
+        if wants_json:
+            return jsonify({"ok": False, "error": "សូមបញ្ចូលសាររបស់អ្នក។"}), 400
+        return redirect(url_for("expert_system.cases_detail", case_id=case_id, _anchor="followUpConversation"))
     if len(body) > 2000:
         body = body[:2000]
 
-    CaseMessageService.add_message(case, current_user.id, body, is_doctor=is_reviewer)
+    msg = CaseMessageService.add_message(case, current_user.id, body, is_doctor=is_reviewer)
     AuditService.log("COMMENT", "Case", case.id, "Follow-up message posted")
 
-    detail_link = url_for("expert_system.cases_detail", case_id=case.id)
+    detail_link = url_for("expert_system.cases_detail", case_id=case.id, _anchor="followUpConversation")
     if is_reviewer:
         # Doctor replied -> notify the farmer who owns the case.
         if case.user_id and case.user_id != current_user.id:
@@ -502,8 +567,21 @@ def cases_message(case_id: int):
         else:
             NotificationService.notify_doctors_new_case(case)
 
-    flash("សាររបស់អ្នកត្រូវបានផ្ញើ។", "success")
-    return redirect(url_for("expert_system.cases_detail", case_id=case_id))
+    if wants_json:
+        author_name = current_user.full_name or current_user.username or "អ្នកប្រើ"
+        return jsonify({
+            "ok": True,
+            "message": {
+                "id": msg.id,
+                "body": msg.body,
+                "author_name": author_name,
+                "is_doctor": msg.is_doctor,
+                "created_at": msg.created_at.strftime('%d/%m/%Y %H:%M') if msg.created_at else "",
+                "is_mine": True,
+            }
+        })
+
+    return redirect(url_for("expert_system.cases_detail", case_id=case_id, _anchor="followUpConversation"))
 
 
 @expert_system_bp.route("/cases/<int:case_id>/follow-up", methods=["POST"])
@@ -969,6 +1047,35 @@ def diseases_create():
                     "category_id": form.category_id.data,
                 }
             )
+
+            # Process structured treatment steps authored during creation
+            steps_json = request.form.get("treatment_steps_json")
+            if steps_json:
+                try:
+                    import json
+                    steps_list = json.loads(steps_json)
+                    if isinstance(steps_list, list):
+                        for step_item in steps_list:
+                            if isinstance(step_item, dict):
+                                stext = step_item.get("text", "").strip()
+                                snote = step_item.get("note", "").strip()
+                                if stext:
+                                    TreatmentStepService.add(
+                                        disease, stext, snote, created_by_id=current_user.id
+                                    )
+                except Exception:
+                    pass
+            else:
+                steps_texts = request.form.getlist("steps_text[]")
+                steps_notes = request.form.getlist("steps_note[]")
+                for i, stext in enumerate(steps_texts):
+                    stext = stext.strip()
+                    snote = steps_notes[i].strip() if i < len(steps_notes) else ""
+                    if stext:
+                        TreatmentStepService.add(
+                            disease, stext, snote, created_by_id=current_user.id
+                        )
+
             AuditService.log("CREATE", "Disease", disease.id, f"Created disease: {disease.name}")
             flash(f"Disease '{disease.name}' created successfully.", "success")
             return redirect(url_for("expert_system.diseases_index"))
@@ -1018,10 +1125,16 @@ def diseases_delete(disease_id: int):
         abort(404)
     if request.method == "POST":
         disease_name = disease.name
-        DiseaseService.delete(disease)
-        AuditService.log("DELETE", "Disease", disease_id, f"Deleted disease: {disease_name}")
-        flash("ជំងឺត្រូវបានលុប។", "success")
-        return redirect(url_for("expert_system.diseases_index"))
+        try:
+            DiseaseService.delete(disease)
+            AuditService.log("DELETE", "Disease", disease_id, f"Deleted disease: {disease_name}")
+            flash(f"Disease '{disease_name}' deleted successfully.", "success")
+            return redirect(url_for("expert_system.diseases_index"))
+        except Exception as e:
+            db.session.rollback()
+            current_app.logger.exception("Failed to delete disease %s: %s", disease_id, e)
+            flash(f"Cannot delete disease '{disease_name}': {e}", "danger")
+            return redirect(url_for("expert_system.diseases_index"))
     return render_template(
         "expert_system/diseases/delete_confirm.html",
         disease=disease,

@@ -41,12 +41,12 @@ def google_callback():
     try:
         token = oauth.google.authorize_access_token()
     except Exception as e:
+        # Log the full detail server-side for debugging, but show the
+        # user a generic, friendly message.
         current_app.logger.error(
             "OAuth token error [%s]: %s", type(e).__name__, e, exc_info=True
         )
-        # Surface the specific reason so we can distinguish a state
-        # mismatch (cookie problem) from a token/clock/config problem.
-        flash(f"Google authentication failed: {e}", "danger")
+        flash("Google authentication failed. Please try again.", "danger")
         return redirect(url_for("auth.login"))
 
     # Extract user info from the ID token (OIDC)
@@ -119,6 +119,14 @@ def google_callback():
     login_user(user, remember=True)
     AuditService.log("LOGIN", "User", user.id, "User logged in via Google OAuth")
     flash("Logged in successfully with Google.", "success")
+
+    # Check for pending guest diagnosis in session
+    if session.get("diagnosis_symptoms"):
+        from app.routes.expert_system import commit_pending_diagnosis_case
+        saved_case = commit_pending_diagnosis_case(user.id)
+        if saved_case:
+            flash("ការវិភាគរបស់អ្នកត្រូវបានរក្សាទុកដោយជោគជ័យ!", "success")
+            return redirect(url_for("expert_system.cases_detail", case_id=saved_case.id))
 
     if user.has_permission("view_dashboard"):
         return redirect(url_for("dashboard.index"))

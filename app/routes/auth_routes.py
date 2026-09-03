@@ -1,5 +1,5 @@
 # app/routes/auth_routes.py
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from flask_login import login_user, logout_user, login_required, current_user
 from app.models.user import UserTable
 from app.models.role import RoleTable
@@ -30,6 +30,14 @@ def login():
             AuditService.log("LOGIN", "User", user.id, "User logged in")
             flash("Logged in successfully.", "success")
             
+            # Check for pending guest diagnosis in session
+            if session.get("diagnosis_symptoms"):
+                from app.routes.expert_system import commit_pending_diagnosis_case
+                saved_case = commit_pending_diagnosis_case(user.id)
+                if saved_case:
+                    flash("ការវិភាគរបស់អ្នកត្រូវបានរក្សាទុកដោយជោគជ័យ!", "success")
+                    return redirect(url_for("expert_system.cases_detail", case_id=saved_case.id))
+
             # Redirect based on permissions
             if user.has_permission("view_dashboard"):
                 return redirect(url_for("dashboard.index"))
@@ -104,6 +112,14 @@ def register():
         AuditService.log("REGISTER", "User", new_user.id, "New user registered")
         flash("Account created successfully. Please check your email to verify your address.", "success")
         
+        # Check for pending guest diagnosis in session
+        if session.get("diagnosis_symptoms"):
+            from app.routes.expert_system import commit_pending_diagnosis_case
+            saved_case = commit_pending_diagnosis_case(new_user.id)
+            if saved_case:
+                flash("ការវិភាគរបស់អ្នកត្រូវបានរក្សាទុកដោយជោគជ័យ!", "success")
+                return redirect(url_for("expert_system.cases_detail", case_id=saved_case.id))
+
         # Redirect based on permissions (new users are typically 'User' role)
         if new_user.has_permission("view_dashboard"):
             return redirect(url_for("dashboard.index"))

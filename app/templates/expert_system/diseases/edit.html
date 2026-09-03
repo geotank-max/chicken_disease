@@ -1,6 +1,6 @@
 {% extends "layouts/base.html" %}
-{% block title %}កែប្រែជំងឺ{% endblock %}
-{% block page_title %}កែប្រែជំងឺ{% endblock %}
+{% block title %}{{ t('diseases.edit_title') }}{% endblock %}
+{% block page_title %}{{ t('diseases.edit_title') }}{% endblock %}
 
 {% block content %}
 <div class="card border-0 shadow-sm p-4">
@@ -56,7 +56,7 @@
         </div>
         <div class="d-flex gap-2 mt-4">
             {{ form.submit(class="btn btn-brand") }}
-            <a href="{{ url_for('expert_system.diseases_index') }}" class="btn btn-secondary">បោះបង់</a>
+            <a href="{{ url_for('expert_system.diseases_index') }}" class="btn btn-secondary">{{ t('btn.cancel') }}</a>
         </div>
     </form>
 </div>
@@ -64,12 +64,11 @@
 {# ── Treatment steps authoring (structured checklist / Option A) ─────────── #}
 <div class="card border-0 shadow-sm p-4 mt-4">
     <div class="d-flex justify-content-between align-items-center mb-1">
-        <h5 class="fw-bold mb-0"><i class="bi bi-list-check me-2 text-primary"></i>ជំហានព្យាបាល (បញ្ជីត្រួតពិនិត្យ)</h5>
-        <span class="badge bg-secondary" id="stepsCount">{{ disease.treatment_steps|length }} ជំហាន</span>
+        <h5 class="fw-bold mb-0"><i class="bi bi-list-check me-2 text-primary"></i>{{ t('steps.title') }}</h5>
+        <span class="badge bg-secondary" id="stepsCount">{{ t('steps.count', count=disease.treatment_steps|length) }}</span>
     </div>
     <p class="text-muted small mb-3">
-        បង្កើតជំហានព្យាបាលច្បាស់លាស់ដែលកសិករអាចធីកម្តងមួយៗ។
-        បើមិនមានជំហានទេ ប្រព័ន្ធនឹងបំបែកអត្ថបទ "ការព្យាបាល" ខាងលើដោយស្វ័យប្រវត្តិ។
+        {{ t('steps.desc') }}
     </p>
 
     <div id="stepsContainer" class="mb-3"
@@ -83,15 +82,15 @@
     <form id="stepAddForm" method="post" action="{{ url_for('expert_system.disease_step_add', disease_id=disease.id) }}" class="row g-2 align-items-end border-top pt-3">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div class="col-md-6">
-            <label class="form-label fw-bold small">ជំហានថ្មី</label>
-            <input type="text" name="text" class="form-control" maxlength="500" placeholder="ឧ. ដាក់ឱ្យដោយឡែក..." required>
+            <label class="form-label fw-bold small">{{ t('steps.new_step') }}</label>
+            <input type="text" name="text" class="form-control" maxlength="500" placeholder="{{ t('steps.new_step_ph') }}" required>
         </div>
         <div class="col-md-4">
-            <label class="form-label fw-bold small">កំណត់ចំណាំ (ស្រេចចិត្ត)</label>
-            <input type="text" name="note" class="form-control" maxlength="500" placeholder="ដូស / ព័ត៌មានបន្ថែម">
+            <label class="form-label fw-bold small">{{ t('steps.notes_optional') }}</label>
+            <input type="text" name="note" class="form-control" maxlength="500" placeholder="{{ t('steps.notes_ph') }}">
         </div>
         <div class="col-md-2">
-            <button type="submit" class="btn btn-brand w-100"><i class="bi bi-plus-lg me-1"></i>បន្ថែម</button>
+            <button type="submit" class="btn btn-brand w-100"><i class="bi bi-plus-lg me-1"></i>{{ t('btn.add') }}</button>
         </div>
     </form>
 

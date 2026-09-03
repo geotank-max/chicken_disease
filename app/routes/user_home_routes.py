@@ -11,9 +11,12 @@ user_home_bp = Blueprint("user_home", __name__, url_prefix="/home")
 def index():
     stats = UserHomeService.get_my_stats(current_user.id)
     recent_cases = UserHomeService.get_recent_cases(current_user.id)
+    featured_disease = UserHomeService.get_featured_disease()
 
     return render_template(
         "user_home/index.html",
         stats=stats,
         recent_cases=recent_cases,
+        featured_disease=featured_disease,
     )
+

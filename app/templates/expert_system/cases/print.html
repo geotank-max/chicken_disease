@@ -13,7 +13,7 @@
         .label { font-weight: bold; color: #374151; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
         .box { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 12px; }
         .badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 10px; font-weight: bold; }
-        .badge-blue { background: #eff6ff; color: #2563eb; }
+        .badge-blue { background: #ecfdf5; color: #059669; }
         .badge-red { background: #fef2f2; color: #dc2626; }
         .badge-green { background: #ecfdf5; color: #059669; }
         ul { padding-left: 18px; margin: 0; }
@@ -31,23 +31,23 @@
 <body>
     {% if not pdf_mode %}
     <div class="no-print" style="margin-bottom: 20px;">
-        <button onclick="window.print()" style="padding: 8px 16px; cursor: pointer; background: #2563eb; color: white; border: none; border-radius: 4px;">Print</button>
-        <a href="{{ url_for('expert_system.cases_detail', case_id=case.id) }}" style="margin-left: 8px; color: #2563eb;">Back to Case</a>
+        <button onclick="window.print()" style="padding: 8px 16px; cursor: pointer; background: #059669; color: white; border: none; border-radius: 4px; font-weight: 600;">{{ t('btn.print') }}</button>
+        <a href="{{ url_for('expert_system.cases_detail', case_id=case.id) }}" style="margin-left: 8px; color: #059669; text-decoration: none; font-weight: 600;">{{ t('btn.back') }}</a>
     </div>
     {% endif %}
 
-    <h1>Chicken Disease Diagnosis Report</h1>
-    <h2>IDNS Expert System &mdash; Case #{{ case.id }}</h2>
+    <h1>{{ t('print.report_header') }}</h1>
+    <h2>{{ t('print.system_name') }} &mdash; {{ t('print.case_id') }} #{{ case.id }}</h2>
 
     <div class="meta">
-        Date: {{ case.created_at.strftime('%d/%m/%Y %H:%M') }} |
-        Status: {{ case.status_label_km }} |
-        {% if case.user %}User: {{ case.user.full_name }}{% endif %}
+        {{ t('cases.col_date') }}: {{ case.created_at.strftime('%d/%m/%Y %H:%M') }} |
+        {{ t('cases.col_status') }}: {{ get_translated_option('status', case.status) }} |
+        {% if case.user %}{{ t('nav.users') }}: {{ case.user.full_name }}{% endif %}
     </div>
 
     {% if case.final_disease %}
     <div class="section">
-        <div class="label">Diagnosed Disease</div>
+        <div class="label">Diagnosed Disease (Primary / Top Match)</div>
         <div class="box">
             <strong style="font-size: 16px;">{{ case.final_disease.name }}</strong>
             {% if case.confidence is not none %}
@@ -61,6 +61,49 @@
             {% endif %}
         </div>
     </div>
+
+    {% if case.possible_diagnoses and case.possible_diagnoses|length > 0 %}
+    <div class="section">
+        <div class="label">All Possible Diagnoses / Differential Diagnoses ({{ case.possible_diagnoses|length }})</div>
+        <table style="width: 100%; border-collapse: collapse; margin-top: 4px; font-size: 11px;">
+            <thead>
+                <tr style="background: #f3f4f6; border-bottom: 1px solid #d1d5db; text-align: left;">
+                    <th style="padding: 6px 8px; width: 65px;">Rank</th>
+                    <th style="padding: 6px 8px;">Disease Name</th>
+                    <th style="padding: 6px 8px; width: 110px;">Category</th>
+                    <th style="padding: 6px 8px; width: 80px;">Severity</th>
+                    <th style="padding: 6px 8px; width: 100px;">Symptom Match</th>
+                    <th style="padding: 6px 8px; width: 80px; text-align: right;">Confidence</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pd in case.possible_diagnoses %}
+                <tr style="border-bottom: 1px solid #e5e7eb; {% if pd.rank == 1 %}background: #f0fdf4; font-weight: 600;{% endif %}">
+                    <td style="padding: 6px 8px;">
+                        {% if pd.rank == 1 %}
+                        <span style="background: #059669; color: white; padding: 1px 5px; border-radius: 3px; font-size: 9px;">#1 Most likely</span>
+                        {% else %}
+                        #{{ pd.rank }}
+                        {% endif %}
+                    </td>
+                    <td style="padding: 6px 8px;">
+                        {{ pd.disease.name }}
+                        {% if pd.disease.is_contagious %}
+                        <span style="color: #dc2626; font-size: 9px; margin-left: 4px;">[Contagious]</span>
+                        {% endif %}
+                    </td>
+                    <td style="padding: 6px 8px; color: #4b5563;">{{ pd.disease.category.name if pd.disease.category else '-' }}</td>
+                    <td style="padding: 6px 8px; color: #4b5563;">{{ pd.disease.severity or '-' }}</td>
+                    <td style="padding: 6px 8px; color: #4b5563;">{{ pd.matched_symptom_count }}/{{ pd.required_symptom_count }} matched</td>
+                    <td style="padding: 6px 8px; text-align: right; color: {% if pd.confidence >= 70 %}#059669{% elif pd.confidence >= 40 %}#d97706{% else %}#dc2626{% endif %};">
+                        {{ pd.confidence }}%
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
 
     <div class="section">
         <div class="label">Description</div>
@@ -104,14 +147,21 @@
     </div>
     {% endif %}
 
-    {% if case.flock_size or case.bird_age or case.breed or case.location %}
+    {% if case.flock_size or case.bird_age or case.breed or case.location or case.province %}
     <div class="section">
-        <div class="label">Flock Information</div>
+        <div class="label">Flock &amp; Farm Information</div>
         <table class="info">
             {% if case.flock_size %}<tr><td class="lbl">Flock Size:</td><td>{{ case.flock_size }} birds</td></tr>{% endif %}
             {% if case.bird_age %}<tr><td class="lbl">Bird Age:</td><td>{{ case.bird_age }}</td></tr>{% endif %}
             {% if case.breed %}<tr><td class="lbl">Breed:</td><td>{{ case.breed }}</td></tr>{% endif %}
-            {% if case.location %}<tr><td class="lbl">Location:</td><td>{{ case.location }}</td></tr>{% endif %}
+            {% if case.province %}
+            <tr><td class="lbl">Province:</td><td>{{ case.province }}{% if case.district %}, {{ case.district }}{% endif %}{% if case.commune %}, {{ case.commune }}{% endif %}</td></tr>
+            {% elif case.location %}
+            <tr><td class="lbl">Location:</td><td>{{ case.location }}</td></tr>
+            {% endif %}
+            {% if case.farm_type %}<tr><td class="lbl">Farm Type:</td><td>{{ case.farm_type | replace('_', ' ') | title }}</td></tr>{% endif %}
+            {% if case.farm_scale %}<tr><td class="lbl">Farm Scale:</td><td>{{ case.farm_scale }} birds</td></tr>{% endif %}
+            {% if case.latitude and case.longitude %}<tr><td class="lbl">GPS Coordinates:</td><td>{{ case.latitude }}, {{ case.longitude }}</td></tr>{% endif %}
         </table>
         {% if case.notes %}<p><em>Notes: {{ case.notes }}</em></p>{% endif %}
     </div>
