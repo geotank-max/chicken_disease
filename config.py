@@ -51,8 +51,12 @@ class Config:
     
     # Set DATABASE_URL to override (e.g., managed DB in production).
     # Otherwise build the URL from the individual DB_* components above.
+    _raw_db_url = os.environ.get("DATABASE_URL")
+    if _raw_db_url and _raw_db_url.startswith("postgres://"):
+        _raw_db_url = _raw_db_url.replace("postgres://", "postgresql://", 1)
+
     SQLALCHEMY_DATABASE_URI = (
-        os.environ.get("DATABASE_URL")
+        _raw_db_url
         or f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
     )
     

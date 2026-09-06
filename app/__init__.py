@@ -14,6 +14,10 @@ def create_app(config_class: type[Config] = Config):
     csrf.init_app(app)
     login_manager.init_app(app)
 
+    # Support reverse proxies (e.g. Render, Nginx) so HTTPS and headers are recognized
+    from werkzeug.middleware.proxy_fix import ProxyFix
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
+
     # Initialize Google OAuth
     from app.services.oauth_service import init_oauth
     init_oauth(app)
