@@ -99,8 +99,10 @@ class UserService:
             # Nullify reviewed_by on applications reviewed by this user
             DoctorApplication.query.filter_by(reviewed_by_id=user_id).update({"reviewed_by_id": None}, synchronize_session=False)
 
-            # Nullify vet clinic link
-            VetClinic.query.filter_by(user_id=user_id).update({"user_id": None}, synchronize_session=False)
+            # Nullify vet clinic link if table exists
+            from sqlalchemy import inspect
+            if inspect(db.engine).has_table("tbl_vet_clinics"):
+                VetClinic.query.filter_by(user_id=user_id).update({"user_id": None}, synchronize_session=False)
 
             # Clear role associations (M2M)
             user.roles = []

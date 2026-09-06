@@ -190,6 +190,7 @@ def create_app(config_class: type[Config] = Config):
         from app.models.audit_log import AuditLog
         from app.models.doctor_application import DoctorApplication
         from app.models.notification import Notification
+        from app.models.vet_clinic import VetClinic
 
         if os.environ.get("RESET_DB", "0") == "1":
             db.drop_all()

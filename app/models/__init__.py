@@ -8,6 +8,8 @@ from .expert_system import (
 )
 from .doctor_application import DoctorApplication
 from .notification import Notification
+from .audit_log import AuditLog
+from .vet_clinic import VetClinic
 
 __all__ = [
     "UserTable",
@@ -25,4 +27,6 @@ __all__ = [
     "CaseDiagnosis",
     "DoctorApplication",
     "Notification",
+    "AuditLog",
+    "VetClinic",
 ]
