@@ -26,6 +26,9 @@ def migrate_schema() -> None:
         for col, col_type in disease_cols.items():
             if not _column_exists(inspector, "tbl_diseases", col):
                 alterations.append(f"ALTER TABLE tbl_diseases ADD COLUMN {col} {col_type}")
+        alterations.append("ALTER TABLE tbl_diseases ALTER COLUMN treatment TYPE TEXT")
+        alterations.append("ALTER TABLE tbl_diseases ALTER COLUMN description TYPE TEXT")
+        alterations.append("ALTER TABLE tbl_diseases ALTER COLUMN prevention TYPE TEXT")
 
     # ── tbl_users: email verification & password reset ──────────
     user_new_cols = {
@@ -96,9 +99,11 @@ def migrate_schema() -> None:
                 alterations.append(f"ALTER TABLE tbl_cases ADD COLUMN {col} {col_type}")
 
     for sql in alterations:
-        db.session.execute(text(sql))
-    if alterations:
-        db.session.commit()
+        try:
+            db.session.execute(text(sql))
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
 
     # ── Normalize legacy location strings in tbl_cases ─────────
     inspector = inspect(db.engine)

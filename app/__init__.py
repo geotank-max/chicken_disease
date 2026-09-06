@@ -205,7 +205,8 @@ def create_app(config_class: type[Config] = Config):
             from app.services.seed_service import seed_all
             seed_all()
         else:
-            from app.services.seed_service import upgrade_permissions
+            from app.services.seed_service import upgrade_permissions, update_disease_knowledge
             upgrade_permissions()
+            update_disease_knowledge()
 
     return app

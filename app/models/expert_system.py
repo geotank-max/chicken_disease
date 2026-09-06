@@ -107,9 +107,9 @@ class Disease(db.Model):
 
     id = db.Column(db.Integer, db.Sequence('seq_diseases_id'), primary_key=True)
     name = db.Column(db.String(120), unique=True, nullable=False)
-    description = db.Column(db.String(255), nullable=False)
-    treatment = db.Column(db.String(255), nullable=False)
-    prevention = db.Column(db.String(500))
+    description = db.Column(db.Text, nullable=False)
+    treatment = db.Column(db.Text, nullable=False)
+    prevention = db.Column(db.Text)
     severity = db.Column(db.String(50))
     is_contagious = db.Column(db.Boolean, default=False, nullable=False)
     category_id = db.Column(db.Integer, db.ForeignKey("tbl_categories.id"))
