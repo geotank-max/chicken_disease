@@ -1,7 +1,7 @@
 # app/routes/oauth_routes.py
 """OAuth routes for Google social login."""
 
-from flask import Blueprint, redirect, url_for, flash, current_app, session
+from flask import Blueprint, redirect, url_for, flash, current_app, session, request
 from flask_login import login_user
 from app.models.user import UserTable
 from app.models.role import RoleTable
@@ -27,6 +27,7 @@ def google_login():
     # Google. Otherwise the state can be lost on the first attempt
     # and only succeed on the retry.
     session.permanent = True
+    session["oauth_mode"] = request.args.get("mode", "login")
 
     redirect_uri = current_app.config["GOOGLE_REDIRECT_URI"]
     # prompt="select_account" forces Google to show the account
@@ -38,6 +39,7 @@ def google_login():
 @oauth_bp.route("/callback")
 def google_callback():
     """Handle the callback from Google after user grants consent."""
+    oauth_mode = session.pop("oauth_mode", "login")
     try:
         token = oauth.google.authorize_access_token()
     except Exception as e:
@@ -81,6 +83,11 @@ def google_callback():
 
     # ── Create new user if none found ────────────────────────────
     if not user:
+        # If user is logging in, do not auto-create an account!
+        if oauth_mode != "signup":
+            flash("រកមិនឃើញគណនីជាមួយ Google នេះទេ។ សូមចុះឈ្មោះជាមុនសិន។ / No account found with this Google email. Please sign up first.", "warning")
+            return redirect(url_for("auth.register"))
+
         # Generate a username from email (part before @)
         base_username = email.split("@")[0]
         username = base_username
@@ -108,6 +115,7 @@ def google_callback():
         db.session.add(user)
         db.session.commit()
         AuditService.log("REGISTER", "User", user.id, "New user registered via Google OAuth")
+        flash("បានបង្កើតគណនីដោយជោគជ័យជាមួយ Google។ / Account created successfully with Google.", "success")
 
     # ── Login the user ───────────────────────────────────────────
     if not user.is_active:
