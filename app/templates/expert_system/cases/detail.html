@@ -189,9 +189,6 @@
                 <a href="{{ url_for('expert_system.cases_print', case_id=case.id) }}" target="_blank" class="btn btn-sm btn-outline-secondary">
                     <i class="bi bi-printer me-1"></i> {{ t('case_detail.print') }}
                 </a>
-                <a href="{{ url_for('expert_system.cases_pdf', case_id=case.id) }}" class="btn btn-sm btn-outline-primary">
-                    <i class="bi bi-file-pdf me-1"></i> PDF
-                </a>
             </div>
         </div>
 
@@ -235,7 +232,7 @@
                     <div class="row g-2 small">
                         {% if case.flock_size %}<div class="col-md-3"><strong>{{ t('case_detail.flock_size') }}:</strong> {{ case.flock_size }}</div>{% endif %}
                         {% if case.bird_age %}<div class="col-md-3"><strong>{{ t('case_detail.bird_age') }}:</strong> {{ case.bird_age }}</div>{% endif %}
-                        {% if case.breed %}<div class="col-md-3"><strong>{{ t('case_detail.breed') }}:</strong> {{ case.breed }}</div>{% endif %}
+                        {% if case.breed %}<div class="col-md-3"><strong>{{ t('case_detail.breed') }}:</strong> {{ get_translated_option('breed', case.breed) or case.breed }}</div>{% endif %}
                         {% if case.province %}
                         <div class="col-md-3">
                             <strong>{{ t('diag.province') }}:</strong> 
@@ -628,8 +625,15 @@
                                          id="featuredPhotoImg"
                                          loading="lazy">
                                     <div class="case-photo-feature-overlay">
-                                        <span id="featuredPhotoCat">{{ cat_names.get(first_photo.category, first_photo.category_label_km) }}</span>
-                                        <strong id="featuredPhotoName">{{ first_photo.original_filename }}</strong>
+                                        <div class="d-flex align-items-center justify-content-between w-100">
+                                            <div>
+                                                <span id="featuredPhotoCat">{{ cat_names.get(first_photo.category, first_photo.category_label_km) }}</span>
+                                                <strong id="featuredPhotoName" class="d-block text-white mt-1 small" style="text-shadow: 0 1px 3px rgba(0,0,0,0.8); word-break: break-all;">{{ first_photo.original_filename }}</strong>
+                                            </div>
+                                            <span class="badge bg-white bg-opacity-25 text-white p-2 rounded-circle shadow-sm" title="Click to enlarge">
+                                                <i class="bi bi-arrows-fullscreen fs-6"></i>
+                                            </span>
+                                        </div>
                                     </div>
                                 </a>
                             </div>
@@ -1060,6 +1064,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         thumbLinks.forEach(item => item.classList.remove('active'));
         link.classList.add('active');
+        link.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
     }
 
     filterPills.forEach(pill => {
@@ -1109,9 +1114,13 @@ document.addEventListener('DOMContentLoaded', function() {
     thumbLinks.forEach((link, i) => {
         link.addEventListener('click', e => {
             e.preventDefault();
-            openAt(i);
-            if (!bsModal) bsModal = new bootstrap.Modal(lbModal);
-            bsModal.show();
+            if (currentIdx === i) {
+                openAt(i);
+                if (!bsModal) bsModal = new bootstrap.Modal(lbModal);
+                bsModal.show();
+            } else {
+                selectPhoto(i);
+            }
         });
     });
     featuredLink?.addEventListener('click', e => {

@@ -1,6 +1,6 @@
 {% extends "layouts/base.html" %}
-{% block title %}Permission: {{ permission.code }}{% endblock %}
-{% block page_title %}Permission Details{% endblock %}
+{% block title %}{{ t('perm.detail_title') }}: {{ permission.code }}{% endblock %}
+{% block page_title %}{{ t('perm.detail_title') }}{% endblock %}
 {% block page_subtitle %}{{ permission.code }}{% endblock %}
 
 {% block content %}
@@ -9,29 +9,29 @@
         <!-- Back nav -->
         <div class="mb-3">
             <a href="{{ url_for('tbl_permissions.index') }}" class="text-decoration-none text-muted small">
-                <i class="bi bi-arrow-left me-1"></i> Back to Permissions
+                <i class="bi bi-arrow-left me-1"></i> {{ t('perm.btn_back') }}
             </a>
         </div>
 
-        <div class="card border-0 shadow-sm">
-            <div class="card-header bg-white border-bottom p-4">
+        <div class="card border shadow-sm">
+            <div class="card-header border-bottom p-4">
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
                         <div class="d-flex align-items-center gap-2 mb-2">
-                            <div class="perm-detail-icon">
-                                <i class="bi bi-key"></i>
+                            <div class="perm-detail-icon d-flex align-items-center justify-content-center rounded bg-primary bg-opacity-10 text-primary" style="width: 36px; height: 36px;">
+                                <i class="bi bi-key fs-5"></i>
                             </div>
                             <code class="fs-5 text-primary fw-bold">{{ permission.code }}</code>
                         </div>
-                        <h5 class="fw-bold mb-1">{{ permission.name }}</h5>
-                        <span class="badge bg-primary bg-opacity-10 text-primary">{{ permission.module }}</span>
+                        <h5 class="fw-bold mb-1 text-dark">{{ permission.name }}</h5>
+                        <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25">{{ permission.module }}</span>
                     </div>
                     <div class="d-flex gap-2">
                         <a href="{{ url_for('tbl_permissions.edit', permission_id=permission.id) }}" class="btn btn-sm btn-outline-primary">
-                            <i class="bi bi-pencil me-1"></i> Edit
+                            <i class="bi bi-pencil me-1"></i> {{ t('btn.edit') }}
                         </a>
                         <a href="{{ url_for('tbl_permissions.delete_confirm', permission_id=permission.id) }}" class="btn btn-sm btn-outline-danger">
-                            <i class="bi bi-trash3 me-1"></i> Delete
+                            <i class="bi bi-trash3 me-1"></i> {{ t('btn.delete') }}
                         </a>
                     </div>
                 </div>
@@ -39,22 +39,22 @@
             <div class="card-body p-4">
                 {% if permission.description %}
                 <div class="mb-4">
-                    <h6 class="text-uppercase text-muted small fw-bold mb-2">Description</h6>
-                    <p class="mb-0">{{ permission.description }}</p>
+                    <h6 class="text-uppercase text-muted small fw-bold mb-2">{{ t('perm.description') }}</h6>
+                    <p class="mb-0 text-dark">{{ permission.description }}</p>
                 </div>
                 {% endif %}
 
                 <div class="row g-3 mb-4">
                     <div class="col-sm-6">
-                        <div class="p-3 bg-light rounded">
-                            <div class="text-muted small fw-semibold mb-1">Created</div>
-                            <div class="fw-medium">{{ permission.created_at.strftime('%d %b %Y, %H:%M') }}</div>
+                        <div class="p-3 bg-light-subtle rounded border">
+                            <div class="text-muted small fw-semibold mb-1">{{ t('perm.created_at') }}</div>
+                            <div class="fw-medium text-dark">{{ permission.created_at.strftime('%d %b %Y, %H:%M') }}</div>
                         </div>
                     </div>
                     <div class="col-sm-6">
-                        <div class="p-3 bg-light rounded">
-                            <div class="text-muted small fw-semibold mb-1">Last Updated</div>
-                            <div class="fw-medium">{{ permission.updated_at.strftime('%d %b %Y, %H:%M') }}</div>
+                        <div class="p-3 bg-light-subtle rounded border">
+                            <div class="text-muted small fw-semibold mb-1">{{ t('perm.updated_at') }}</div>
+                            <div class="fw-medium text-dark">{{ permission.updated_at.strftime('%d %b %Y, %H:%M') }}</div>
                         </div>
                     </div>
                 </div>
@@ -62,18 +62,18 @@
                 <!-- Roles using this permission -->
                 <div>
                     <h6 class="text-uppercase text-muted small fw-bold mb-3">
-                        <i class="bi bi-shield me-1"></i> Assigned to Roles ({{ permission.roles | length }})
+                        <i class="bi bi-shield me-1 text-primary"></i> {{ t('perm.roles_assigned', count=permission.roles|length) }}
                     </h6>
                     {% if permission.roles %}
                     <div class="d-flex flex-wrap gap-2">
                         {% for role in permission.roles %}
-                        <span class="badge rounded-pill bg-primary bg-opacity-10 text-primary px-3 py-2 fw-medium">
-                            <i class="bi bi-shield-check me-1"></i>{{ role.name }}
+                        <span class="badge rounded-pill bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-3 py-2 fw-medium">
+                            <i class="bi bi-shield-check me-1"></i>{{ get_translated_role(role.name) }}
                         </span>
                         {% endfor %}
                     </div>
                     {% else %}
-                    <p class="text-muted small mb-0">This permission is not assigned to any role yet.</p>
+                    <p class="text-muted small mb-0">{{ t('perm.no_roles_assigned') }}</p>
                     {% endif %}
                 </div>
             </div>

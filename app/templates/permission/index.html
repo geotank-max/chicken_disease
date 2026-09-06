@@ -1,7 +1,7 @@
 {% extends "layouts/base.html" %}
-{% block title %}Permissions{% endblock %}
-{% block page_title %}Permissions{% endblock %}
-{% block page_subtitle %}Manage system access controls{% endblock %}
+{% block title %}{{ t('perm.manage_title') }}{% endblock %}
+{% block page_title %}{{ t('perm.manage_title') }}{% endblock %}
+{% block page_subtitle %}{{ t('perm.manage_subtitle') }}{% endblock %}
 
 {% block extra_styles %}
 <style>
@@ -9,11 +9,12 @@
     .perm-stat-card {
         border: 1px solid var(--border-color);
         border-radius: var(--radius);
-        background: #fff;
+        background: var(--bg-card);
         padding: 1rem 1.25rem;
         display: flex;
         align-items: center;
         gap: 0.875rem;
+        transition: background-color 0.2s ease, border-color 0.2s ease;
     }
     .perm-stat-icon {
         width: 44px;
@@ -26,12 +27,12 @@
         flex-shrink: 0;
     }
     .perm-stat-icon.primary { background: var(--primary-light); color: var(--primary); }
-    .perm-stat-icon.amber   { background: #fef3c7; color: #d97706; }
-    .perm-stat-icon.green   { background: #dcfce7; color: #16a34a; }
+    .perm-stat-icon.amber   { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+    .perm-stat-icon.green   { background: rgba(16, 185, 129, 0.15); color: #10b981; }
     .perm-stat-value { font-size: 1.35rem; font-weight: 700; line-height: 1; color: var(--text-main); }
     .perm-stat-label { font-size: 0.8rem; color: var(--text-muted); }
 
-    .perm-search-wrap { position: relative; max-width: 340px; }
+    .perm-search-wrap { position: relative; max-width: 380px; }
     .perm-search-wrap .bi {
         position: absolute; left: 0.85rem; top: 50%; transform: translateY(-50%);
         color: var(--text-muted); pointer-events: none;
@@ -40,6 +41,8 @@
         padding-left: 2.35rem;
         border-radius: 0.5rem;
         border: 1px solid var(--border-color);
+        background-color: var(--bg-card);
+        color: var(--text-main);
     }
     .perm-search-wrap input:focus {
         border-color: var(--primary);
@@ -50,14 +53,15 @@
         border: 1px solid var(--border-color);
         border-radius: var(--radius);
         overflow: hidden;
-        background: #fff;
+        background: var(--bg-card);
+        transition: background-color 0.2s ease, border-color 0.2s ease;
     }
     .perm-module-head {
         display: flex;
         align-items: center;
         justify-content: space-between;
         padding: 0.85rem 1.1rem;
-        background: #fafbfc;
+        background: var(--bg-body);
         border-bottom: 1px solid var(--border-color);
     }
     .perm-row {
@@ -65,28 +69,29 @@
         align-items: center;
         gap: 1rem;
         padding: 0.8rem 1.1rem;
-        border-bottom: 1px solid #f1f3f5;
+        border-bottom: 1px solid var(--border-color);
         transition: background 0.12s ease;
     }
     .perm-row:last-child { border-bottom: 0; }
-    .perm-row:hover { background: var(--primary-light); }
+    .perm-row:hover { background: rgba(5, 150, 105, 0.06); }
     .perm-code {
         font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
         font-size: 0.8rem;
         color: var(--primary);
         background: var(--primary-light);
-        padding: 0.15rem 0.5rem;
+        padding: 0.2rem 0.55rem;
         border-radius: 0.375rem;
         white-space: nowrap;
         text-decoration: none;
+        border: 1px solid var(--primary-border);
     }
     .perm-code:hover { text-decoration: underline; }
     .perm-name { font-weight: 600; color: var(--text-main); font-size: 0.9rem; }
     .perm-desc { font-size: 0.8rem; color: var(--text-muted); }
     .perm-roles-badge {
         font-size: 0.72rem;
-        background: #f3f4f6;
-        color: var(--text-muted);
+        background: var(--border-color);
+        color: var(--text-secondary);
         padding: 0.2rem 0.55rem;
         border-radius: 999px;
         white-space: nowrap;
@@ -105,20 +110,20 @@
 <!-- Summary stats -->
 <div class="row g-3 mb-4">
     <div class="col-sm-6 col-lg-4">
-        <div class="perm-stat-card">
+        <div class="perm-stat-card shadow-sm">
             <div class="perm-stat-icon primary"><i class="bi bi-key-fill"></i></div>
             <div>
                 <div class="perm-stat-value">{{ total }}</div>
-                <div class="perm-stat-label">Total permissions</div>
+                <div class="perm-stat-label">{{ t('perm.total_permissions') }}</div>
             </div>
         </div>
     </div>
     <div class="col-sm-6 col-lg-4">
-        <div class="perm-stat-card">
+        <div class="perm-stat-card shadow-sm">
             <div class="perm-stat-icon amber"><i class="bi bi-folder2-open"></i></div>
             <div>
                 <div class="perm-stat-value">{{ module_names | length }}</div>
-                <div class="perm-stat-label">Modules</div>
+                <div class="perm-stat-label">{{ t('perm.modules') }}</div>
             </div>
         </div>
     </div>
@@ -128,10 +133,10 @@
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
     <div class="perm-search-wrap flex-grow-1">
         <i class="bi bi-search"></i>
-        <input type="text" id="permSearch" class="form-control" placeholder="Search by code, name, or description...">
+        <input type="text" id="permSearch" class="form-control" placeholder="{{ t('perm.search_ph') }}">
     </div>
-    <a href="{{ url_for('tbl_permissions.create') }}" class="btn btn-primary btn-sm px-3">
-        <i class="bi bi-plus-lg me-1"></i> New Permission
+    <a href="{{ url_for('tbl_permissions.create') }}" class="btn btn-primary btn-sm px-3 shadow-sm">
+        <i class="bi bi-plus-lg me-1"></i> {{ t('perm.btn_new') }}
     </a>
 </div>
 
@@ -147,10 +152,10 @@
 
 <div id="permModules" class="d-flex flex-column gap-3">
 {% for module, perms in grouped.items() %}
-    <div class="perm-module-card" data-module-card>
+    <div class="perm-module-card shadow-sm" data-module-card>
         <div class="perm-module-head">
             <div class="d-flex align-items-center gap-2">
-                <div class="module-icon">
+                <div class="module-icon text-primary">
                     {% if module == 'Users' %}<i class="bi bi-people"></i>
                     {% elif module == 'Roles' %}<i class="bi bi-shield-lock"></i>
                     {% elif module == 'Permissions' %}<i class="bi bi-key"></i>
@@ -159,8 +164,8 @@
                     {% else %}<i class="bi bi-folder"></i>{% endif %}
                 </div>
                 <div>
-                    <h6 class="mb-0 fw-bold">{{ module }}</h6>
-                    <small class="text-muted" data-module-count>{{ perms | length }} permission{{ 's' if perms | length != 1 else '' }}</small>
+                    <h6 class="mb-0 fw-bold text-dark">{{ module }}</h6>
+                    <small class="text-muted" data-module-count>{{ perms | length }} {{ t('roles.permissions_count', count=perms|length) }}</small>
                 </div>
             </div>
         </div>
@@ -171,19 +176,19 @@
                  data-search="{{ (perm.code ~ ' ' ~ perm.name ~ ' ' ~ (perm.description or '')) | lower }}">
                 <a href="{{ url_for('tbl_permissions.detail', permission_id=perm.id) }}" class="perm-code">{{ perm.code }}</a>
                 <div class="flex-grow-1 min-w-0">
-                    <div class="perm-name">{{ perm.name }}</div>
+                    <div class="perm-name text-dark">{{ perm.name }}</div>
                     {% if perm.description %}
                     <div class="perm-desc">{{ perm.description }}</div>
                     {% endif %}
                 </div>
-                <span class="perm-roles-badge" title="Assigned to {{ perm.roles | length }} role(s)">
+                <span class="perm-roles-badge" title="{{ t('perm.roles_assigned', count=perm.roles|length) }}">
                     <i class="bi bi-person-badge me-1"></i>{{ perm.roles | length }}
                 </span>
                 <div class="perm-actions btn-group btn-group-sm">
-                    <a href="{{ url_for('tbl_permissions.edit', permission_id=perm.id) }}" class="btn btn-outline-secondary" title="Edit">
+                    <a href="{{ url_for('tbl_permissions.edit', permission_id=perm.id) }}" class="btn btn-outline-secondary" title="{{ t('btn.edit') }}">
                         <i class="bi bi-pencil"></i>
                     </a>
-                    <a href="{{ url_for('tbl_permissions.delete_confirm', permission_id=perm.id) }}" class="btn btn-outline-danger" title="Delete">
+                    <a href="{{ url_for('tbl_permissions.delete_confirm', permission_id=perm.id) }}" class="btn btn-outline-danger" title="{{ t('btn.delete') }}">
                         <i class="bi bi-trash3"></i>
                     </a>
                 </div>
@@ -197,8 +202,8 @@
 <!-- No-results hint (shown by search when nothing matches) -->
 <div id="permNoResults" class="perm-empty-hint text-center py-5">
     <i class="bi bi-search fs-1 text-muted opacity-50"></i>
-    <h6 class="text-muted mt-3">No permissions match your search</h6>
-    <p class="small text-muted mb-0">Try a different code, name, or keyword.</p>
+    <h6 class="text-dark mt-3 fw-bold">{{ t('perm.no_match') }}</h6>
+    <p class="small text-muted mb-0">{{ t('perm.no_match_hint') }}</p>
 </div>
 
 {% else %}
@@ -207,10 +212,10 @@
         <div class="text-muted mb-3">
             <i class="bi bi-key fs-1 opacity-50"></i>
         </div>
-        <h6 class="text-muted">No permissions defined yet</h6>
-        <p class="small text-muted mb-3">Create your first permission to start managing access control.</p>
+        <h6 class="text-dark fw-bold">{{ t('perm.empty_title') }}</h6>
+        <p class="small text-muted mb-3">{{ t('perm.empty_desc') }}</p>
         <a href="{{ url_for('tbl_permissions.create') }}" class="btn btn-primary btn-sm">
-            <i class="bi bi-plus-lg me-1"></i> Create Permission
+            <i class="bi bi-plus-lg me-1"></i> {{ t('perm.btn_new') }}
         </a>
     </div>
 </div>

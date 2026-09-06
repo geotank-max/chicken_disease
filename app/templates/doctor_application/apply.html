@@ -1,7 +1,7 @@
 {% extends "layouts/base.html" %}
-{% block title %}Apply as Doctor{% endblock %}
-{% block page_title %}Apply as Doctor{% endblock %}
-{% block page_subtitle %}Submit your credentials to become a verified veterinary doctor on IDNS.{% endblock %}
+{% block title %}{{ t('doc_app.apply_title', default='Apply as Doctor') }}{% endblock %}
+{% block page_title %}{{ t('doc_app.apply_title', default='Apply as Doctor') }}{% endblock %}
+{% block page_subtitle %}{{ t('doc_app.apply_subtitle', default='Submit your credentials to become a verified veterinary doctor on IDNS.') }}{% endblock %}
 
 {% block content %}
 <div class="row g-4">
@@ -14,7 +14,7 @@
                 <div class="d-flex align-items-center">
                     <i class="bi bi-exclamation-circle-fill me-2 fs-5"></i>
                     <div>
-                        <strong>Please fix the following errors:</strong>
+                        <strong>{{ t('common.fix_errors', default='Please fix the following errors:') }}</strong>
                         <ul class="mb-0 mt-1">
                         {% for field, errors in form.errors.items() %}
                             {% for error in errors %}
@@ -29,27 +29,27 @@
             {% endif %}
 
             <!-- Personal Info -->
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-header bg-white py-3">
-                    <h5 class="mb-0 fw-bold"><i class="bi bi-person-vcard me-2 text-primary"></i>Personal Information</h5>
+            <div class="card border shadow-sm mb-4">
+                <div class="card-header bg-light-subtle py-3">
+                    <h5 class="mb-0 fw-bold fs-6"><i class="bi bi-person-vcard me-2 text-primary"></i>{{ t('doc_app.personal_info', default='Personal Information') }}</h5>
                 </div>
                 <div class="card-body p-4">
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label class="form-label fw-bold">Full Name <span class="text-danger">*</span></label>
+                            <label class="form-label fw-bold">{{ t('doc_app.full_name', default='Full Name') }} <span class="text-danger">*</span></label>
                             {{ form.full_name(class="form-control" + (" is-invalid" if form.full_name.errors else "")) }}
                             {% if form.full_name.errors %}<div class="invalid-feedback">{{ form.full_name.errors[0] }}</div>{% endif %}
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-bold">Phone Number</label>
+                            <label class="form-label fw-bold">{{ t('doc_app.phone', default='Phone Number') }}</label>
                             {{ form.phone(class="form-control") }}
                         </div>
                         <div class="col-12">
-                            <label class="form-label fw-bold">Address</label>
+                            <label class="form-label fw-bold">{{ t('doc_app.address', default='Address') }}</label>
                             {{ form.address(class="form-control") }}
                         </div>
                         <div class="col-12">
-                            <label class="form-label fw-bold">Motivation / Experience</label>
+                            <label class="form-label fw-bold">{{ t('doc_app.motivation', default='Motivation / Experience') }}</label>
                             {{ form.motivation(class="form-control") }}
                         </div>
                     </div>
@@ -57,21 +57,21 @@
             </div>
 
             <!-- Document Uploads -->
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-header bg-white py-3">
-                    <h5 class="mb-0 fw-bold"><i class="bi bi-file-earmark-pdf me-2 text-danger"></i>Required Documents</h5>
+            <div class="card border shadow-sm mb-4">
+                <div class="card-header bg-light-subtle py-3">
+                    <h5 class="mb-0 fw-bold fs-6"><i class="bi bi-file-earmark-pdf me-2 text-danger"></i>{{ t('doc_app.required_docs', default='Required Documents') }}</h5>
                 </div>
                 <div class="card-body p-4">
-                    <p class="text-muted small mb-4">Upload PDF files only. Maximum 10MB per file.</p>
+                    <p class="text-muted small mb-4">{{ t('doc_app.docs_hint', default='Upload PDF files only. Maximum 10MB per file.') }}</p>
 
                     <div class="row g-4">
                         <div class="col-md-6">
-                            <div class="border rounded p-3 h-100 {% if form.pdf_dv_certificate.errors %}border-danger{% endif %}">
+                            <div class="border rounded p-3 h-100 bg-light-subtle {% if form.pdf_dv_certificate.errors %}border-danger{% endif %}">
                                 <div class="d-flex align-items-center mb-2">
                                     <i class="bi bi-file-earmark-medical text-primary fs-4 me-2"></i>
                                     <div>
-                                        <label class="form-label fw-bold mb-0">DV Certificate <span class="text-danger">*</span></label>
-                                        <small class="text-muted d-block">Veterinary degree certificate</small>
+                                        <label class="form-label fw-bold mb-0">{{ t('doc_app.doc_dv', default='DV Certificate') }} <span class="text-danger">*</span></label>
+                                        <small class="text-muted d-block">{{ t('doc_app.doc_dv_desc', default='Veterinary degree certificate') }}</small>
                                     </div>
                                 </div>
                                 {{ form.pdf_dv_certificate(class="form-control form-control-sm") }}
@@ -80,12 +80,12 @@
                         </div>
 
                         <div class="col-md-6">
-                            <div class="border rounded p-3 h-100 {% if form.pdf_id_card.errors %}border-danger{% endif %}">
+                            <div class="border rounded p-3 h-100 bg-light-subtle {% if form.pdf_id_card.errors %}border-danger{% endif %}">
                                 <div class="d-flex align-items-center mb-2">
                                     <i class="bi bi-person-badge text-primary fs-4 me-2"></i>
                                     <div>
-                                        <label class="form-label fw-bold mb-0">ID Card <span class="text-danger">*</span></label>
-                                        <small class="text-muted d-block">National identity card</small>
+                                        <label class="form-label fw-bold mb-0">{{ t('doc_app.doc_id', default='ID Card') }} <span class="text-danger">*</span></label>
+                                        <small class="text-muted d-block">{{ t('doc_app.doc_id_desc', default='National identity card') }}</small>
                                     </div>
                                 </div>
                                 {{ form.pdf_id_card(class="form-control form-control-sm") }}
@@ -94,12 +94,12 @@
                         </div>
 
                         <div class="col-md-6">
-                            <div class="border rounded p-3 h-100 {% if form.pdf_birth_certificate.errors %}border-danger{% endif %}">
+                            <div class="border rounded p-3 h-100 bg-light-subtle {% if form.pdf_birth_certificate.errors %}border-danger{% endif %}">
                                 <div class="d-flex align-items-center mb-2">
                                     <i class="bi bi-file-earmark-text text-primary fs-4 me-2"></i>
                                     <div>
-                                        <label class="form-label fw-bold mb-0">Birth Certificate <span class="text-danger">*</span></label>
-                                        <small class="text-muted d-block">Official birth document</small>
+                                        <label class="form-label fw-bold mb-0">{{ t('doc_app.doc_birth', default='Birth Certificate') }} <span class="text-danger">*</span></label>
+                                        <small class="text-muted d-block">{{ t('doc_app.doc_birth_desc', default='Official birth document') }}</small>
                                     </div>
                                 </div>
                                 {{ form.pdf_birth_certificate(class="form-control form-control-sm") }}
@@ -108,12 +108,12 @@
                         </div>
 
                         <div class="col-md-6">
-                            <div class="border rounded p-3 h-100">
+                            <div class="border rounded p-3 h-100 bg-light-subtle">
                                 <div class="d-flex align-items-center mb-2">
                                     <i class="bi bi-mortarboard text-primary fs-4 me-2"></i>
                                     <div>
-                                        <label class="form-label fw-bold mb-0">Diploma / Degree</label>
-                                        <small class="text-muted d-block">Optional additional qualification</small>
+                                        <label class="form-label fw-bold mb-0">{{ t('doc_app.doc_diploma', default='Diploma / Degree') }}</label>
+                                        <small class="text-muted d-block">{{ t('doc_app.doc_diploma_desc', default='Optional additional qualification') }}</small>
                                     </div>
                                 </div>
                                 {{ form.pdf_diploma(class="form-control form-control-sm") }}
@@ -126,10 +126,10 @@
             <!-- Submit -->
             <div class="d-flex gap-2 justify-content-between">
                 <a href="{{ url_for('expert_system.diagnose') }}" class="btn btn-outline-secondary px-4">
-                    <i class="bi bi-arrow-left me-1"></i> Cancel
+                    <i class="bi bi-arrow-left me-1"></i> {{ t('common.cancel', default='Cancel') }}
                 </a>
                 <button type="submit" class="btn btn-primary px-4 fw-bold">
-                    <i class="bi bi-send me-1"></i> Submit Application
+                    <i class="bi bi-send me-1"></i> {{ t('doc_app.btn_submit', default='Submit Application') }}
                 </button>
             </div>
         </form>
@@ -138,28 +138,28 @@
     <!-- Sidebar Info -->
     <div class="col-lg-4">
         <div class="position-sticky" style="top: 2rem;">
-            <div class="card border-0 shadow-sm bg-primary bg-opacity-10 border-primary border-opacity-25">
+            <div class="card border border-primary border-opacity-25 shadow-sm bg-primary bg-opacity-10">
                 <div class="card-body p-4">
-                    <h6 class="fw-bold text-primary mb-3"><i class="bi bi-info-circle me-2"></i>How it works</h6>
+                    <h6 class="fw-bold text-primary mb-3"><i class="bi bi-info-circle me-2"></i>{{ t('doc_app.how_it_works', default='How it works') }}</h6>
                     <ol class="small mb-0 ps-3">
-                        <li class="mb-2">Fill in your personal details</li>
-                        <li class="mb-2">Upload required PDF documents</li>
-                        <li class="mb-2">Submit your application</li>
-                        <li class="mb-2">Admin reviews your documents</li>
-                        <li>Once approved, your account is upgraded to Doctor</li>
+                        <li class="mb-2">{{ t('doc_app.step1', default='Fill in your personal details') }}</li>
+                        <li class="mb-2">{{ t('doc_app.step2', default='Upload required PDF documents') }}</li>
+                        <li class="mb-2">{{ t('doc_app.step3', default='Submit your application') }}</li>
+                        <li class="mb-2">{{ t('doc_app.step4', default='Admin reviews your documents') }}</li>
+                        <li>{{ t('doc_app.step5', default='Once approved, your account is upgraded to Doctor') }}</li>
                     </ol>
                 </div>
             </div>
 
-            <div class="card border-0 shadow-sm mt-3">
+            <div class="card border shadow-sm mt-3">
                 <div class="card-body p-4">
-                    <h6 class="fw-bold text-muted mb-3">Doctor privileges include:</h6>
+                    <h6 class="fw-bold text-muted mb-3">{{ t('doc_app.privileges_title', default='Doctor privileges include:') }}</h6>
                     <ul class="small mb-0 list-unstyled">
-                        <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>View dashboard analytics</li>
-                        <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Review diagnosis cases</li>
-                        <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Manage knowledge base</li>
-                        <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Author diagnostic rules</li>
-                        <li><i class="bi bi-check-circle text-success me-2"></i>Export case reports</li>
+                        <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>{{ t('doc_app.priv1', default='View dashboard analytics') }}</li>
+                        <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>{{ t('doc_app.priv2', default='Review diagnosis cases') }}</li>
+                        <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>{{ t('doc_app.priv3', default='Manage knowledge base') }}</li>
+                        <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>{{ t('doc_app.priv4', default='Author diagnostic rules') }}</li>
+                        <li><i class="bi bi-check-circle text-success me-2"></i>{{ t('doc_app.priv5', default='Export case reports') }}</li>
                     </ul>
                 </div>
             </div>

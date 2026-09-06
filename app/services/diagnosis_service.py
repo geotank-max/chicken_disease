@@ -49,7 +49,9 @@ class DiagnosisService:
                 "category": disease.category.name if disease.category else "",
                 "severity": disease.severity or "",
                 "description": disease.description or "",
+                "confidence": rule.confidence or 100.0,
             })
+            entry["confidence"] = max(entry.get("confidence", 0.0), rule.confidence or 100.0)
             for symptom in rule.symptoms:
                 entry["symptoms"].add(symptom.id)
                 symptom_to_diseases.setdefault(symptom.id, set()).add(disease.name)

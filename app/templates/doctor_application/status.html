@@ -1,12 +1,12 @@
 {% extends "layouts/base.html" %}
-{% block title %}Application Status{% endblock %}
-{% block page_title %}Application Submitted{% endblock %}
-{% block page_subtitle %}Your doctor application is being reviewed.{% endblock %}
+{% block title %}{{ t('doc_app.status_submitted_title', default='Application Submitted') }}{% endblock %}
+{% block page_title %}{{ t('doc_app.status_submitted_title', default='Application Submitted') }}{% endblock %}
+{% block page_subtitle %}{{ t('doc_app.status_submitted_subtitle', default='Your doctor application is being reviewed.') }}{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-lg-6">
-        <div class="card border-0 shadow-sm text-center overflow-hidden">
+        <div class="card border shadow-sm text-center overflow-hidden">
             <div class="card-body p-5">
                 <div class="mx-auto mb-4 d-flex align-items-center justify-content-center rounded-circle bg-{{ application.status_color }} bg-opacity-10" style="width: 80px; height: 80px;">
                     {% if application.status == 'pending' %}
@@ -18,36 +18,36 @@
                     {% endif %}
                 </div>
 
-                <h3 class="fw-bold mb-2">{{ application.status_label }}</h3>
+                <h3 class="fw-bold mb-2">{{ get_translated_option('doc_app_status', application.status) }}</h3>
                 <p class="text-muted mb-4">
                     {% if application.status == 'pending' %}
-                    Your application was submitted on {{ application.created_at.strftime('%d/%m/%Y at %H:%M') }}. An administrator will review your documents shortly.
+                    {{ t('doc_app.msg_pending', date=application.created_at.strftime('%d/%m/%Y %H:%M'), default='Your application was submitted on ' ~ application.created_at.strftime('%d/%m/%Y at %H:%M') ~ '. An administrator will review your documents shortly.') }}
                     {% elif application.status == 'approved' %}
-                    Congratulations! Your application has been approved. You now have Doctor privileges.
+                    {{ t('doc_app.msg_approved', default='Congratulations! Your application has been approved. You now have Doctor privileges.') }}
                     {% else %}
-                    Your application was not approved. Please contact the administrator for details.
+                    {{ t('doc_app.msg_rejected', default='Your application was not approved. Please contact the administrator for details.') }}
                     {% endif %}
                 </p>
 
                 {% if application.review_notes %}
-                <div class="bg-light rounded p-3 text-start mb-4">
-                    <small class="fw-bold text-muted text-uppercase">Admin Notes:</small>
+                <div class="bg-light-subtle border rounded p-3 text-start mb-4">
+                    <small class="fw-bold text-muted text-uppercase">{{ t('doc_app.admin_notes', default='Admin Notes:') }}</small>
                     <p class="mb-0 mt-1">{{ application.review_notes }}</p>
                 </div>
                 {% endif %}
 
-                <div class="bg-light rounded p-3 text-start">
+                <div class="bg-light-subtle border rounded p-3 text-start">
                     <div class="row small">
-                        <div class="col-6 mb-2"><span class="text-muted">Name:</span><br><strong>{{ application.full_name }}</strong></div>
-                        <div class="col-6 mb-2"><span class="text-muted">Phone:</span><br><strong>{{ application.phone or 'N/A' }}</strong></div>
-                        <div class="col-6"><span class="text-muted">Submitted:</span><br><strong>{{ application.created_at.strftime('%d/%m/%Y') }}</strong></div>
-                        <div class="col-6"><span class="text-muted">Documents:</span><br><strong>{{ 3 + (1 if application.pdf_diploma else 0) }} PDFs</strong></div>
+                        <div class="col-6 mb-2"><span class="text-muted">{{ t('doc_app.full_name', default='Name') }}:</span><br><strong>{{ application.full_name }}</strong></div>
+                        <div class="col-6 mb-2"><span class="text-muted">{{ t('doc_app.phone', default='Phone') }}:</span><br><strong>{{ application.phone or t('doc_app.not_provided', default='N/A') }}</strong></div>
+                        <div class="col-6"><span class="text-muted">{{ t('doc_app.col_date', default='Submitted') }}:</span><br><strong>{{ application.created_at.strftime('%d/%m/%Y') }}</strong></div>
+                        <div class="col-6"><span class="text-muted">{{ t('doc_app.col_docs', default='Documents') }}:</span><br><strong>{{ 3 + (1 if application.pdf_diploma else 0) }} {{ t('doc_app.files', default='PDFs') }}</strong></div>
                     </div>
                 </div>
             </div>
-            <div class="card-footer bg-white py-3">
+            <div class="card-footer bg-light-subtle py-3">
                 <a href="{{ url_for('expert_system.diagnose') }}" class="btn btn-primary px-4">
-                    <i class="bi bi-arrow-left me-1"></i> Back to Diagnosis
+                    <i class="bi bi-arrow-left me-1"></i> {{ t('doc_app.btn_back_diag', default='Back to Diagnosis') }}
                 </a>
             </div>
         </div>

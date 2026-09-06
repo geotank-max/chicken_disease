@@ -1,47 +1,46 @@
 {% extends "layouts/base.html" %}
-{% block title %}ព័ត៌មានលម្អិតអ្នកប្រើប្រាស់{% endblock %}
+{% block title %}{{ t('users.detail_title', default='User Details') }}{% endblock %}
+{% block page_title %}{{ t('users.detail_title', default='User Details') }}{% endblock %}
+{% block page_subtitle %}{{ t('users.user_heading', username=user.username, default='User: ' ~ user.username) }}{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="h3 mb-0">អ្នកប្រើប្រាស់៖ {{ user.username }}</h1>
-    <div>
-        {# Use table_users.edit #}
-        <a href="{{ url_for('tbl_users.edit', user_id=user.id) }} "
+    <a href="{{ url_for('tbl_users.index') }}" class="text-decoration-none text-muted small">
+        <i class="bi bi-arrow-left me-1"></i> {{ t('users.btn_back_list', default='Back to List') }}
+    </a>
+    <div class="btn-group">
+        <a href="{{ url_for('tbl_users.edit', user_id=user.id) }}"
             class="btn btn-sm btn-outline-secondary">
-            កែប្រែ
+            <i class="bi bi-pencil me-1"></i> {{ t('common.edit', default='Edit') }}
         </a>
-        {# Use table_users.delete_confirm #}
-        <a href="{{ url_for('tbl_users.delete_confirm', user_id=user.id) }} "
+        <a href="{{ url_for('tbl_users.delete_confirm', user_id=user.id) }}"
             class="btn btn-sm btn-outline-danger">
-            លុប
-        </a>
-        {# Use table_users.index #}
-        <a href="{{ url_for('tbl_users.index') }} "
-            class="btn btn-sm btn-outline-primary">
-            ត្រឡប់ទៅបញ្ជី
+            <i class="bi bi-trash me-1"></i> {{ t('common.delete', default='Delete') }}
         </a>
     </div>
 </div>
 
-<div class="card mb-3">
-    <div class="card-body">
-        <p><strong>ឈ្មោះអ្នកប្រើប្រាស់៖</strong>{{ user.username }}</p>
-        <p><strong>ឈ្មោះពេញ៖</strong>{{ user.full_name }}</p>
-        <p><strong>អ៊ីមែល៖</strong>{{ user.email }}</p>
-        <p>
-            <strong>ស្ថានភាព៖</strong>
+<div class="card border shadow-sm mb-3">
+    <div class="card-body p-4">
+        <p class="mb-2"><strong>{{ t('users.username', default='Username') }}:</strong> {{ user.username }}</p>
+        <p class="mb-2"><strong>{{ t('users.full_name', default='Full Name') }}:</strong> {{ user.full_name }}</p>
+        <p class="mb-2"><strong>{{ t('users.email', default='Email') }}:</strong> {{ user.email }}</p>
+        <p class="mb-2">
+            <strong>{{ t('users.col_status', default='Status') }}:</strong>
             {% if user.is_active %}
-                <span class="badge text-bg-success">សកម្ម</span>
+                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25">{{ t('users.status_active', default='Active') }}</span>
             {% else %}
-                <span class="badge text-bg-secondary">អសកម្ម</span>
+                <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25">{{ t('users.status_inactive', default='Inactive') }}</span>
             {% endif %}
         </p>
-        <p>
-            <strong>តួនាទី៖</strong>
-            {% if user.role %}
-                {{ user.role | map(attribute="name") | join(",")}}
+        <p class="mb-0">
+            <strong>{{ t('users.col_role', default='Role') }}:</strong>
+            {% if user.roles %}
+                {% for role in user.roles %}
+                    <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25">{{ get_translated_role(role.name) }}</span>
+                {% endfor %}
             {% else %}
-                <span class="text-muted">គ្មានតួនាទី</span>
+                <span class="text-muted small fst-italic">{{ t('users.no_role', default='No Role') }}</span>
             {% endif %}
         </p>
     </div>

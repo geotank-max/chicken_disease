@@ -2,9 +2,9 @@
     {{ form.hidden_tag() }}
 
     <div class="mb-3">
-        <label for="code" class="form-label small fw-semibold">Permission Code</label>
+        <label for="code" class="form-label small fw-semibold">{{ t('perm.code', default='Permission Code') }}</label>
         {{ form.code(class="form-control", placeholder="e.g. manage_users", id="code") }}
-        <div class="form-text">Unique identifier used in code. Use snake_case.</div>
+        <div class="form-text text-muted">{{ t('perm.code_hint', default='Unique identifier used in code. Use snake_case.') }}</div>
         {% if form.code.errors %}
         <div class="text-danger small mt-1">
             {% for error in form.code.errors %}<div>{{ error }}</div>{% endfor %}
@@ -13,7 +13,7 @@
     </div>
 
     <div class="mb-3">
-        <label for="name" class="form-label small fw-semibold">Display Name</label>
+        <label for="name" class="form-label small fw-semibold">{{ t('perm.display_name', default='Display Name') }}</label>
         {{ form.name(class="form-control", placeholder="e.g. Manage Users", id="name") }}
         {% if form.name.errors %}
         <div class="text-danger small mt-1">
@@ -23,9 +23,9 @@
     </div>
 
     <div class="mb-3">
-        <label for="module" class="form-label small fw-semibold">Module</label>
+        <label for="module" class="form-label small fw-semibold">{{ t('perm.module', default='Module') }}</label>
         {{ form.module(class="form-control", placeholder="e.g. Users, Roles, Expert System", id="module") }}
-        <div class="form-text">Group permissions by module for easier management.</div>
+        <div class="form-text text-muted">{{ t('perm.module_hint', default='Group permissions by module for easier management.') }}</div>
         {% if form.module.errors %}
         <div class="text-danger small mt-1">
             {% for error in form.module.errors %}<div>{{ error }}</div>{% endfor %}
@@ -34,12 +34,12 @@
     </div>
 
     <div class="mb-4">
-        <label for="description" class="form-label small fw-semibold">Description <span class="text-muted fw-normal">(optional)</span></label>
-        {{ form.description(class="form-control", rows=3, placeholder="What does this permission allow?", id="description") }}
+        <label for="description" class="form-label small fw-semibold">{{ t('perm.description', default='Description') }} <span class="text-muted fw-normal">({{ t('common.optional', default='optional') }})</span></label>
+        {{ form.description(class="form-control", rows=3, placeholder=t('perm.description_ph', default='What does this permission allow?'), id="description") }}
     </div>
 
-    <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+    <div class="d-flex justify-content-between align-items-center pt-3 border-top">
         {{ form.submit(class="btn btn-primary px-4") }}
-        <a href="{{ url_for('tbl_permissions.index') }}" class="btn btn-link text-muted text-decoration-none">Cancel</a>
+        <a href="{{ url_for('tbl_permissions.index') }}" class="btn btn-link text-muted text-decoration-none">{{ t('common.cancel', default='Cancel') }}</a>
     </div>
 </form>

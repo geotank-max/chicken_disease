@@ -65,26 +65,86 @@
     </script>
     <style>
         * { box-sizing: border-box; }
+
+        :root {
+            --auth-bg: #f0fdf4;
+            --card-bg: #ffffff;
+            --card-border: #e2e8f0;
+            --text-title: #0f172a;
+            --text-subtitle: #64748b;
+            --text-label: #334155;
+            --input-bg: #ffffff;
+            --input-border: #e2e8f0;
+            --input-color: #0f172a;
+            --input-placeholder: #94a3b8;
+            --input-icon: #94a3b8;
+            --footer-border: #f1f5f9;
+            --divider-border: #e5e7eb;
+            --divider-text: #9ca3af;
+            --google-btn-bg: #ffffff;
+            --google-btn-border: #e5e7eb;
+            --google-btn-color: #374151;
+            --google-btn-hover-border: #2563eb;
+            --card-shadow: 0 20px 50px rgba(5, 150, 105, 0.08);
+            --dropdown-bg: #ffffff;
+            --dropdown-border: #e2e8f0;
+            --dropdown-color: #334155;
+            --dropdown-hover-bg: #f8fafc;
+            --btn-outline-border: #cbd5e1;
+            --btn-outline-color: #64748b;
+        }
+
+        [data-theme="dark"] {
+            --auth-bg: #090d16;
+            --card-bg: #111827;
+            --card-border: #1f293d;
+            --text-title: #f3f4f6;
+            --text-subtitle: #94a3b8;
+            --text-label: #cbd5e1;
+            --input-bg: #0f172a;
+            --input-border: #1f293d;
+            --input-color: #f3f4f6;
+            --input-placeholder: #64748b;
+            --input-icon: #64748b;
+            --footer-border: #1f293d;
+            --divider-border: #1f293d;
+            --divider-text: #64748b;
+            --google-btn-bg: #1e293b;
+            --google-btn-border: #1f293d;
+            --google-btn-color: #f3f4f6;
+            --google-btn-hover-border: #38bdf8;
+            --card-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+            --dropdown-bg: #1e293b;
+            --dropdown-border: #1f293d;
+            --dropdown-color: #cbd5e1;
+            --dropdown-hover-bg: #334155;
+            --btn-outline-border: #334155;
+            --btn-outline-color: #cbd5e1;
+        }
+
         body {
             font-family: 'Inter', 'Noto Sans Khmer', sans-serif;
-            background: #f0fdf4;
+            background: var(--auth-bg);
+            color: var(--text-title);
             margin: 0;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 1rem;
+            transition: background-color 0.2s ease, color 0.2s ease;
         }
         .register-card {
             display: flex;
-            background: #fff;
+            background: var(--card-bg);
             border-radius: 1rem;
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 20px 50px rgba(5, 150, 105, 0.08);
+            border: 1px solid var(--card-border);
+            box-shadow: var(--card-shadow);
             overflow: hidden;
             width: 100%;
             max-width: 900px;
             min-height: 520px;
+            transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
         }
         .register-brand {
             flex: 0 0 290px;
@@ -145,14 +205,14 @@
             z-index: 10;
         }
         .register-form-inner { width: 100%; max-width: 380px; margin: 0 auto; }
-        .register-title { font-size: 1.35rem; font-weight: 700; color: #0f172a; margin-bottom: 0.25rem; }
-        .register-subtitle { font-size: 0.85rem; color: #64748b; margin-bottom: 1.5rem; }
+        .register-title { font-size: 1.35rem; font-weight: 700; color: var(--text-title); margin-bottom: 0.25rem; }
+        .register-subtitle { font-size: 0.85rem; color: var(--text-subtitle); margin-bottom: 1.5rem; }
 
         .form-group { margin-bottom: 1.25rem; }
         .form-group .form-label {
             font-size: 0.78rem;
             font-weight: 600;
-            color: #334155;
+            color: var(--text-label);
             margin-bottom: 0.4rem;
         }
         .input-icon-wrapper { position: relative; }
@@ -161,24 +221,31 @@
             left: 0.85rem;
             top: 50%;
             transform: translateY(-50%);
-            color: #94a3b8;
+            color: var(--input-icon);
             font-size: 1rem;
             pointer-events: none;
         }
         .input-with-icon {
             padding-left: 2.5rem;
-            padding-right: 0.85rem;
+            padding-right: 2.5rem;
             height: 44px;
             border-radius: 0.5rem;
-            border: 1.5px solid #e2e8f0;
+            border: 1.5px solid var(--input-border);
+            background: var(--input-bg);
+            color: var(--input-color);
             font-size: 0.875rem;
-            transition: border-color 0.15s, box-shadow 0.15s;
+            transition: border-color 0.15s, box-shadow 0.15s, background-color 0.15s, color 0.15s;
             width: 100%;
+        }
+        .input-with-icon::placeholder {
+            color: var(--input-placeholder);
         }
         .input-with-icon:focus {
             border-color: #059669;
             box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.15);
             outline: none;
+            background: var(--input-bg);
+            color: var(--input-color);
         }
         .password-toggle {
             position: absolute;
@@ -187,13 +254,13 @@
             transform: translateY(-50%);
             background: none;
             border: none;
-            color: #94a3b8;
+            color: var(--input-icon);
             cursor: pointer;
             padding: 0.25rem;
             font-size: 1rem;
             line-height: 1;
         }
-        .password-toggle:hover { color: #334155; }
+        .password-toggle:hover { color: var(--text-label); }
 
         .form-row { display: flex; gap: 1rem; }
         .form-row .form-group { flex: 1; }
@@ -222,11 +289,67 @@
             text-align: center;
             margin-top: 1.75rem;
             padding-top: 1.25rem;
-            border-top: 1px solid #f1f5f9;
+            border-top: 1px solid var(--footer-border);
         }
-        .register-footer p { font-size: 0.82rem; color: #64748b; margin: 0; }
+        .register-footer p { font-size: 0.82rem; color: var(--text-subtitle); margin: 0; }
         .register-footer a { color: #059669; font-weight: 600; text-decoration: none; }
         .register-footer a:hover { text-decoration: underline; }
+
+        .auth-divider {
+            display: flex;
+            align-items: center;
+            margin-top: 1.25rem;
+        }
+        .auth-divider hr {
+            flex: 1;
+            border: none;
+            border-top: 1px solid var(--divider-border);
+            margin: 0;
+        }
+        .auth-divider span {
+            padding: 0 0.75rem;
+            font-size: 0.78rem;
+            color: var(--divider-text);
+            font-weight: 500;
+        }
+
+        .btn-google {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            width: 100%;
+            height: 44px;
+            border-radius: 0.5rem;
+            border: 1.5px solid var(--google-btn-border);
+            background: var(--google-btn-bg);
+            color: var(--google-btn-color);
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-decoration: none;
+            margin-top: 1rem;
+            transition: border-color 0.15s, box-shadow 0.15s, background-color 0.15s, color 0.15s;
+        }
+        .btn-google:hover {
+            border-color: var(--google-btn-hover-border);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+            color: var(--google-btn-color);
+        }
+
+        .dropdown-menu {
+            background-color: var(--dropdown-bg);
+            border: 1px solid var(--dropdown-border);
+        }
+        .dropdown-item {
+            color: var(--dropdown-color);
+        }
+        .dropdown-item:hover, .dropdown-item:focus {
+            background-color: var(--dropdown-hover-bg);
+        }
+        .theme-toggle-btn {
+            border-color: var(--btn-outline-border);
+            color: var(--btn-outline-color);
+        }
 
         .alert-sm {
             font-size: 0.8rem;
@@ -371,7 +494,7 @@
                                     name="password"
                                     placeholder="{{ t('auth.password') }}"
                                     required>
-                                <button type="button" class="password-toggle" id="togglePassword" aria-label="Show password">
+                                <button type="button" class="password-toggle" data-target="password" aria-label="Show password">
                                     <i class="bi bi-eye"></i>
                                 </button>
                             </div>
@@ -387,6 +510,9 @@
                                     name="confirm_password"
                                     placeholder="{{ t('auth.confirm_password') }}"
                                     required>
+                                <button type="button" class="password-toggle" data-target="confirm_password" aria-label="Show password">
+                                    <i class="bi bi-eye"></i>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -401,18 +527,12 @@
                 </div>
 
                 <!-- Google OAuth divider and button -->
-                <div style="display:flex; align-items:center; margin-top:1.25rem;">
-                    <hr style="flex:1; border:none; border-top:1px solid #e5e7eb;">
-                    <span style="padding:0 0.75rem; font-size:0.78rem; color:#9ca3af; font-weight:500;">OR</span>
-                    <hr style="flex:1; border:none; border-top:1px solid #e5e7eb;">
+                <div class="auth-divider">
+                    <hr>
+                    <span>OR</span>
+                    <hr>
                 </div>
-                <a href="{{ url_for('oauth.google_login') }}" class="btn-google" style="
-                    display:flex; align-items:center; justify-content:center; gap:0.5rem;
-                    width:100%; height:44px; border-radius:0.5rem; border:1.5px solid #e5e7eb;
-                    background:#fff; color:#374151; font-size:0.875rem; font-weight:600;
-                    text-decoration:none; margin-top:1rem; transition:border-color 0.15s, box-shadow 0.15s;
-                " onmouseover="this.style.borderColor='#2563eb'; this.style.boxShadow='0 0 0 3px rgba(37,99,235,0.1)'"
-                   onmouseout="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none'">
+                <a href="{{ url_for('oauth.google_login') }}" class="btn-google">
                     <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59a14.5 14.5 0 0 1 0-9.18l-7.98-6.19a23.99 23.99 0 0 0 0 21.56l7.98-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
                     Sign up with Google
                 </a>

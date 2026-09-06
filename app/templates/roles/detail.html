@@ -1,19 +1,19 @@
 {% extends "layouts/base.html" %}
-{% block title %}Role: {{ role.name }}{% endblock %}
-{% block page_title %}{{ role.name }}{% endblock %}
-{% block page_subtitle %}Role details and assigned permissions{% endblock %}
+{% block title %}{{ get_translated_role(role.name) }} - {{ t('roles.manage_title') }}{% endblock %}
+{% block page_title %}{{ get_translated_role(role.name) }}{% endblock %}
+{% block page_subtitle %}{{ t('roles.manage_subtitle') }}{% endblock %}
 
 {% block content %}
 <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
     <a href="{{ url_for('tbl_roles.index') }}" class="text-decoration-none text-muted">
-        <i class="bi bi-arrow-left me-1"></i> Back to Roles
+        <i class="bi bi-arrow-left me-1"></i> {{ t('roles.btn_back') }}
     </a>
     <div class="d-flex gap-2">
         <a href="{{ url_for('tbl_roles.edit', role_id=role.id) }}" class="btn btn-sm btn-primary">
-            <i class="bi bi-pencil me-1"></i> Edit Role
+            <i class="bi bi-pencil me-1"></i> {{ t('btn.edit') }}
         </a>
         <a href="{{ url_for('tbl_roles.delete_confirm', role_id=role.id) }}" class="btn btn-sm btn-outline-danger">
-            <i class="bi bi-trash me-1"></i> Delete
+            <i class="bi bi-trash me-1"></i> {{ t('btn.delete') }}
         </a>
     </div>
 </div>
@@ -21,17 +21,17 @@
 <div class="row g-4">
     <!-- Role Info -->
     <div class="col-lg-4">
-        <div class="card border-0 shadow-sm">
+        <div class="card border shadow-sm">
             <div class="card-body text-center py-4">
                 <div class="mx-auto mb-3 d-flex align-items-center justify-content-center rounded-circle bg-primary bg-opacity-10" style="width: 72px; height: 72px;">
                     <i class="bi bi-shield-check text-primary fs-2"></i>
                 </div>
-                <h4 class="fw-bold mb-1">{{ role.name }}</h4>
-                <p class="text-muted mb-3">{{ role.description or 'No description provided' }}</p>
+                <h4 class="fw-bold mb-1 text-dark">{{ get_translated_role(role.name) }}</h4>
+                <p class="text-muted mb-3">{{ role.description or t('roles.no_desc') }}</p>
                 <div class="d-flex justify-content-center gap-3">
                     <div class="text-center">
                         <div class="fs-4 fw-bold text-primary">{{ role.permissions|length }}</div>
-                        <small class="text-muted">Permissions</small>
+                        <small class="text-muted">{{ t('nav.permissions') }}</small>
                     </div>
                 </div>
             </div>
@@ -40,9 +40,9 @@
 
     <!-- Permissions List -->
     <div class="col-lg-8">
-        <div class="card border-0 shadow-sm">
-            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-                <h5 class="mb-0 fw-bold"><i class="bi bi-key me-2 text-primary"></i>Assigned Permissions</h5>
+        <div class="card border shadow-sm">
+            <div class="card-header border-bottom py-3 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold text-dark"><i class="bi bi-key me-2 text-primary"></i>{{ t('roles.permissions_assigned') }}</h5>
                 <span class="badge bg-primary rounded-pill">{{ role.permissions|length }}</span>
             </div>
             <div class="card-body p-0">
@@ -52,15 +52,15 @@
                     {% for perm in role.permissions|sort(attribute='module') %}
                     {% if perm.module != ns.current_module %}
                     {% set ns.current_module = perm.module %}
-                    <div class="list-group-item bg-light py-2 px-4">
+                    <div class="list-group-item bg-light-subtle py-2 px-4 border-bottom">
                         <small class="fw-bold text-uppercase text-muted">{{ perm.module or 'General' }}</small>
                     </div>
                     {% endif %}
                     <div class="list-group-item px-4 py-3">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <span class="fw-medium">{{ perm.name }}</span>
-                                <small class="text-muted ms-2">({{ perm.code }})</small>
+                                <span class="fw-medium text-dark">{{ perm.name }}</span>
+                                <code class="small ms-2 text-primary">({{ perm.code }})</code>
                             </div>
                             <i class="bi bi-check-circle-fill text-success"></i>
                         </div>
@@ -70,7 +70,7 @@
                 {% else %}
                 <div class="text-center py-5">
                     <i class="bi bi-key text-muted display-4 d-block mb-3"></i>
-                    <p class="text-muted mb-0">No permissions assigned to this role yet.</p>
+                    <p class="text-muted mb-0">{{ t('roles.no_perms_assigned') }}</p>
                 </div>
                 {% endif %}
             </div>

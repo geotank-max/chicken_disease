@@ -1,12 +1,12 @@
 {% extends "layouts/base.html" %}
-{% block title %}Review Application{% endblock %}
-{% block page_title %}Review Application{% endblock %}
-{% block page_subtitle %}Application #{{ application.id }} from {{ application.full_name }}{% endblock %}
+{% block title %}{{ t('doc_app.review_title', default='Review Application') }}{% endblock %}
+{% block page_title %}{{ t('doc_app.review_title', default='Review Application') }}{% endblock %}
+{% block page_subtitle %}{{ t('doc_app.application_num', id=application.id, name=application.full_name, default='Application #' ~ application.id ~ ' from ' ~ application.full_name) }}{% endblock %}
 
 {% block content %}
 <div class="d-flex mb-4">
-    <a href="{{ url_for('doctor_app.admin_list') }}" class="text-decoration-none text-muted">
-        <i class="bi bi-arrow-left me-1"></i> Back to Applications
+    <a href="{{ url_for('doctor_app.admin_list') }}" class="text-decoration-none text-muted small">
+        <i class="bi bi-arrow-left me-1"></i> {{ t('doc_app.btn_back_list', default='Back to Applications') }}
     </a>
 </div>
 
@@ -17,45 +17,45 @@
         <div class="alert alert-{{ application.status_color }} d-flex align-items-center mb-4">
             <i class="bi bi-{% if application.status == 'pending' %}hourglass-split{% elif application.status == 'approved' %}check-circle{% else %}x-circle{% endif %} me-2 fs-5"></i>
             <div>
-                <strong>Status: {{ application.status_label }}</strong>
+                <strong>{{ t('doc_app.col_status', default='Status') }}: {{ get_translated_option('doc_app_status', application.status) }}</strong>
                 {% if application.reviewed_at %}
-                <span class="ms-2 small">Reviewed {{ application.reviewed_at.strftime('%d/%m/%Y %H:%M') }}</span>
+                <span class="ms-2 small">{{ t('doc_app.reviewed_on', date=application.reviewed_at.strftime('%d/%m/%Y %H:%M'), default='Reviewed ' ~ application.reviewed_at.strftime('%d/%m/%Y %H:%M')) }}</span>
                 {% endif %}
             </div>
         </div>
 
         <!-- Personal Info -->
-        <div class="card border-0 shadow-sm mb-4">
-            <div class="card-header bg-white py-3">
-                <h5 class="mb-0 fw-bold"><i class="bi bi-person-vcard me-2 text-primary"></i>Applicant Information</h5>
+        <div class="card border shadow-sm mb-4">
+            <div class="card-header bg-light-subtle py-3">
+                <h5 class="mb-0 fw-bold fs-6"><i class="bi bi-person-vcard me-2 text-primary"></i>{{ t('doc_app.personal_info', default='Applicant Information') }}</h5>
             </div>
             <div class="card-body p-4">
                 <div class="row g-3">
                     <div class="col-md-6">
-                        <label class="small text-muted fw-bold text-uppercase">Full Name</label>
+                        <label class="small text-muted fw-bold text-uppercase">{{ t('doc_app.full_name', default='Full Name') }}</label>
                         <p class="fw-medium mb-0">{{ application.full_name }}</p>
                     </div>
                     <div class="col-md-6">
-                        <label class="small text-muted fw-bold text-uppercase">Username</label>
+                        <label class="small text-muted fw-bold text-uppercase">{{ t('doc_app.username', default='Username') }}</label>
                         <p class="fw-medium mb-0">@{{ application.user.username if application.user else 'N/A' }}</p>
                     </div>
                     <div class="col-md-6">
-                        <label class="small text-muted fw-bold text-uppercase">Phone</label>
-                        <p class="fw-medium mb-0">{{ application.phone or 'Not provided' }}</p>
+                        <label class="small text-muted fw-bold text-uppercase">{{ t('doc_app.phone', default='Phone') }}</label>
+                        <p class="fw-medium mb-0">{{ application.phone or t('doc_app.not_provided', default='Not provided') }}</p>
                     </div>
                     <div class="col-md-6">
-                        <label class="small text-muted fw-bold text-uppercase">Email</label>
+                        <label class="small text-muted fw-bold text-uppercase">{{ t('doc_app.email', default='Email') }}</label>
                         <p class="fw-medium mb-0">{{ application.user.email if application.user else 'N/A' }}</p>
                     </div>
                     {% if application.address %}
                     <div class="col-12">
-                        <label class="small text-muted fw-bold text-uppercase">Address</label>
+                        <label class="small text-muted fw-bold text-uppercase">{{ t('doc_app.address', default='Address') }}</label>
                         <p class="fw-medium mb-0">{{ application.address }}</p>
                     </div>
                     {% endif %}
                     {% if application.motivation %}
                     <div class="col-12">
-                        <label class="small text-muted fw-bold text-uppercase">Motivation / Experience</label>
+                        <label class="small text-muted fw-bold text-uppercase">{{ t('doc_app.motivation', default='Motivation / Experience') }}</label>
                         <p class="fw-medium mb-0">{{ application.motivation }}</p>
                     </div>
                     {% endif %}
@@ -64,9 +64,9 @@
         </div>
 
         <!-- Documents -->
-        <div class="card border-0 shadow-sm mb-4">
-            <div class="card-header bg-white py-3">
-                <h5 class="mb-0 fw-bold"><i class="bi bi-file-earmark-pdf me-2 text-danger"></i>Submitted Documents</h5>
+        <div class="card border shadow-sm mb-4">
+            <div class="card-header bg-light-subtle py-3">
+                <h5 class="mb-0 fw-bold fs-6"><i class="bi bi-file-earmark-pdf me-2 text-danger"></i>{{ t('doc_app.required_docs', default='Submitted Documents') }}</h5>
             </div>
             <div class="card-body p-4">
                 <div class="row g-3">
@@ -74,10 +74,10 @@
                         <div class="border rounded p-3 d-flex align-items-center">
                             <i class="bi bi-file-earmark-pdf text-danger fs-4 me-3"></i>
                             <div class="flex-grow-1">
-                                <div class="fw-medium small">DV Certificate</div>
-                                <small class="text-muted">Required</small>
+                                <div class="fw-medium small">{{ t('doc_app.doc_dv', default='DV Certificate') }}</div>
+                                <small class="text-muted">{{ t('doc_app.required_badge', default='Required') }}</small>
                             </div>
-                            <a href="{{ url_for('doctor_app.serve_upload', filename=application.pdf_dv_certificate) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                            <a href="{{ url_for('doctor_app.serve_upload', filename=application.pdf_dv_certificate) }}" target="_blank" class="btn btn-sm btn-outline-primary" title="{{ t('common.download', default='Download') }}">
                                 <i class="bi bi-download"></i>
                             </a>
                         </div>
@@ -86,10 +86,10 @@
                         <div class="border rounded p-3 d-flex align-items-center">
                             <i class="bi bi-file-earmark-pdf text-danger fs-4 me-3"></i>
                             <div class="flex-grow-1">
-                                <div class="fw-medium small">ID Card</div>
-                                <small class="text-muted">Required</small>
+                                <div class="fw-medium small">{{ t('doc_app.doc_id', default='ID Card') }}</div>
+                                <small class="text-muted">{{ t('doc_app.required_badge', default='Required') }}</small>
                             </div>
-                            <a href="{{ url_for('doctor_app.serve_upload', filename=application.pdf_id_card) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                            <a href="{{ url_for('doctor_app.serve_upload', filename=application.pdf_id_card) }}" target="_blank" class="btn btn-sm btn-outline-primary" title="{{ t('common.download', default='Download') }}">
                                 <i class="bi bi-download"></i>
                             </a>
                         </div>
@@ -98,10 +98,10 @@
                         <div class="border rounded p-3 d-flex align-items-center">
                             <i class="bi bi-file-earmark-pdf text-danger fs-4 me-3"></i>
                             <div class="flex-grow-1">
-                                <div class="fw-medium small">Birth Certificate</div>
-                                <small class="text-muted">Required</small>
+                                <div class="fw-medium small">{{ t('doc_app.doc_birth', default='Birth Certificate') }}</div>
+                                <small class="text-muted">{{ t('doc_app.required_badge', default='Required') }}</small>
                             </div>
-                            <a href="{{ url_for('doctor_app.serve_upload', filename=application.pdf_birth_certificate) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                            <a href="{{ url_for('doctor_app.serve_upload', filename=application.pdf_birth_certificate) }}" target="_blank" class="btn btn-sm btn-outline-primary" title="{{ t('common.download', default='Download') }}">
                                 <i class="bi bi-download"></i>
                             </a>
                         </div>
@@ -111,10 +111,10 @@
                         <div class="border rounded p-3 d-flex align-items-center">
                             <i class="bi bi-file-earmark-pdf text-danger fs-4 me-3"></i>
                             <div class="flex-grow-1">
-                                <div class="fw-medium small">Diploma / Degree</div>
-                                <small class="text-muted">Optional</small>
+                                <div class="fw-medium small">{{ t('doc_app.doc_diploma', default='Diploma / Degree') }}</div>
+                                <small class="text-muted">{{ t('doc_app.optional_badge', default='Optional') }}</small>
                             </div>
-                            <a href="{{ url_for('doctor_app.serve_upload', filename=application.pdf_diploma) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                            <a href="{{ url_for('doctor_app.serve_upload', filename=application.pdf_diploma) }}" target="_blank" class="btn btn-sm btn-outline-primary" title="{{ t('common.download', default='Download') }}">
                                 <i class="bi bi-download"></i>
                             </a>
                         </div>
@@ -126,38 +126,38 @@
 
         <!-- Review Form (only if pending) -->
         {% if application.status == 'pending' %}
-        <div class="card border-0 shadow-sm">
-            <div class="card-header bg-white py-3">
-                <h5 class="mb-0 fw-bold"><i class="bi bi-patch-check me-2 text-primary"></i>Make Decision</h5>
+        <div class="card border shadow-sm">
+            <div class="card-header bg-light-subtle py-3">
+                <h5 class="mb-0 fw-bold fs-6"><i class="bi bi-patch-check me-2 text-primary"></i>{{ t('doc_app.decision_card', default='Make Decision') }}</h5>
             </div>
             <div class="card-body p-4">
                 <form method="post">
                     {{ form.hidden_tag() }}
                     <div class="row g-3">
                         <div class="col-md-4">
-                            <label class="form-label fw-bold">Decision</label>
+                            <label class="form-label fw-bold">{{ t('doc_app.decision_label', default='Decision') }}</label>
                             {{ form.action(class="form-select") }}
                         </div>
                         <div class="col-md-8">
-                            <label class="form-label fw-bold">Notes (optional)</label>
+                            <label class="form-label fw-bold">{{ t('doc_app.notes_label', default='Notes (optional)') }}</label>
                             {{ form.review_notes(class="form-control") }}
                         </div>
                     </div>
                     <div class="d-flex gap-2 mt-4">
                         <button type="submit" class="btn btn-primary fw-bold px-4">
-                            <i class="bi bi-check-lg me-1"></i> Submit Decision
+                            <i class="bi bi-check-lg me-1"></i> {{ t('doc_app.btn_decision', default='Submit Decision') }}
                         </button>
                     </div>
                 </form>
             </div>
         </div>
         {% elif application.review_notes %}
-        <div class="card border-0 shadow-sm">
-            <div class="card-header bg-white py-3">
-                <h5 class="mb-0 fw-bold"><i class="bi bi-chat-text me-2 text-primary"></i>Review Notes</h5>
+        <div class="card border shadow-sm">
+            <div class="card-header bg-light-subtle py-3">
+                <h5 class="mb-0 fw-bold fs-6"><i class="bi bi-chat-text me-2 text-primary"></i>{{ t('doc_app.admin_notes', default='Review Notes') }}</h5>
             </div>
             <div class="card-body p-4">
-                <p class="mb-1"><strong>Reviewed by:</strong> {{ application.reviewed_by.full_name if application.reviewed_by else 'N/A' }}</p>
+                <p class="mb-1"><strong>{{ t('doc_app.reviewed_by', default='Reviewed by:') }}</strong> {{ application.reviewed_by.full_name if application.reviewed_by else 'N/A' }}</p>
                 <p class="mb-0">{{ application.review_notes }}</p>
             </div>
         </div>
@@ -167,7 +167,7 @@
     <!-- Sidebar -->
     <div class="col-lg-4">
         <div class="position-sticky" style="top: 2rem;">
-            <div class="card border-0 shadow-sm">
+            <div class="card border shadow-sm">
                 <div class="card-body text-center py-4">
                     <div class="mx-auto mb-3 d-flex align-items-center justify-content-center rounded-circle bg-primary bg-opacity-10" style="width: 64px; height: 64px;">
                         <span class="fw-bold text-primary fs-4">{{ application.user.username[0]|upper if application.user else '?' }}</span>
@@ -175,22 +175,22 @@
                     <h5 class="fw-bold mb-1">{{ application.full_name }}</h5>
                     <p class="text-muted small mb-2">@{{ application.user.username if application.user else 'unknown' }}</p>
                     <span class="badge bg-{{ application.status_color }} bg-opacity-10 text-{{ application.status_color }} border border-{{ application.status_color }} border-opacity-25 px-3 py-2">
-                        {{ application.status_label }}
+                        {{ get_translated_option('doc_app_status', application.status) }}
                     </span>
                 </div>
-                <div class="card-footer bg-white">
+                <div class="card-footer bg-light-subtle">
                     <ul class="list-unstyled mb-0 small">
                         <li class="d-flex justify-content-between py-2 border-bottom">
-                            <span class="text-muted">Application ID</span>
+                            <span class="text-muted">{{ t('doc_app.app_id', default='Application ID') }}</span>
                             <span class="fw-medium">#{{ application.id }}</span>
                         </li>
                         <li class="d-flex justify-content-between py-2 border-bottom">
-                            <span class="text-muted">Submitted</span>
+                            <span class="text-muted">{{ t('doc_app.col_date', default='Submitted') }}</span>
                             <span class="fw-medium">{{ application.created_at.strftime('%d/%m/%Y') }}</span>
                         </li>
                         <li class="d-flex justify-content-between py-2">
-                            <span class="text-muted">Current Role</span>
-                            <span class="fw-medium">{{ application.user.roles[0].name if application.user and application.user.roles else 'User' }}</span>
+                            <span class="text-muted">{{ t('doc_app.current_role', default='Current Role') }}</span>
+                            <span class="fw-medium">{{ get_translated_role(application.user.roles[0].name) if application.user and application.user.roles else t('users.role_user', default='User') }}</span>
                         </li>
                     </ul>
                 </div>

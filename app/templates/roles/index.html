@@ -1,15 +1,15 @@
 {% extends "layouts/base.html" %}
-{% block title %}Roles{% endblock %}
-{% block page_title %}Roles Management{% endblock %}
-{% block page_subtitle %}Manage system roles and their permissions.{% endblock %}
+{% block title %}{{ t('roles.manage_title') }}{% endblock %}
+{% block page_title %}{{ t('roles.manage_title') }}{% endblock %}
+{% block page_subtitle %}{{ t('roles.manage_subtitle') }}{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2">{{ roles|length }} roles</span>
+        <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 border border-primary border-opacity-25">{{ t('roles.roles_count', count=roles|length) }}</span>
     </div>
-    <a href="{{ url_for('tbl_roles.create') }}" class="btn btn-primary">
-        <i class="bi bi-plus-lg me-1"></i> Create Role
+    <a href="{{ url_for('tbl_roles.create') }}" class="btn btn-primary shadow-sm">
+        <i class="bi bi-plus-lg me-1"></i> {{ t('roles.btn_create') }}
     </a>
 </div>
 
@@ -17,38 +17,38 @@
 <div class="row g-4">
     {% for role in roles %}
     <div class="col-md-6 col-xl-4">
-        <div class="card border-0 shadow-sm h-100">
+        <div class="card border shadow-sm h-100">
             <div class="card-body p-4">
                 <div class="d-flex justify-content-between align-items-start mb-3">
                     <div>
                         <div class="d-flex align-items-center justify-content-center rounded-circle bg-primary bg-opacity-10 mb-3" style="width: 48px; height: 48px;">
                             <i class="bi bi-shield-check text-primary fs-5"></i>
                         </div>
-                        <h5 class="fw-bold mb-1">{{ role.name }}</h5>
-                        <p class="text-muted small mb-0">{{ role.description or 'No description' }}</p>
+                        <h5 class="fw-bold mb-1 text-dark">{{ get_translated_role(role.name) }}</h5>
+                        <p class="text-muted small mb-0">{{ role.description or t('roles.no_desc') }}</p>
                     </div>
                     <div class="dropdown">
-                        <button class="btn btn-sm btn-light border-0" data-bs-toggle="dropdown" aria-expanded="false">
+                        <button class="btn btn-sm btn-outline-secondary border-0" data-bs-toggle="dropdown" aria-expanded="false" title="Actions">
                             <i class="bi bi-three-dots-vertical"></i>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-                            <li><a class="dropdown-item" href="{{ url_for('tbl_roles.detail', role_id=role.id) }}"><i class="bi bi-eye me-2"></i>View Details</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('tbl_roles.edit', role_id=role.id) }}"><i class="bi bi-pencil me-2"></i>Edit</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('tbl_roles.detail', role_id=role.id) }}"><i class="bi bi-eye me-2 text-primary"></i>{{ t('roles.btn_view_details') }}</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('tbl_roles.edit', role_id=role.id) }}"><i class="bi bi-pencil me-2 text-warning"></i>{{ t('btn.edit') }}</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item text-danger" href="{{ url_for('tbl_roles.delete_confirm', role_id=role.id) }}"><i class="bi bi-trash me-2"></i>Delete</a></li>
+                            <li><a class="dropdown-item text-danger" href="{{ url_for('tbl_roles.delete_confirm', role_id=role.id) }}"><i class="bi bi-trash me-2"></i>{{ t('btn.delete') }}</a></li>
                         </ul>
                     </div>
                 </div>
                 <div class="d-flex align-items-center gap-3 pt-3 border-top">
                     <div class="d-flex align-items-center">
                         <i class="bi bi-key text-muted me-1"></i>
-                        <span class="small fw-medium">{{ role.permissions|length }} permissions</span>
+                        <span class="small fw-medium text-muted">{{ t('roles.permissions_count', count=role.permissions|length) }}</span>
                     </div>
                 </div>
             </div>
             <div class="card-footer bg-transparent border-top-0 px-4 pb-4 pt-0">
                 <a href="{{ url_for('tbl_roles.detail', role_id=role.id) }}" class="btn btn-sm btn-outline-primary w-100">
-                    View Details <i class="bi bi-arrow-right ms-1"></i>
+                    {{ t('roles.btn_view_details') }} <i class="bi bi-arrow-right ms-1"></i>
                 </a>
             </div>
         </div>
@@ -56,13 +56,13 @@
     {% endfor %}
 </div>
 {% else %}
-<div class="card border-0 shadow-sm text-center py-5">
+<div class="card border shadow-sm text-center py-5">
     <div class="card-body">
         <i class="bi bi-shield text-muted display-4 d-block mb-3"></i>
-        <h5 class="fw-bold">No roles defined yet</h5>
-        <p class="text-muted">Create your first role to get started.</p>
+        <h5 class="fw-bold text-dark">{{ t('roles.empty_title') }}</h5>
+        <p class="text-muted">{{ t('roles.empty_desc') }}</p>
         <a href="{{ url_for('tbl_roles.create') }}" class="btn btn-primary">
-            <i class="bi bi-plus-lg me-1"></i> Create Role
+            <i class="bi bi-plus-lg me-1"></i> {{ t('roles.btn_create') }}
         </a>
     </div>
 </div>

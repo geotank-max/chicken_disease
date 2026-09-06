@@ -1,32 +1,43 @@
 {% extends "layouts/base.html" %}
-{% block title %}លុបអ្នកប្រើប្រាស់{% endblock %}
+{% block title %}{{ t('users.confirm_delete_title', default='Delete User') }}{% endblock %}
+{% block page_title %}{{ t('users.confirm_delete_title', default='Delete User') }}{% endblock %}
+{% block page_subtitle %}{{ t('roles.delete_subtitle', default='This action cannot be undone') }}{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
-    <div class="col-md-6">
-        <div class="card border-danger">
-            <div class="card-header bg-danger text-white">
-                <h5 class="mb-0">បញ្ជាក់ការលុប</h5>
-            </div>
-            <div class="card-body">
-                <p>
-                    តើអ្នកប្រាកដថាចង់លុបអ្នកប្រើប្រាស់
-                    <strong>{{ user.username }}</strong>({{ user.full_name}})?
+    <div class="col-md-6 col-lg-5">
+        <div class="mb-3">
+            <a href="{{ url_for('tbl_users.index') }}" class="text-decoration-none text-muted small">
+                <i class="bi bi-arrow-left me-1"></i> {{ t('users.btn_back', default='Back to Users') }}
+            </a>
+        </div>
+
+        <div class="card border shadow-sm text-center">
+            <div class="card-body p-4">
+                <div class="delete-icon-wrapper mb-3">
+                    <i class="bi bi-exclamation-triangle text-danger fs-1"></i>
+                </div>
+                <h5 class="fw-bold mb-2">{{ t('users.confirm_delete_title', default='Confirm Deletion') }}</h5>
+                <p class="text-muted mb-3">
+                    {{ t('users.confirm_delete_msg', username=user.username, full_name=user.full_name, default='Are you sure you want to delete user ' ~ user.username ~ ' (' ~ user.full_name ~ ')?') }}
                 </p>
 
-                {# Use tbl_users.delete here #}
-                <form method="post" action="{{ url_for('tbl_users.delete', user_id=user.id) }}">
-                    {{ form.hidden_tag()}}
+                <div class="bg-light-subtle border rounded p-3 mb-4 text-start small">
+                    <div class="mb-1"><strong>{{ t('users.username', default='Username') }}:</strong> {{ user.username }}</div>
+                    <div class="mb-1"><strong>{{ t('users.full_name', default='Full Name') }}:</strong> {{ user.full_name }}</div>
+                    <div><strong>{{ t('users.email', default='Email') }}:</strong> {{ user.email }}</div>
+                </div>
 
-                    <button class="btn btn-danger">
-                        លុប
-                    </button>
-                    
-                    {# You can send them back to detail or index #}
-                    <a href="{{ url_for('tbl_users.detail', user_id=user.id) }}" 
-                    class="btn btn-secondary">
-                    បោះបង់
-                    </a>
+                <form method="post" action="{{ url_for('tbl_users.delete', user_id=user.id) }}">
+                    {{ form.hidden_tag() }}
+                    <div class="d-flex gap-2 justify-content-center">
+                        <button type="submit" class="btn btn-danger px-4">
+                            <i class="bi bi-trash me-1"></i> {{ t('common.delete', default='Delete') }}
+                        </button>
+                        <a href="{{ url_for('tbl_users.index') }}" class="btn btn-outline-secondary px-4">
+                            {{ t('common.cancel', default='Cancel') }}
+                        </a>
+                    </div>
                 </form>
             </div>
         </div>

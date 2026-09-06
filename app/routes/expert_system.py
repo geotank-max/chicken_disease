@@ -42,6 +42,7 @@ from app.models.expert_system import (
 )
 from app.data.cambodia_geography import (
     CAMBODIA_PROVINCES, FARM_TYPES, FARM_SCALES,
+    CHICKEN_BREEDS, AGE_UNITS, BREEDS_BY_CODE, get_breed_label,
     get_province_by_key, get_districts_by_province, normalize_legacy_location,
 )
 
@@ -83,10 +84,39 @@ def _parse_flock_data(form_data):
     loc_parts = [p for p in [district, province] if p]
     location_str = ", ".join(loc_parts) if loc_parts else form_data.get("location", "").strip()
 
+    lang = session.get("lang", "km")
+
+    # Parse Age (Number + Unit)
+    bird_age_val = form_data.get("bird_age_val", "").strip()
+    bird_age_unit = form_data.get("bird_age_unit", "weeks").strip().lower()
+    raw_bird_age = form_data.get("bird_age", "").strip()
+
+    if bird_age_val:
+        unit_map_km = {"weeks": "សប្ដាហ៍", "days": "ថ្ងៃ", "months": "ខែ"}
+        unit_map_en = {"weeks": "weeks", "days": "days", "months": "months"}
+        unit_label = unit_map_km.get(bird_age_unit, bird_age_unit) if lang == "km" else unit_map_en.get(bird_age_unit, bird_age_unit)
+        bird_age_str = f"{bird_age_val} {unit_label}"
+    else:
+        bird_age_str = raw_bird_age
+
+    # Parse Breed (Select + Other)
+    breed_code = form_data.get("breed", "").strip()
+    breed_other = form_data.get("breed_other", "").strip()
+    if breed_code == "other":
+        breed_str = breed_other if breed_other else ("ផ្សេងៗ" if lang == "km" else "Other")
+    elif breed_code in BREEDS_BY_CODE:
+        breed_str = get_breed_label(breed_code, lang=lang)
+    else:
+        breed_str = breed_code
+
     return {
         "flock_size": _parse_int_field(form_data, "flock_size", lo=1),
-        "bird_age": form_data.get("bird_age", "").strip(),
-        "breed": form_data.get("breed", "").strip(),
+        "bird_age": bird_age_str,
+        "bird_age_val": bird_age_val,
+        "bird_age_unit": bird_age_unit,
+        "breed": breed_str,
+        "breed_code": breed_code,
+        "breed_other": breed_other,
         "province": province,
         "district": district,
         "commune": commune,
@@ -325,6 +355,7 @@ def diagnose():
                     "category": info["category"],
                     "severity": info["severity"],
                     "description": info["description"],
+                    "confidence": info.get("confidence", 100.0),
                 }
                 for name, info in diseases_map.items()
             },
@@ -346,6 +377,43 @@ def diagnose():
         if getattr(current_user, "farm_scale", None):
             wizard_flock_data.setdefault("farm_scale", current_user.farm_scale)
 
+    # Normalize existing bird_age into numeric value and unit
+    if wizard_flock_data.get("bird_age") and not wizard_flock_data.get("bird_age_val"):
+        age_str = str(wizard_flock_data["bird_age"]).strip()
+        parts = age_str.split(None, 1)
+        if len(parts) >= 1 and parts[0].replace(".", "", 1).isdigit():
+            wizard_flock_data["bird_age_val"] = parts[0]
+            if len(parts) > 1:
+                u = parts[1].lower()
+                if "day" in u or "ថ្ងៃ" in u:
+                    wizard_flock_data["bird_age_unit"] = "days"
+                elif "month" in u or "ខែ" in u:
+                    wizard_flock_data["bird_age_unit"] = "months"
+                else:
+                    wizard_flock_data["bird_age_unit"] = "weeks"
+            else:
+                wizard_flock_data["bird_age_unit"] = "weeks"
+        else:
+            wizard_flock_data["bird_age_val"] = age_str
+            wizard_flock_data["bird_age_unit"] = "weeks"
+
+    # Normalize existing breed into breed_code / breed_other
+    if wizard_flock_data.get("breed") and not wizard_flock_data.get("breed_code"):
+        b_str = str(wizard_flock_data["breed"]).strip().lower()
+        matched_code = None
+        for b in CHICKEN_BREEDS:
+            if (b_str == b["code"] or
+                b_str == b["name_en"].lower() or
+                b_str == b["name_km"].lower() or
+                b["code"] in b_str):
+                matched_code = b["code"]
+                break
+        if matched_code:
+            wizard_flock_data["breed_code"] = matched_code
+        else:
+            wizard_flock_data["breed_code"] = "other"
+            wizard_flock_data["breed_other"] = wizard_flock_data["breed"]
+
     return render_template(
         "expert_system/diagnose.html",
         step=step,
@@ -358,6 +426,8 @@ def diagnose():
         cambodia_provinces=CAMBODIA_PROVINCES,
         farm_types=FARM_TYPES,
         farm_scales=FARM_SCALES,
+        chicken_breeds=CHICKEN_BREEDS,
+        age_units=AGE_UNITS,
         saved_case=saved_case,
         yes_no_labels=YES_NO_LABELS,
         vaccination_labels=VACCINATION_LABELS,

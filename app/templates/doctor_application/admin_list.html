@@ -1,40 +1,40 @@
 {% extends "layouts/base.html" %}
-{% block title %}Doctor Applications{% endblock %}
-{% block page_title %}Doctor Applications{% endblock %}
-{% block page_subtitle %}Review and approve doctor role requests.{% endblock %}
+{% block title %}{{ t('doc_app.title', default='Doctor Applications') }}{% endblock %}
+{% block page_title %}{{ t('doc_app.title', default='Doctor Applications') }}{% endblock %}
+{% block page_subtitle %}{{ t('doc_app.admin_subtitle', default='Review and approve doctor role requests.') }}{% endblock %}
 
 {% block content %}
 <!-- Filter tabs -->
-<div class="card border-0 shadow-sm mb-4">
+<div class="card border shadow-sm mb-4">
     <div class="card-body py-3">
         <div class="d-flex gap-2 flex-wrap">
             <a href="{{ url_for('doctor_app.admin_list') }}" class="btn btn-sm {% if not current_filter %}btn-primary{% else %}btn-outline-secondary{% endif %}">
-                All
+                {{ t('doc_app.filter_all', default='All') }}
             </a>
             <a href="{{ url_for('doctor_app.admin_list', status='pending') }}" class="btn btn-sm {% if current_filter == 'pending' %}btn-warning{% else %}btn-outline-warning{% endif %}">
-                <i class="bi bi-hourglass-split me-1"></i> Pending
+                <i class="bi bi-hourglass-split me-1"></i> {{ t('doc_app.status_pending', default='Pending') }}
             </a>
             <a href="{{ url_for('doctor_app.admin_list', status='approved') }}" class="btn btn-sm {% if current_filter == 'approved' %}btn-success{% else %}btn-outline-success{% endif %}">
-                <i class="bi bi-check-circle me-1"></i> Approved
+                <i class="bi bi-check-circle me-1"></i> {{ t('doc_app.status_approved', default='Approved') }}
             </a>
             <a href="{{ url_for('doctor_app.admin_list', status='rejected') }}" class="btn btn-sm {% if current_filter == 'rejected' %}btn-danger{% else %}btn-outline-danger{% endif %}">
-                <i class="bi bi-x-circle me-1"></i> Rejected
+                <i class="bi bi-x-circle me-1"></i> {{ t('doc_app.status_rejected', default='Rejected') }}
             </a>
         </div>
     </div>
 </div>
 
 {% if applications %}
-<div class="card border-0 shadow-sm">
+<div class="card border shadow-sm">
     <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
-            <thead class="bg-light">
+            <thead class="table-light">
                 <tr>
-                    <th class="ps-4 py-3 small fw-bold text-muted text-uppercase">Applicant</th>
-                    <th class="py-3 small fw-bold text-muted text-uppercase">Date</th>
-                    <th class="py-3 small fw-bold text-muted text-uppercase">Documents</th>
-                    <th class="py-3 small fw-bold text-muted text-uppercase">Status</th>
-                    <th class="pe-4 py-3 text-end small fw-bold text-muted text-uppercase">Action</th>
+                    <th class="ps-4 py-3 small fw-bold text-muted text-uppercase">{{ t('doc_app.col_applicant', default='Applicant') }}</th>
+                    <th class="py-3 small fw-bold text-muted text-uppercase">{{ t('doc_app.col_date', default='Date') }}</th>
+                    <th class="py-3 small fw-bold text-muted text-uppercase">{{ t('doc_app.col_docs', default='Documents') }}</th>
+                    <th class="py-3 small fw-bold text-muted text-uppercase">{{ t('doc_app.col_status', default='Status') }}</th>
+                    <th class="pe-4 py-3 text-end small fw-bold text-muted text-uppercase">{{ t('doc_app.col_action', default='Action') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -42,7 +42,7 @@
                 <tr>
                     <td class="ps-4">
                         <div class="d-flex align-items-center">
-                            <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                            <div class="bg-light-subtle border rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
                                 <span class="fw-bold text-muted">{{ app.user.username[0]|upper if app.user else '?' }}</span>
                             </div>
                             <div>
@@ -57,17 +57,17 @@
                     </td>
                     <td>
                         <span class="badge bg-secondary bg-opacity-10 text-secondary border">
-                            <i class="bi bi-file-pdf me-1"></i>{{ 3 + (1 if app.pdf_diploma else 0) }} files
+                            <i class="bi bi-file-pdf me-1"></i>{{ 3 + (1 if app.pdf_diploma else 0) }} {{ t('doc_app.files', default='files') }}
                         </span>
                     </td>
                     <td>
                         <span class="badge bg-{{ app.status_color }} bg-opacity-10 text-{{ app.status_color }} border border-{{ app.status_color }} border-opacity-25">
-                            {{ app.status_label }}
+                            {{ get_translated_option('doc_app_status', app.status) }}
                         </span>
                     </td>
                     <td class="pe-4 text-end">
                         <a href="{{ url_for('doctor_app.admin_review', app_id=app.id) }}" class="btn btn-sm btn-outline-primary">
-                            <i class="bi bi-eye me-1"></i> Review
+                            <i class="bi bi-eye me-1"></i> {{ t('doc_app.btn_review', default='Review') }}
                         </a>
                     </td>
                 </tr>
@@ -77,12 +77,12 @@
     </div>
 </div>
 {% else %}
-<div class="card border-0 shadow-sm text-center py-5">
+<div class="card border shadow-sm text-center py-5">
     <div class="card-body">
         <i class="bi bi-inbox text-muted display-4 d-block mb-3"></i>
-        <h5 class="fw-bold">No applications found</h5>
+        <h5 class="fw-bold">{{ t('doc_app.empty_list', default='No applications found') }}</h5>
         <p class="text-muted mb-0">
-            {% if current_filter %}No {{ current_filter }} applications.{% else %}No doctor applications have been submitted yet.{% endif %}
+            {% if current_filter %}{{ t('doc_app.empty_filter', filter=get_translated_option('doc_app_status', current_filter), default='No ' ~ current_filter ~ ' applications.') }}{% else %}{{ t('doc_app.empty_none_submitted', default='No doctor applications have been submitted yet.') }}{% endif %}
         </p>
     </div>
 </div>

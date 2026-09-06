@@ -1,18 +1,18 @@
 {% extends "layouts/base.html" %}
-{% block title %}Create Permission{% endblock %}
-{% block page_title %}Create Permission{% endblock %}
-{% block page_subtitle %}Add a new access control permission{% endblock %}
+{% block title %}{{ t('perm.create_title', default='Create Permission') }}{% endblock %}
+{% block page_title %}{{ t('perm.create_title', default='Create Permission') }}{% endblock %}
+{% block page_subtitle %}{{ t('perm.create_subtitle', default='Add a new access control permission') }}{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-lg-6">
         <div class="mb-3">
             <a href="{{ url_for('tbl_permissions.index') }}" class="text-decoration-none text-muted small">
-                <i class="bi bi-arrow-left me-1"></i> Back to Permissions
+                <i class="bi bi-arrow-left me-1"></i> {{ t('perm.btn_back', default='Back to Permissions') }}
             </a>
         </div>
 
-        <div class="card border-0 shadow-sm">
+        <div class="card border shadow-sm">
             <div class="card-body p-4">
                 {% include "permission/_form.html" %}
             </div>

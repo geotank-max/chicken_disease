@@ -800,12 +800,24 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "en": "Bird Age",
     },
     "diag.bird_age_ph": {
-        "km": "ឧ. ៧-៩ សប្ដាហ៍ ឬ ៤៥ ថ្ងៃ",
-        "en": "e.g. 7-9 weeks or 45 days",
+        "km": "ឧ. ២",
+        "en": "e.g. 2",
     },
     "diag.bird_age_help": {
-        "km": "អាយុកាលគិតជាថ្ងៃ ឬសប្តាហ៍",
-        "en": "Age in days or weeks",
+        "km": "បញ្ចូលចំនួន និងជ្រើសរើសឯកតា (ថ្ងៃ, សប្តាហ៍ ឬខែ)",
+        "en": "Enter number and select unit (Days, Weeks, or Months)",
+    },
+    "diag.unit_weeks": {
+        "km": "សប្ដាហ៍",
+        "en": "Weeks",
+    },
+    "diag.unit_days": {
+        "km": "ថ្ងៃ",
+        "en": "Days",
+    },
+    "diag.unit_months": {
+        "km": "ខែ",
+        "en": "Months",
     },
     "diag.breed": {
         "km": "ពូជ/ប្រភេទមាន់",
@@ -814,6 +826,18 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     "diag.breed_ph": {
         "km": "ឧ. មាន់ស្រែ, មាន់សាច់, មាន់ពង",
         "en": "e.g. Broiler, Layer, Native/Local",
+    },
+    "diag.select_breed": {
+        "km": "ជ្រើសរើសពូជ/ប្រភេទមាន់",
+        "en": "Select Chicken Breed / Type",
+    },
+    "diag.breed_other_ph": {
+        "km": "បញ្ជាក់ឈ្មោះពូជមាន់ជាក់លាក់...",
+        "en": "Specify chicken breed...",
+    },
+    "diag.breed_other_label": {
+        "km": "ឈ្មោះពូជជាក់លាក់",
+        "en": "Specific Breed Name",
     },
     "diag.location": {
         "km": "ទីតាំង/ខេត្ត",
@@ -2103,6 +2127,90 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "km": "បញ្ជីអ្នកប្រើប្រាស់ទាំងអស់ដែលបានចុះឈ្មោះក្នុងប្រព័ន្ធ",
         "en": "List of all registered users in the system",
     },
+    "users.registered_users": {
+        "km": "អ្នកប្រើប្រាស់ដែលបានចុះឈ្មោះ",
+        "en": "Registered Users",
+    },
+    "users.btn_new": {
+        "km": "អ្នកប្រើប្រាស់ថ្មី",
+        "en": "New User",
+    },
+    "users.col_id": {
+        "km": "លេខសម្គាល់",
+        "en": "ID",
+    },
+    "users.col_user": {
+        "km": "អ្នកប្រើប្រាស់",
+        "en": "User",
+    },
+    "users.col_email": {
+        "km": "អ៊ីមែល",
+        "en": "Email",
+    },
+    "users.col_role": {
+        "km": "តួនាទី",
+        "en": "Role",
+    },
+    "users.col_status": {
+        "km": "ស្ថានភាព",
+        "en": "Status",
+    },
+    "users.col_action": {
+        "km": "សកម្មភាព",
+        "en": "Action",
+    },
+    "users.no_role": {
+        "km": "គ្មានតួនាទី",
+        "en": "No Role",
+    },
+    "users.status_active": {
+        "km": "សកម្ម",
+        "en": "Active",
+    },
+    "users.status_inactive": {
+        "km": "អសកម្ម",
+        "en": "Inactive",
+    },
+    "users.empty": {
+        "km": "រកមិនឃើញអ្នកប្រើប្រាស់ទេ។",
+        "en": "No users found.",
+    },
+    "users.detail_title": {
+        "km": "ព័ត៌មានលម្អិតអ្នកប្រើប្រាស់",
+        "en": "User Details",
+    },
+    "users.user_heading": {
+        "km": "អ្នកប្រើប្រាស់៖ {username}",
+        "en": "User: {username}",
+    },
+    "users.btn_back_list": {
+        "km": "ត្រឡប់ទៅបញ្ជី",
+        "en": "Back to List",
+    },
+    "users.confirm_delete_title": {
+        "km": "បញ្ជាក់ការលុប",
+        "en": "Confirm Deletion",
+    },
+    "users.confirm_delete_msg": {
+        "km": "តើអ្នកពិតជាចង់លុបអ្នកប្រើប្រាស់ {username} ({full_name}) មែនទេ?",
+        "en": "Are you sure you want to delete user {username} ({full_name})?",
+    },
+    "users.profile_title": {
+        "km": "ប្រវត្តិរូបរបស់ខ្ញុំ",
+        "en": "My Profile",
+    },
+    "users.profile_subtitle": {
+        "km": "គ្រប់គ្រងព័ត៌មានគណនីរបស់អ្នក",
+        "en": "Manage your account information",
+    },
+    "users.profile_edit": {
+        "km": "កែប្រែប្រវត្តិរូប",
+        "en": "Edit Profile",
+    },
+    "users.joined_date": {
+        "km": "បានចូលរួម",
+        "en": "Joined",
+    },
     "users.create_title": {
         "km": "បង្កើតអ្នកប្រើប្រាស់",
         "en": "Create User",
@@ -2276,6 +2384,646 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "en": "Please check and fix the following form errors:",
     },
 
+    # ── Roles Management ───────────────────────────────────────────────
+    "roles.manage_title": {
+        "km": "ការគ្រប់គ្រងតួនាទី",
+        "en": "Roles Management",
+    },
+    "roles.manage_subtitle": {
+        "km": "គ្រប់គ្រងតួនាទីក្នុងប្រព័ន្ធ និងសិទ្ធិអនុញ្ញាតដែលបានកំណត់",
+        "en": "Manage system roles and their assigned permissions",
+    },
+    "roles.create_title": {
+        "km": "បង្កើតតួនាទីថ្មី",
+        "en": "Create Role",
+    },
+    "roles.create_subtitle": {
+        "km": "កំណត់តួនាទីថ្មីជាមួយសិទ្ធិប្រើប្រាស់ជាក់លាក់",
+        "en": "Define a new role with specific permissions",
+    },
+    "roles.edit_title": {
+        "km": "កែប្រែតួនាទី",
+        "en": "Edit Role",
+    },
+    "roles.edit_subtitle": {
+        "km": "កែប្រែព័ត៌មាន និងសិទ្ធិអនុញ្ញាតសម្រាប់តួនាទី៖ {name}",
+        "en": "Update role settings and permissions for {name}",
+    },
+    "roles.delete_title": {
+        "km": "លុបតួនាទី",
+        "en": "Delete Role",
+    },
+    "roles.delete_subtitle": {
+        "km": "សកម្មភាពនេះមិនអាចត្រឡប់វិញបានទេ",
+        "en": "This action cannot be undone",
+    },
+    "roles.delete_confirm": {
+        "km": "តើអ្នកពិតជាចង់លុបតួនាទី \"{name}\" មែនទេ?",
+        "en": "Delete \"{name}\"?",
+    },
+    "roles.delete_warning_permanent": {
+        "km": "ការលុបនេះនឹងលុបតួនាទីនេះចេញពីប្រព័ន្ធជារៀងរហូត។",
+        "en": "This will permanently remove this role.",
+    },
+    "roles.delete_warning_users": {
+        "km": "តួនាទីនេះត្រូវបានកំណត់ឱ្យអ្នកប្រើប្រាស់ចំនួន {count} នាក់។ ពួកគេនឹងបាត់បង់សិទ្ធិទាំងនេះ។",
+        "en": "This role is currently assigned to {count} user(s). They will lose these permissions.",
+    },
+    "roles.btn_create": {
+        "km": "បង្កើតតួនាទី",
+        "en": "Create Role",
+    },
+    "roles.btn_view_details": {
+        "km": "មើលព័ត៌មានលម្អិត",
+        "en": "View Details",
+    },
+    "roles.btn_back": {
+        "km": "ត្រឡប់ទៅបញ្ជីតួនាទី",
+        "en": "Back to Roles",
+    },
+    "roles.btn_back_detail": {
+        "km": "ត្រឡប់ទៅព័ត៌មានលម្អិត",
+        "en": "Back to Role Details",
+    },
+    "roles.btn_delete": {
+        "km": "លុបតួនាទី",
+        "en": "Delete Role",
+    },
+    "roles.btn_save": {
+        "km": "រក្សាទុកការផ្លាស់ប្តូរ",
+        "en": "Save Changes",
+    },
+    "roles.info_card": {
+        "km": "ព័ត៌មានតួនាទី",
+        "en": "Role Information",
+    },
+    "roles.name": {
+        "km": "ឈ្មោះតួនាទី",
+        "en": "Role Name",
+    },
+    "roles.name_ph": {
+        "km": "ឧទាហរណ៍៖ Editor, Moderator",
+        "en": "e.g. Editor, Moderator",
+    },
+    "roles.description": {
+        "km": "ការពិពណ៌នា",
+        "en": "Description",
+    },
+    "roles.description_ph": {
+        "km": "តើតួនាទីនេះមានមុខងារអ្វីខ្លះ?",
+        "en": "What does this role do?",
+    },
+    "roles.no_desc": {
+        "km": "មិនមានការពិពណ៌នាទេ",
+        "en": "No description",
+    },
+    "roles.permissions_assigned": {
+        "km": "សិទ្ធិអនុញ្ញាតដែលបានកំណត់",
+        "en": "Assigned Permissions",
+    },
+    "roles.permissions_count": {
+        "km": "{count} សិទ្ធិ",
+        "en": "{count} permissions",
+    },
+    "roles.roles_count": {
+        "km": "{count} តួនាទី",
+        "en": "{count} roles",
+    },
+    "roles.select_perms_hint": {
+        "km": "ជ្រើសរើសសិទ្ធិអនុញ្ញាតដែលត្រូវផ្តល់ឱ្យតួនាទីនេះ។",
+        "en": "Select permissions to grant to this role.",
+    },
+    "roles.check_uncheck_hint": {
+        "km": "ធីក ឬដោះធីក ដើម្បីកែប្រែសិទ្ធិនៃតួនាទីនេះ។",
+        "en": "Check or uncheck to update role permissions.",
+    },
+    "roles.empty_title": {
+        "km": "មិនទាន់មានតួនាទីត្រូវបានបង្កើតនៅឡើយទេ",
+        "en": "No roles defined yet",
+    },
+    "roles.empty_desc": {
+        "km": "បង្កើតតួនាទីដំបូងរបស់អ្នកដើម្បីចាប់ផ្តើម។",
+        "en": "Create your first role to get started.",
+    },
+    "roles.no_perms_assigned": {
+        "km": "មិនទាន់មានសិទ្ធិត្រូវបានកំណត់ឱ្យតួនាទីនេះនៅឡើយទេ។",
+        "en": "No permissions assigned to this role yet.",
+    },
+    "roles.summary_title": {
+        "km": "សង្ខេបបច្ចុប្បន្ន",
+        "en": "Current Summary",
+    },
+    "roles.role_id": {
+        "km": "លេខសម្គាល់តួនាទី",
+        "en": "Role ID",
+    },
+    "roles.created_date": {
+        "km": "កាលបរិច្ឆេទបង្កើត",
+        "en": "Created",
+    },
+
+    # ── Permissions Management ──────────────────────────────────────────
+    "perm.manage_title": {
+        "km": "ការគ្រប់គ្រងសិទ្ធិអនុញ្ញាត",
+        "en": "Permissions Management",
+    },
+    "perm.manage_subtitle": {
+        "km": "គ្រប់គ្រងសិទ្ធិចូលប្រើប្រាស់ប្រព័ន្ធ",
+        "en": "Manage system access controls",
+    },
+    "perm.total_permissions": {
+        "km": "សិទ្ធិសរុប",
+        "en": "Total permissions",
+    },
+    "perm.modules": {
+        "km": "ផ្នែក/ម៉ូឌុល",
+        "en": "Modules",
+    },
+    "perm.search_ph": {
+        "km": "ស្វែងរកតាមកូដ ឈ្មោះ ឬការពិពណ៌នា...",
+        "en": "Search by code, name, or description...",
+    },
+    "perm.btn_new": {
+        "km": "សិទ្ធិថ្មី",
+        "en": "New Permission",
+    },
+    "perm.create_title": {
+        "km": "បង្កើតសិទ្ធិអនុញ្ញាត",
+        "en": "Create Permission",
+    },
+    "perm.create_subtitle": {
+        "km": "បន្ថែមសិទ្ធិចូលប្រើប្រាស់ថ្មីក្នុងប្រព័ន្ធ",
+        "en": "Add a new access control permission",
+    },
+    "perm.edit_title": {
+        "km": "កែប្រែសិទ្ធិអនុញ្ញាត",
+        "en": "Edit Permission",
+    },
+    "perm.detail_title": {
+        "km": "ព័ត៌មានលម្អិតនៃសិទ្ធិ",
+        "en": "Permission Details",
+    },
+    "perm.delete_title": {
+        "km": "លុបសិទ្ធិអនុញ្ញាត",
+        "en": "Delete Permission",
+    },
+    "perm.delete_confirm": {
+        "km": "តើអ្នកពិតជាចង់លុបសិទ្ធិអនុញ្ញាតនេះមែនទេ?",
+        "en": "Delete Permission?",
+    },
+    "perm.delete_warning": {
+        "km": "អ្នករៀបនឹងលុបចេញជាអចិន្ត្រៃយ៍នូវសិទ្ធិ៖",
+        "en": "You are about to permanently delete:",
+    },
+    "perm.assigned_roles_warning": {
+        "km": "សិទ្ធិនេះកំពុងត្រូវបានកំណត់ឱ្យ {count} តួនាទី៖",
+        "en": "This permission is assigned to {count} role(s):",
+    },
+    "perm.btn_back": {
+        "km": "ត្រឡប់ទៅបញ្ជីសិទ្ធិ",
+        "en": "Back to Permissions",
+    },
+    "perm.btn_back_detail": {
+        "km": "ត្រឡប់ទៅព័ត៌មានលម្អិត",
+        "en": "Back to Details",
+    },
+    "perm.code": {
+        "km": "កូដសិទ្ធិ",
+        "en": "Permission Code",
+    },
+    "perm.code_hint": {
+        "km": "លេខកូដសម្គាល់សម្រាប់ប្រើក្នុងប្រព័ន្ធ (snake_case)",
+        "en": "Unique identifier used in code. Use snake_case.",
+    },
+    "perm.display_name": {
+        "km": "ឈ្មោះបង្ហាញ",
+        "en": "Display Name",
+    },
+    "perm.module": {
+        "km": "ផ្នែក/ម៉ូឌុល",
+        "en": "Module",
+    },
+    "perm.module_hint": {
+        "km": "ដាក់ជាក្រុមតាមម៉ូឌុល ដើម្បីងាយស្រួលគ្រប់គ្រង",
+        "en": "Group permissions by module for easier management.",
+    },
+    "perm.description": {
+        "km": "ការពិពណ៌នា",
+        "en": "Description",
+    },
+    "perm.description_ph": {
+        "km": "តើសិទ្ធិនេះអនុញ្ញាតឱ្យធ្វើអ្វីខ្លះ?",
+        "en": "What does this permission allow?",
+    },
+    "perm.roles_assigned": {
+        "km": "បានកំណត់ឱ្យតួនាទី ({count})",
+        "en": "Assigned to Roles ({count})",
+    },
+    "perm.no_roles_assigned": {
+        "km": "សិទ្ធិនេះមិនទាន់ត្រូវបានកំណត់ឱ្យតួនាទីណាមួយនៅឡើយទេ។",
+        "en": "This permission is not assigned to any role yet.",
+    },
+    "perm.created_at": {
+        "km": "កាលបរិច្ឆេទបង្កើត",
+        "en": "Created",
+    },
+    "perm.updated_at": {
+        "km": "កែប្រែចុងក្រោយ",
+        "en": "Last Updated",
+    },
+    "perm.no_match": {
+        "km": "រកមិនឃើញសិទ្ធិដែលត្រូវនឹងការស្វែងរករបស់អ្នកទេ",
+        "en": "No permissions match your search",
+    },
+    "perm.no_match_hint": {
+        "km": "សូមសាកល្បងស្វែងរកជាមួយកូដ ឈ្មោះ ឬពាក្យគន្លឹះផ្សេង។",
+        "en": "Try a different code, name, or keyword.",
+    },
+    "perm.empty_title": {
+        "km": "មិនទាន់មានសិទ្ធិត្រូវបានបង្កើតនៅឡើយទេ",
+        "en": "No permissions defined yet",
+    },
+    "perm.empty_desc": {
+        "km": "បង្កើតសិទ្ធិដំបូងរបស់អ្នកដើម្បីគ្រប់គ្រងការចូលប្រើប្រាស់។",
+        "en": "Create your first permission to start managing access control.",
+    },
+
+    # ── Audit Logs ──────────────────────────────────────────────────────
+    "audit.title": {
+        "km": "កំណត់ហេតុសវនកម្ម",
+        "en": "Audit Logs",
+    },
+    "audit.subtitle": {
+        "km": "តាមដានសកម្មភាពប្រព័ន្ធ និងការផ្លាស់ប្តូរទិន្នន័យ",
+        "en": "Track system activity and data modifications",
+    },
+    "audit.recent_activity": {
+        "km": "សកម្មភាពថ្មីៗ",
+        "en": "Recent Activity",
+    },
+    "audit.search_ph": {
+        "km": "ស្វែងរកតាមឈ្មោះអ្នកប្រើប្រាស់...",
+        "en": "Search by username...",
+    },
+    "audit.export_csv": {
+        "km": "នាំចេញជា CSV",
+        "en": "Export CSV",
+    },
+    "audit.col_date": {
+        "km": "កាលបរិច្ឆេទ",
+        "en": "Date & Time",
+    },
+    "audit.col_user": {
+        "km": "អ្នកប្រើប្រាស់",
+        "en": "User",
+    },
+    "audit.col_action": {
+        "km": "សកម្មភាព",
+        "en": "Action",
+    },
+    "audit.col_target": {
+        "km": "គោលដៅ",
+        "en": "Target",
+    },
+    "audit.col_details": {
+        "km": "ព័ត៌មានលម្អិត",
+        "en": "Details",
+    },
+    "audit.col_ip": {
+        "km": "អាសយដ្ឋាន IP",
+        "en": "IP Address",
+    },
+    "audit.empty": {
+        "km": "រកមិនឃើញកំណត់ហេតុទេ។",
+        "en": "No audit logs found.",
+    },
+    "audit.user_logs_title": {
+        "km": "កំណត់ហេតុសកម្មភាពអ្នកប្រើប្រាស់",
+        "en": "User Activity Logs",
+    },
+    "audit.user_logs_subtitle": {
+        "km": "ប្រវត្តិសកម្មភាពសម្រាប់អ្នកប្រើប្រាស់៖ {username}",
+        "en": "Activity history for user: {username}",
+    },
+    "audit.btn_back": {
+        "km": "ត្រឡប់ទៅកំណត់ហេតុសវនកម្ម",
+        "en": "Back to Audit Logs",
+    },
+    "audit.user_empty": {
+        "km": "មិនមានសកម្មភាពត្រូវបានកត់ត្រាសម្រាប់អ្នកប្រើប្រាស់នេះទេ។",
+        "en": "No activity recorded for this user.",
+    },
+    "audit.act_create": {
+        "km": "បង្កើត",
+        "en": "Create",
+    },
+    "audit.act_update": {
+        "km": "កែប្រែ",
+        "en": "Update",
+    },
+    "audit.act_delete": {
+        "km": "លុប",
+        "en": "Delete",
+    },
+    "audit.act_login": {
+        "km": "ចូលប្រព័ន្ធ",
+        "en": "Login",
+    },
+
+    # ── Doctor Applications ─────────────────────────────────────────────
+    "doc_app.title": {
+        "km": "ពាក្យស្នើសុំវេជ្ជបណ្ឌិត",
+        "en": "Doctor Applications",
+    },
+    "doc_app.admin_subtitle": {
+        "km": "ពិនិត្យ និងអនុម័តសំណើសុំតួនាទីជាវេជ្ជបណ្ឌិត",
+        "en": "Review and approve doctor role requests",
+    },
+    "doc_app.apply_title": {
+        "km": "ស្នើសុំជាវេជ្ជបណ្ឌិត",
+        "en": "Apply as Doctor",
+    },
+    "doc_app.apply_subtitle": {
+        "km": "ដាក់បញ្ជូនឯកសារបញ្ជាក់ដើម្បីក្លាយជាវេជ្ជបណ្ឌិតពេទ្យសត្វនៅលើ IDNS",
+        "en": "Submit your credentials to become a verified veterinary doctor on IDNS",
+    },
+    "doc_app.my_status_title": {
+        "km": "ពាក្យស្នើសុំរបស់ខ្ញុំ",
+        "en": "My Applications",
+    },
+    "doc_app.my_status_subtitle": {
+        "km": "តាមដានស្ថានភាពពាក្យស្នើសុំវេជ្ជបណ្ឌិតរបស់អ្នក",
+        "en": "Track the status of your doctor application",
+    },
+    "doc_app.status_submitted_title": {
+        "km": "ពាក្យស្នើសុំត្រូវបានដាក់ជូន",
+        "en": "Application Submitted",
+    },
+    "doc_app.status_submitted_subtitle": {
+        "km": "ពាក្យស្នើសុំវេជ្ជបណ្ឌិតរបស់អ្នកកំពុងស្ថិតក្នុងការត្រួតពិនិត្យ",
+        "en": "Your doctor application is being reviewed",
+    },
+    "doc_app.review_title": {
+        "km": "ពិនិត្យពាក្យស្នើសុំ",
+        "en": "Review Application",
+    },
+    "doc_app.filter_all": {
+        "km": "ទាំងអស់",
+        "en": "All",
+    },
+    "doc_app.status_pending": {
+        "km": "កំពុងរង់ចាំពិនិត្យ",
+        "en": "Pending Review",
+    },
+    "doc_app.status_approved": {
+        "km": "បានអនុម័ត",
+        "en": "Approved",
+    },
+    "doc_app.status_rejected": {
+        "km": "បានបដិសេធ",
+        "en": "Rejected",
+    },
+    "doc_app.col_applicant": {
+        "km": "បេក្ខជន",
+        "en": "Applicant",
+    },
+    "doc_app.col_date": {
+        "km": "កាលបរិច្ឆេទ",
+        "en": "Date",
+    },
+    "doc_app.col_docs": {
+        "km": "ឯកសារ",
+        "en": "Documents",
+    },
+    "doc_app.col_status": {
+        "km": "ស្ថានភាព",
+        "en": "Status",
+    },
+    "doc_app.col_action": {
+        "km": "សកម្មភាព",
+        "en": "Action",
+    },
+    "doc_app.btn_review": {
+        "km": "ពិនិត្យ",
+        "en": "Review",
+    },
+    "doc_app.btn_apply": {
+        "km": "ស្នើសុំឥឡូវនេះ",
+        "en": "Apply Now",
+    },
+    "doc_app.btn_submit": {
+        "km": "ដាក់ពាក្យស្នើសុំ",
+        "en": "Submit Application",
+    },
+    "doc_app.btn_decision": {
+        "km": "ដាក់បញ្ជូនការសម្រេច",
+        "en": "Submit Decision",
+    },
+    "doc_app.btn_back_list": {
+        "km": "ត្រឡប់ទៅបញ្ជីពាក្យស្នើសុំ",
+        "en": "Back to Applications",
+    },
+    "doc_app.btn_back_diag": {
+        "km": "ត្រឡប់ទៅការវិភាគ",
+        "en": "Back to Diagnosis",
+    },
+    "doc_app.files": {
+        "km": "ឯកសារ",
+        "en": "files",
+    },
+    "doc_app.empty_list": {
+        "km": "រកមិនឃើញពាក្យស្នើសុំទេ",
+        "en": "No applications found",
+    },
+    "doc_app.empty_filter": {
+        "km": "មិនមានពាក្យស្នើសុំដែលមានស្ថានភាព {filter} ទេ។",
+        "en": "No {filter} applications.",
+    },
+    "doc_app.empty_none_submitted": {
+        "km": "មិនទាន់មានពាក្យស្នើសុំវេជ្ជបណ្ឌិតត្រូវបានដាក់ជូននៅឡើយទេ។",
+        "en": "No doctor applications have been submitted yet.",
+    },
+    "doc_app.personal_info": {
+        "km": "ព័ត៌មានផ្ទាល់ខ្លួន",
+        "en": "Personal Information",
+    },
+    "doc_app.full_name": {
+        "km": "ឈ្មោះពេញ",
+        "en": "Full Name",
+    },
+    "doc_app.phone": {
+        "km": "លេខទូរស័ព្ទ",
+        "en": "Phone Number",
+    },
+    "doc_app.address": {
+        "km": "អាសយដ្ឋាន",
+        "en": "Address",
+    },
+    "doc_app.motivation": {
+        "km": "បទពិសោធន៍ / គោលបំណង",
+        "en": "Motivation / Experience",
+    },
+    "doc_app.required_docs": {
+        "km": "ឯកសារតម្រូវ",
+        "en": "Required Documents",
+    },
+    "doc_app.docs_hint": {
+        "km": "សូមផ្ទុកឡើងឯកសារជាទម្រង់ PDF តែប៉ុណ្ណោះ។ ទំហំអតិបរមា 10MB ក្នុងមួយឯកសារ។",
+        "en": "Upload PDF files only. Maximum 10MB per file.",
+    },
+    "doc_app.doc_dv": {
+        "km": "សញ្ញាបត្រពេទ្យសត្វ (DV Certificate)",
+        "en": "DV Certificate",
+    },
+    "doc_app.doc_dv_desc": {
+        "km": "វិញ្ញាបនបត្រ ឬសញ្ញាបត្រផ្នែកបសុព្យាបាល",
+        "en": "Veterinary degree certificate",
+    },
+    "doc_app.doc_id": {
+        "km": "អត្តសញ្ញាណប័ណ្ណ (ID Card)",
+        "en": "ID Card",
+    },
+    "doc_app.doc_id_desc": {
+        "km": "អត្តសញ្ញាណប័ណ្ណសញ្ជាតិខ្មែរ ឬលិខិតឆ្លងដែន",
+        "en": "National identity card",
+    },
+    "doc_app.doc_birth": {
+        "km": "សំបុត្រកំណើត (Birth Certificate)",
+        "en": "Birth Certificate",
+    },
+    "doc_app.doc_birth_desc": {
+        "km": "សំបុត្រកំណើតផ្លូវការ",
+        "en": "Official birth document",
+    },
+    "doc_app.doc_diploma": {
+        "km": "សញ្ញាបត្របន្ថែម (Diploma / Degree)",
+        "en": "Diploma / Degree",
+    },
+    "doc_app.doc_diploma_desc": {
+        "km": "វិញ្ញាបនបត្របណ្តុះបណ្តាលបន្ថែម (ប្រសិនបើមាន)",
+        "en": "Optional additional qualification",
+    },
+    "doc_app.required_badge": {
+        "km": "តម្រូវ",
+        "en": "Required",
+    },
+    "doc_app.optional_badge": {
+        "km": "ជម្រើស",
+        "en": "Optional",
+    },
+    "doc_app.how_it_works": {
+        "km": "របៀបដំណើរការ",
+        "en": "How it works",
+    },
+    "doc_app.step1": {
+        "km": "បំពេញព័ត៌មានផ្ទាល់ខ្លួនរបស់អ្នក",
+        "en": "Fill in your personal details",
+    },
+    "doc_app.step2": {
+        "km": "ផ្ទុកឡើងឯកសារ PDF ដែលតម្រូវ",
+        "en": "Upload required PDF documents",
+    },
+    "doc_app.step3": {
+        "km": "ដាក់បញ្ជូនពាក្យស្នើសុំរបស់អ្នក",
+        "en": "Submit your application",
+    },
+    "doc_app.step4": {
+        "km": "អ្នកគ្រប់គ្រងពិនិត្យមើលឯកសាររបស់អ្នក",
+        "en": "Admin reviews your documents",
+    },
+    "doc_app.step5": {
+        "km": "នៅពេលអនុម័ត គណនីរបស់អ្នកនឹងត្រូវបានតម្លើងជា Doctor",
+        "en": "Once approved, your account is upgraded to Doctor",
+    },
+    "doc_app.privileges_title": {
+        "km": "សិទ្ធិពិសេសរបស់វេជ្ជបណ្ឌិតរួមមាន៖",
+        "en": "Doctor privileges include:",
+    },
+    "doc_app.priv1": {
+        "km": "មើលរបាយការណ៍ និងស្ថិតិលើ Dashboard",
+        "en": "View dashboard analytics",
+    },
+    "doc_app.priv2": {
+        "km": "ពិនិត្យ និងផ្ទៀងផ្ទាត់ករណីជំងឺ",
+        "en": "Review diagnosis cases",
+    },
+    "doc_app.priv3": {
+        "km": "គ្រប់គ្រងមូលដ្ឋានចំណេះដឹងជំងឺ",
+        "en": "Manage knowledge base",
+    },
+    "doc_app.priv4": {
+        "km": "បង្កើត និងកែសម្រួលច្បាប់វិភាគជំងឺ",
+        "en": "Author diagnostic rules",
+    },
+    "doc_app.priv5": {
+        "km": "ទាញយករបាយការណ៍ករណីជំងឺ",
+        "en": "Export case reports",
+    },
+    "doc_app.submitted_on": {
+        "km": "បានដាក់ជូននៅ {date}",
+        "en": "Submitted on {date}",
+    },
+    "doc_app.application_num": {
+        "km": "ពាក្យស្នើសុំ #{id} ពី {name}",
+        "en": "Application #{id} from {name}",
+    },
+    "doc_app.username": {
+        "km": "ឈ្មោះគណនី",
+        "en": "Username",
+    },
+    "doc_app.email": {
+        "km": "អ៊ីមែល",
+        "en": "Email",
+    },
+    "doc_app.not_provided": {
+        "km": "មិនបានផ្តល់ជូន",
+        "en": "Not provided",
+    },
+    "doc_app.reviewed_by": {
+        "km": "ពិនិត្យដោយ៖",
+        "en": "Reviewed by:",
+    },
+    "doc_app.app_id": {
+        "km": "លេខសម្គាល់ពាក្យស្នើសុំ",
+        "en": "Application ID",
+    },
+    "doc_app.current_role": {
+        "km": "តួនាទីបច្ចុប្បន្ន",
+        "en": "Current Role",
+    },
+    "doc_app.reviewed_on": {
+        "km": "បានពិនិត្យនៅ {date}",
+        "en": "Reviewed {date}",
+    },
+    "doc_app.admin_notes": {
+        "km": "កំណត់សម្គាល់របស់អ្នកគ្រប់គ្រង៖",
+        "en": "Admin Notes:",
+    },
+    "doc_app.decision_card": {
+        "km": "ធ្វើការសម្រេចចិត្ត",
+        "en": "Make Decision",
+    },
+    "doc_app.decision_label": {
+        "km": "ការសម្រេចចិត្ត",
+        "en": "Decision",
+    },
+    "doc_app.notes_label": {
+        "km": "កំណត់សម្គាល់ (ជម្រើស)",
+        "en": "Notes (optional)",
+    },
+    "doc_app.msg_pending": {
+        "km": "ពាក្យស្នើសុំរបស់អ្នកត្រូវបានដាក់ជូននៅ {date}។ អ្នកគ្រប់គ្រងនឹងពិនិត្យឯកសាររបស់អ្នកក្នុងពេលឆាប់ៗនេះ។",
+        "en": "Your application was submitted on {date}. An administrator will review your documents shortly.",
+    },
+    "doc_app.msg_approved": {
+        "km": "អបអរសាទរ! ពាក្យស្នើសុំរបស់អ្នកត្រូវបានអនុម័ត។ ឥឡូវនេះអ្នកមានសិទ្ធិជាវេជ្ជបណ្ឌិត។",
+        "en": "Congratulations! Your application has been approved. You now have Doctor privileges.",
+    },
+    "doc_app.msg_rejected": {
+        "km": "ពាក្យស្នើសុំរបស់អ្នកមិនត្រូវបានអនុម័តទេ។ សូមទាក់ទងអ្នកគ្រប់គ្រងសម្រាប់ព័ត៌មានបន្ថែម។",
+        "en": "Your application was not approved. Please contact the administrator for details.",
+    },
+
     # ── Printable Diagnostic Report ──────────────────────────────────
     "print.report_header": {
         "km": "របាយការណ៍រោគវិនិច្ឆ័យជំងឺមាន់",
@@ -2367,6 +3115,10 @@ def get_translated_option(label_type: str, value: str | None) -> str:
         return ""
     
     val_str = str(value).lower()
+    if label_type == "breed":
+        from app.data.cambodia_geography import get_breed_label
+        return get_breed_label(value, lang=session.get("lang", DEFAULT_LANGUAGE))
+
     key_map = {
         "yes_no": f"opt.{val_str}",
         "vaccination": f"opt.vax_{val_str}",
@@ -2377,6 +3129,9 @@ def get_translated_option(label_type: str, value: str | None) -> str:
         "follow_up": f"followup.{val_str}",
         "severity": f"severity.{val_str}",
         "contagious": "case_detail.contagious" if val_str in ("true", "1", "yes", "contagious") else "case_detail.non_contagious",
+        "age_unit": f"diag.unit_{val_str}",
+        "doc_app_status": f"doc_app.status_{val_str}",
+        "audit_action": f"audit.act_{val_str}",
     }
     
     key = key_map.get(label_type, f"opt.{val_str}")

@@ -325,16 +325,16 @@
 
                         <div class="small text-start px-2">
                             <div class="d-flex justify-content-between py-1.5 border-bottom border-light-subtle text-muted">
-                                <span>{{ t('print.case_id') }} #</span>
-                                <span class="fw-medium text-dark">#{{ user.id }}</span>
+                                <span>{{ t('users.col_id', default='ID') }}:</span>
+                                <span class="fw-medium text-body">#{{ user.id }}</span>
                             </div>
                             <div class="d-flex justify-content-between py-1.5 border-bottom border-light-subtle text-muted">
                                 <span>{{ t('users.email') }}:</span>
-                                <span class="fw-medium text-dark text-truncate ms-2" style="max-width: 170px;">{{ user.email }}</span>
+                                <span class="fw-medium text-body text-truncate ms-2" style="max-width: 170px;">{{ user.email }}</span>
                             </div>
                             <div class="d-flex justify-content-between py-1.5 text-muted">
-                                <span>{{ t('print.date_generated') }}:</span>
-                                <span class="fw-medium text-dark">{{ user.created_at.strftime('%d/%m/%Y') if user.created_at else 'N/A' }}</span>
+                                <span>{{ t('users.joined_date', default='Joined') }}:</span>
+                                <span class="fw-medium text-body">{{ user.created_at.strftime('%d/%m/%Y') if user.created_at else 'N/A' }}</span>
                             </div>
                         </div>
                     </div>

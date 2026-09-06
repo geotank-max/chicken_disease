@@ -1,20 +1,20 @@
 {% extends "layouts/base.html" %}
-{% block title %}My Applications{% endblock %}
-{% block page_title %}My Applications{% endblock %}
-{% block page_subtitle %}Track the status of your doctor application.{% endblock %}
+{% block title %}{{ t('doc_app.my_status_title', default='My Applications') }}{% endblock %}
+{% block page_title %}{{ t('doc_app.my_status_title', default='My Applications') }}{% endblock %}
+{% block page_subtitle %}{{ t('doc_app.my_status_subtitle', default='Track the status of your doctor application.') }}{% endblock %}
 
 {% block content %}
 {% if applications %}
 <div class="row g-4">
     {% for app in applications %}
     <div class="col-lg-6">
-        <div class="card border-0 shadow-sm h-100">
+        <div class="card border shadow-sm h-100">
             <div class="card-body p-4">
                 <div class="d-flex justify-content-between align-items-start mb-3">
                     <div>
-                        <span class="badge bg-{{ app.status_color }} bg-opacity-10 text-{{ app.status_color }} border border-{{ app.status_color }} border-opacity-25 mb-2">{{ app.status_label }}</span>
+                        <span class="badge bg-{{ app.status_color }} bg-opacity-10 text-{{ app.status_color }} border border-{{ app.status_color }} border-opacity-25 mb-2">{{ get_translated_option('doc_app_status', app.status) }}</span>
                         <h5 class="fw-bold mb-1">{{ app.full_name }}</h5>
-                        <small class="text-muted">Submitted {{ app.created_at.strftime('%d/%m/%Y %H:%M') }}</small>
+                        <small class="text-muted">{{ t('doc_app.submitted_on', date=app.created_at.strftime('%d/%m/%Y %H:%M'), default='Submitted ' ~ app.created_at.strftime('%d/%m/%Y %H:%M')) }}</small>
                     </div>
                     <div class="d-flex align-items-center justify-content-center rounded-circle bg-{{ app.status_color }} bg-opacity-10" style="width: 44px; height: 44px;">
                         {% if app.status == 'pending' %}
@@ -28,14 +28,14 @@
                 </div>
 
                 {% if app.review_notes %}
-                <div class="bg-light rounded p-3 mt-3">
-                    <small class="fw-bold text-muted">Admin Notes:</small>
+                <div class="bg-light-subtle border rounded p-3 mt-3">
+                    <small class="fw-bold text-muted">{{ t('doc_app.admin_notes', default='Admin Notes:') }}</small>
                     <p class="mb-0 small mt-1">{{ app.review_notes }}</p>
                 </div>
                 {% endif %}
 
                 {% if app.reviewed_at %}
-                <small class="text-muted d-block mt-2">Reviewed on {{ app.reviewed_at.strftime('%d/%m/%Y') }}</small>
+                <small class="text-muted d-block mt-2">{{ t('doc_app.reviewed_on', date=app.reviewed_at.strftime('%d/%m/%Y'), default='Reviewed on ' ~ app.reviewed_at.strftime('%d/%m/%Y')) }}</small>
                 {% endif %}
             </div>
         </div>
@@ -43,13 +43,13 @@
     {% endfor %}
 </div>
 {% else %}
-<div class="card border-0 shadow-sm text-center py-5">
+<div class="card border shadow-sm text-center py-5">
     <div class="card-body">
         <i class="bi bi-file-earmark-x text-muted display-4 d-block mb-3"></i>
-        <h5 class="fw-bold">No applications yet</h5>
-        <p class="text-muted">You haven't submitted a doctor application.</p>
+        <h5 class="fw-bold">{{ t('doc_app.empty_list', default='No applications yet') }}</h5>
+        <p class="text-muted">{{ t('doc_app.empty_none_submitted', default="You haven't submitted a doctor application.") }}</p>
         <a href="{{ url_for('doctor_app.apply') }}" class="btn btn-primary">
-            <i class="bi bi-plus-lg me-1"></i> Apply Now
+            <i class="bi bi-plus-lg me-1"></i> {{ t('doc_app.btn_apply', default='Apply Now') }}
         </a>
     </div>
 </div>

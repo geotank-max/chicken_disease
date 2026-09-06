@@ -1029,9 +1029,18 @@
                                 </div>
                                 <div class="col-md-6 diagnosis-field">
                                     <label class="form-label">{{ t('diag.bird_age') }} <span class="text-danger">*</span></label>
-                                    <div class="diagnosis-control-shell">
-                                        <span class="diagnosis-control-icon"><i class="bi bi-calendar-week"></i></span>
-                                        <input type="text" name="bird_age" class="form-control diagnosis-control" placeholder="{{ t('diag.bird_age_ph') }}" value="{{ flock_data.bird_age or '' }}" required>
+                                    <div class="input-group diagnosis-age-group">
+                                        <div class="diagnosis-control-shell flex-grow-1" style="border-top-right-radius: 0; border-bottom-right-radius: 0;">
+                                            <span class="diagnosis-control-icon"><i class="bi bi-calendar-week"></i></span>
+                                            <input type="number" step="any" min="0.1" name="bird_age_val" id="birdAgeVal" class="form-control diagnosis-control border-end-0" placeholder="{{ t('diag.bird_age_ph') }}" value="{{ flock_data.bird_age_val or '' }}" required style="border-top-right-radius: 0; border-bottom-right-radius: 0;">
+                                        </div>
+                                        <select name="bird_age_unit" id="birdAgeUnit" class="form-select diagnosis-control bg-light fw-medium" style="max-width: 140px; border-left: 1px solid #ced4da; border-top-left-radius: 0; border-bottom-left-radius: 0;">
+                                            {% for u in age_units %}
+                                            <option value="{{ u.code }}" {% if (flock_data.bird_age_unit or 'weeks') == u.code %}selected{% endif %}>
+                                                {{ u.name_km if session.get('lang', 'km') == 'km' else u.name_en }}
+                                            </option>
+                                            {% endfor %}
+                                        </select>
                                     </div>
                                     <div class="form-text small text-muted">{{ t('diag.bird_age_help') }}</div>
                                 </div>
@@ -1039,7 +1048,18 @@
                                     <label class="form-label">{{ t('diag.breed') }} <span class="text-danger">*</span></label>
                                     <div class="diagnosis-control-shell">
                                         <span class="diagnosis-control-icon"><i class="bi bi-tag"></i></span>
-                                        <input type="text" name="breed" class="form-control diagnosis-control" placeholder="{{ t('diag.breed_ph') }}" value="{{ flock_data.breed or '' }}" required>
+                                        <select name="breed" id="breedSelect" class="form-select diagnosis-control" required>
+                                            <option value="">{{ t('diag.select_breed') }}</option>
+                                            {% for b in chicken_breeds %}
+                                            <option value="{{ b.code }}" {% if (flock_data.breed_code == b.code) or (not flock_data.breed_code and flock_data.breed == b.code) or (flock_data.breed == b.name_km) or (flock_data.breed == b.name_en) %}selected{% endif %}>
+                                                {{ b.name_km }} ({{ b.name_en }})
+                                            </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div id="breedOtherContainer" class="mt-2 {% if flock_data.breed_code != 'other' %}d-none{% endif %}">
+                                        <input type="text" name="breed_other" id="breedOtherInput" class="form-control diagnosis-control" placeholder="{{ t('diag.breed_other_ph') }}" value="{{ flock_data.breed_other or (flock_data.breed if flock_data.breed_code == 'other' else '') }}">
+                                        <div class="form-text small text-muted">{{ t('diag.breed_other_label') }}</div>
                                     </div>
                                 </div>
                                 <!-- Farm Type -->
@@ -1418,8 +1438,8 @@
                         {% if flock_data %}
                         <dl class="summary-grid mb-0 small">
                             {% if flock_data.flock_size %}<dt>{{ t('diag.summary_flock') }}</dt><dd>{{ flock_data.flock_size }} {{ t('diag.birds_unit') }}</dd>{% endif %}
-                            {% if flock_data.bird_age %}<dt>{{ t('diag.summary_age') }}</dt><dd>{{ flock_data.bird_age }}</dd>{% endif %}
-                            {% if flock_data.breed %}<dt>{{ t('diag.summary_breed') }}</dt><dd>{{ flock_data.breed }}</dd>{% endif %}
+                            {% if flock_data.bird_age %}<dt>{{ t('diag.summary_age') }}</dt><dd>{% if flock_data.bird_age_val and flock_data.bird_age_unit %}{{ flock_data.bird_age_val }} {{ t('diag.unit_' + flock_data.bird_age_unit) }}{% else %}{{ flock_data.bird_age }}{% endif %}</dd>{% endif %}
+                            {% if flock_data.breed %}<dt>{{ t('diag.summary_breed') }}</dt><dd>{{ get_translated_option('breed', flock_data.breed_code or flock_data.breed) or flock_data.breed }}</dd>{% endif %}
                             {% if flock_data.sick_bird_count %}<dt>{{ t('diag.summary_sick') }}</dt><dd class="text-danger fw-bold">{{ flock_data.sick_bird_count }} {{ t('diag.birds_unit') }}</dd>{% endif %}
                             {% if flock_data.dead_bird_count %}<dt>{{ t('diag.summary_dead') }}</dt><dd class="text-danger fw-bold">{{ flock_data.dead_bird_count }} {{ t('diag.birds_unit') }}</dd>{% endif %}
                         </dl>
@@ -1775,6 +1795,27 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (districtSelect) {
         districtSelect.addEventListener('change', syncLocationFallback);
+    }
+
+    // Chicken breed 'other' toggle
+    const breedSelect = document.getElementById('breedSelect');
+    const breedOtherContainer = document.getElementById('breedOtherContainer');
+    const breedOtherInput = document.getElementById('breedOtherInput');
+    if (breedSelect && breedOtherContainer) {
+        breedSelect.addEventListener('change', function() {
+            if (this.value === 'other') {
+                breedOtherContainer.classList.remove('d-none');
+                if (breedOtherInput) {
+                    breedOtherInput.required = true;
+                    breedOtherInput.focus();
+                }
+            } else {
+                breedOtherContainer.classList.add('d-none');
+                if (breedOtherInput) {
+                    breedOtherInput.required = false;
+                }
+            }
+        });
     }
 
     // Auto-hint farm scale based on flock size
@@ -2296,7 +2337,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 }).length;
                 if (overlap > 0) {
                     const ratio = diseaseSymptoms.length ? overlap / diseaseSymptoms.length : 0;
-                    scores.push({ name: name, overlap: overlap, ratio: ratio, info: info });
+                    const ruleConf = (info.confidence !== undefined && info.confidence !== null) ? Number(info.confidence) : 100.0;
+                    const conf = Math.min(100, Math.round(ratio * ruleConf));
+                    scores.push({ name: name, overlap: overlap, ratio: ratio, confidence: conf, info: info });
                 }
             });
 
@@ -2307,23 +2350,27 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             scores.sort(function (a, b) {
+                if (b.confidence !== a.confidence) return b.confidence - a.confidence;
                 if (b.overlap !== a.overlap) return b.overlap - a.overlap;
                 return b.ratio - a.ratio;
             });
 
             topIllnessesBox.innerHTML = '';
             scores.slice(0, 4).forEach(function (item) {
-                const pct = Math.round(item.ratio * 100);
+                const pct = item.confidence;
                 const matchText = "{{ t('diag.matched_symptoms_count', count='__CNT__') }}".replace('__CNT__', item.overlap);
+                const isLow = pct < 30;
+                const badgeClass = isLow ? 'bg-secondary bg-opacity-10 text-muted' : (pct >= 70 ? 'bg-success bg-opacity-10 text-success' : 'bg-warning bg-opacity-10 text-warning');
+                const borderClass = isLow ? 'border-secondary' : (pct >= 70 ? 'border-success' : 'border-warning');
                 const row = document.createElement('div');
-                row.className = 'symptom-illness-item shadow-xs mb-2 p-2 rounded-2 border-start border-4 border-success bg-white';
+                row.className = 'symptom-illness-item shadow-xs mb-2 p-2 rounded-2 border-start border-4 ' + borderClass + ' bg-white';
                 row.innerHTML = '<div class="d-flex justify-content-between align-items-start">' +
                     '<div>' +
                         '<div class="fw-bold text-dark small mb-0">' + escapeHtml(item.name) + '</div>' +
                         '<div class="text-muted" style="font-size: 0.72rem;">' + matchText + '</div>' +
                     '</div>' +
                     '<div class="text-end">' +
-                        '<span class="badge bg-success bg-opacity-10 text-success fw-bold">' + pct + '%</span>' +
+                        '<span class="badge ' + badgeClass + ' fw-bold">' + pct + '%</span>' +
                     '</div>' +
                 '</div>';
                 topIllnessesBox.appendChild(row);

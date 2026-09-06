@@ -1,25 +1,25 @@
 {% extends "layouts/base.html" %}
-{% block title %}Delete Permission{% endblock %}
-{% block page_title %}Delete Permission{% endblock %}
-{% block page_subtitle %}This action cannot be undone{% endblock %}
+{% block title %}{{ t('perm.delete_title', default='Delete Permission') }}{% endblock %}
+{% block page_title %}{{ t('perm.delete_title', default='Delete Permission') }}{% endblock %}
+{% block page_subtitle %}{{ t('roles.delete_subtitle', default='This action cannot be undone') }}{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-lg-5">
         <div class="mb-3">
             <a href="{{ url_for('tbl_permissions.detail', permission_id=permission.id) }}" class="text-decoration-none text-muted small">
-                <i class="bi bi-arrow-left me-1"></i> Back to Details
+                <i class="bi bi-arrow-left me-1"></i> {{ t('perm.btn_back_detail', default='Back to Details') }}
             </a>
         </div>
 
-        <div class="card border-0 shadow-sm">
+        <div class="card border shadow-sm">
             <div class="card-body p-4 text-center">
                 <div class="delete-icon-wrapper mb-3">
                     <i class="bi bi-exclamation-triangle"></i>
                 </div>
-                <h5 class="fw-bold mb-2">Delete Permission?</h5>
-                <p class="text-muted mb-1">You are about to permanently delete:</p>
-                <div class="bg-light rounded p-3 mb-3">
+                <h5 class="fw-bold mb-2">{{ t('perm.delete_confirm', default='Delete Permission?') }}</h5>
+                <p class="text-muted mb-1">{{ t('perm.delete_warning', default='You are about to permanently delete:') }}</p>
+                <div class="bg-light-subtle border rounded p-3 mb-3">
                     <code class="text-danger fw-bold fs-6">{{ permission.code }}</code>
                     <div class="small text-muted mt-1">{{ permission.name }} &middot; {{ permission.module }}</div>
                 </div>
@@ -27,8 +27,8 @@
                 {% if permission.roles %}
                 <div class="alert alert-warning alert-sm text-start">
                     <i class="bi bi-exclamation-circle me-1"></i>
-                    This permission is assigned to <strong>{{ permission.roles | length }}</strong> role(s):
-                    {% for role in permission.roles %}<span class="badge bg-warning text-dark ms-1">{{ role.name }}</span>{% endfor %}
+                    {{ t('perm.assigned_roles_warning', count=permission.roles|length, default='This permission is assigned to ' ~ (permission.roles|length) ~ ' role(s):') }}
+                    {% for role in permission.roles %}<span class="badge bg-warning text-dark ms-1">{{ get_translated_role(role.name) }}</span>{% endfor %}
                 </div>
                 {% endif %}
 
@@ -36,10 +36,10 @@
                     {{ form.hidden_tag() }}
                     <div class="d-flex gap-2 justify-content-center">
                         <button type="submit" class="btn btn-danger px-4">
-                            <i class="bi bi-trash3 me-1"></i> Delete
+                            <i class="bi bi-trash3 me-1"></i> {{ t('common.delete', default='Delete') }}
                         </button>
                         <a href="{{ url_for('tbl_permissions.detail', permission_id=permission.id) }}" class="btn btn-outline-secondary px-4">
-                            Cancel
+                            {{ t('common.cancel', default='Cancel') }}
                         </a>
                     </div>
                 </form>

@@ -229,7 +229,9 @@ document.addEventListener('DOMContentLoaded', function () {
             }).length;
             if (overlap > 0) {
                 const ratio = diseaseSymptoms.length ? overlap / diseaseSymptoms.length : 0;
-                scores.push({ name: name, overlap: overlap, ratio: ratio, info: info });
+                const ruleConf = (info.confidence !== undefined && info.confidence !== null) ? Number(info.confidence) : 100.0;
+                const conf = Math.min(100, Math.round(ratio * ruleConf));
+                scores.push({ name: name, overlap: overlap, ratio: ratio, confidence: conf, info: info });
             }
         });
 
@@ -240,22 +242,26 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         scores.sort(function (a, b) {
+            if (b.confidence !== a.confidence) return b.confidence - a.confidence;
             if (b.overlap !== a.overlap) return b.overlap - a.overlap;
             return b.ratio - a.ratio;
         });
 
         topIllnessesBox.innerHTML = '';
         scores.slice(0, 4).forEach(function (item) {
-            const pct = Math.round(item.ratio * 100);
+            const pct = item.confidence;
+            const isLow = pct < 30;
+            const badgeClass = isLow ? 'bg-secondary bg-opacity-10 text-muted' : (pct >= 70 ? 'bg-success bg-opacity-10 text-success' : 'bg-warning bg-opacity-10 text-warning');
+            const borderClass = isLow ? 'border-secondary' : (pct >= 70 ? 'border-success' : 'border-warning');
             const row = document.createElement('div');
-            row.className = 'symptom-illness-item shadow-xs mb-2 p-2 rounded-2 border-start border-4 border-success bg-white';
+            row.className = 'symptom-illness-item shadow-xs mb-2 p-2 rounded-2 border-start border-4 ' + borderClass + ' bg-white';
             row.innerHTML = '<div class="d-flex justify-content-between align-items-start">' +
                 '<div>' +
                     '<div class="fw-bold text-dark small mb-0">' + escapeHtml(item.name) + '</div>' +
                     '<div class="text-muted" style="font-size: 0.72rem;">' + item.overlap + ' រោគសញ្ញាត្រូវគ្នា</div>' +
                 '</div>' +
                 '<div class="text-end">' +
-                    '<span class="badge bg-success bg-opacity-10 text-success fw-bold">' + pct + '%</span>' +
+                    '<span class="badge ' + badgeClass + ' fw-bold">' + pct + '%</span>' +
                 '</div>' +
             '</div>';
             topIllnessesBox.appendChild(row);

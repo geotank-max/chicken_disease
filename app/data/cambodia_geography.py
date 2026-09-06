@@ -456,6 +456,36 @@ FARM_SCALES = [
     {"code": ">1000", "name_en": "> 1,000 Birds (Large Commercial)", "name_km": "> ១,០០០ ក្បាល (កសិដ្ឋានធំ)"},
 ]
 
+CHICKEN_BREEDS = [
+    {"code": "native", "name_en": "Native / Local (Moan Srae)", "name_km": "មាន់ស្រែ / មាន់ស្រុក"},
+    {"code": "broiler", "name_en": "Commercial Broiler (Meat)", "name_km": "មាន់សាច់ (Broiler)"},
+    {"code": "layer", "name_en": "Commercial Layer (Eggs)", "name_km": "មាន់ពង (Layer)"},
+    {"code": "crossbred", "name_en": "Crossbred / Hybrid", "name_km": "មាន់កូនកាត់ / បីសាសន៍"},
+    {"code": "gamefowl", "name_en": "Fighting Cock (Gamefowl)", "name_km": "មាន់ជល់ / មាន់គក"},
+    {"code": "other", "name_en": "Other / Specify", "name_km": "ផ្សេងៗ (បញ្ជាក់បន្ថែម)"},
+]
+
+AGE_UNITS = [
+    {"code": "weeks", "name_en": "Weeks", "name_km": "សប្ដាហ៍"},
+    {"code": "days", "name_en": "Days", "name_km": "ថ្ងៃ"},
+    {"code": "months", "name_en": "Months", "name_km": "ខែ"},
+]
+
+BREEDS_BY_CODE = {b["code"]: b for b in CHICKEN_BREEDS}
+
+
+def get_breed_label(code_or_name: str | None, lang: str = "km") -> str:
+    """Return localized breed name for a breed code, or return raw string if custom/unknown."""
+    if not code_or_name:
+        return ""
+    val = str(code_or_name).strip()
+    if val.lower() in BREEDS_BY_CODE:
+        b = BREEDS_BY_CODE[val.lower()]
+        return b["name_km"] if lang == "km" else b["name_en"]
+    return val
+
+
+
 
 def get_provinces() -> list[dict]:
     """Return all 25 provinces."""
