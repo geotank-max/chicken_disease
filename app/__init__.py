@@ -148,6 +148,7 @@ def create_app(config_class: type[Config] = Config):
 
     @app.errorhandler(500)
     def server_error(e):
+        db.session.rollback()
         return render_template("errors/error.html",
             error_code=500,
             title="Something Went Wrong",
@@ -155,6 +156,12 @@ def create_app(config_class: type[Config] = Config):
             icon="bi-exclamation-octagon",
             icon_class="server-error",
         ), 500
+
+    @app.teardown_request
+    def teardown_request(exception=None):
+        if exception:
+            db.session.rollback()
+        db.session.remove()
 
     @app.errorhandler(413)
     def request_too_large(e):

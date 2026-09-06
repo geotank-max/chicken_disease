@@ -97,19 +97,31 @@ def register():
             "is_active": True,
         }
         
-        new_user = UserService.create_user(
-            data=data,
-            password=password,
-            role_id=default_role_id,
-        )
-        
-        # Send email verification
-        raw_token = new_user.generate_email_verify_token()
-        db.session.commit()
-        EmailService.send_verification_email(new_user, raw_token)
-        
-        login_user(new_user)
-        AuditService.log("REGISTER", "User", new_user.id, "New user registered")
+        try:
+            new_user = UserService.create_user(
+                data=data,
+                password=password,
+                role_id=default_role_id,
+            )
+            
+            # Send email verification
+            raw_token = new_user.generate_email_verify_token()
+            db.session.commit()
+            EmailService.send_verification_email(new_user, raw_token)
+            
+            login_user(new_user)
+            AuditService.log("REGISTER", "User", new_user.id, "New user registered")
+        except Exception as e:
+            db.session.rollback()
+            current_app.logger.error(f"Registration error: {e}", exc_info=True)
+            flash("Registration failed. Please try again.", "danger")
+            return render_template(
+                "auth/register.html",
+                username=username,
+                email=email,
+                full_name=full_name,
+            )
+
         flash("Account created successfully. Please check your email to verify your address.", "success")
         
         # Check for pending guest diagnosis in session

@@ -1,5 +1,5 @@
 # app/routes/user_routes.py
-from flask import Blueprint, render_template, redirect, url_for, flash, abort
+from flask import Blueprint, render_template, redirect, url_for, flash, abort, current_app
 from flask_login import login_required, current_user
 from extensions import db
 from app.forms.user_forms import(
@@ -145,7 +145,12 @@ def delete(user_id: int):
         abort(404)
         
     username = user.username
-    UserService.delete_user(user)
-    AuditService.log("DELETE", "User", user_id, f"Deleted user: {username}")
-    flash("User was deleted successfully.", "success")
+    try:
+        UserService.delete_user(user)
+        AuditService.log("DELETE", "User", user_id, f"Deleted user: {username}")
+        flash("User was deleted successfully.", "success")
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"Failed to delete user {user_id}: {e}", exc_info=True)
+        flash("Failed to delete user due to associated records. Please check logs.", "danger")
     return redirect(url_for("tbl_users.index"))

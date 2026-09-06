@@ -29,6 +29,10 @@ class EmailService:
         """Send a single email. Returns True on success, False on failure."""
         cfg = EmailService._get_smtp_config()
 
+        if not cfg.get("username") or not cfg.get("password"):
+            logger.info("SMTP credentials not configured. Skipping email send.")
+            return False
+
         msg = MIMEMultipart("alternative")
         msg["From"] = cfg["sender"]
         msg["To"] = to
@@ -40,10 +44,10 @@ class EmailService:
 
         try:
             if cfg["use_tls"]:
-                server = smtplib.SMTP(cfg["host"], cfg["port"])
+                server = smtplib.SMTP(cfg["host"], cfg["port"], timeout=10)
                 server.starttls()
             else:
-                server = smtplib.SMTP_SSL(cfg["host"], cfg["port"])
+                server = smtplib.SMTP_SSL(cfg["host"], cfg["port"], timeout=10)
 
             server.login(cfg["username"], cfg["password"])
             server.sendmail(cfg["sender"], to, msg.as_string())
