@@ -792,8 +792,8 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "en": "e.g. 100",
     },
     "diag.flock_size_help": {
-        "km": "ចំនួនមាន់សរុបទាំងអស់នៅក្នុងទ្រុង ឬចំការ",
-        "en": "Total number of chickens in the coop or farm",
+        "km": "ចំនួនមាន់សរុប ឬចំនួនមាន់ក្នុងក្រុមដែលកំពុងប្រឈមនឹងជំងឺ",
+        "en": "Total flock size or number of birds in the affected group",
     },
     "diag.bird_age": {
         "km": "អាយុមាន់",
@@ -803,9 +803,13 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "km": "ឧ. ២",
         "en": "e.g. 2",
     },
+    "diag.bird_age_tip": {
+        "km": "ចម្រុះអាយុ៖ ដាក់អាយុក្រុមដែលឈឺ",
+        "en": "Mixed ages: Enter age of sick group",
+    },
     "diag.bird_age_help": {
-        "km": "បញ្ចូលចំនួន និងជ្រើសរើសឯកតា (ថ្ងៃ, សប្តាហ៍ ឬខែ)",
-        "en": "Enter number and select unit (Days, Weeks, or Months)",
+        "km": "សម្រាប់ហ្វូងមាន់ចម្រុះអាយុ សូមបញ្ចូលអាយុនៃក្រុមមាន់ដែលកំពុងចេញរោគសញ្ញាឈឺ",
+        "en": "For mixed-age flocks, enter the age of the birds currently showing symptoms.",
     },
     "diag.unit_weeks": {
         "km": "សប្ដាហ៍",
@@ -1102,6 +1106,10 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     "diag.live_prediction_title": {
         "km": "ជំងឺដែលអាចទំនង",
         "en": "Likely Suspected Diseases",
+    },
+    "diag.live_ai_badge": {
+        "km": "AI ផ្ទាល់",
+        "en": "Live AI",
     },
     "diag.live_prediction_subtitle": {
         "km": "ការទស្សន៍ទាយតាមពេលវេលាជាក់ស្តែង",

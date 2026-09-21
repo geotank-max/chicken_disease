@@ -1028,7 +1028,12 @@
                                     <div class="form-text small text-muted">{{ t('diag.flock_size_help') }}</div>
                                 </div>
                                 <div class="col-md-6 diagnosis-field">
-                                    <label class="form-label">{{ t('diag.bird_age') }} <span class="text-danger">*</span></label>
+                                    <div class="d-flex align-items-center justify-content-between mb-1">
+                                        <label class="form-label mb-0">{{ t('diag.bird_age') }} <span class="text-danger">*</span></label>
+                                        <span class="badge bg-light text-muted border fw-normal py-1 px-2" style="font-size: 0.72rem;" title="{{ t('diag.bird_age_help') }}">
+                                            <i class="bi bi-info-circle me-1 text-primary"></i>{{ t('diag.bird_age_tip') }}
+                                        </span>
+                                    </div>
                                     <div class="input-group diagnosis-age-group">
                                         <div class="diagnosis-control-shell flex-grow-1" style="border-top-right-radius: 0; border-bottom-right-radius: 0;">
                                             <span class="diagnosis-control-icon"><i class="bi bi-calendar-week"></i></span>
@@ -1037,7 +1042,7 @@
                                         <select name="bird_age_unit" id="birdAgeUnit" class="form-select diagnosis-control bg-light fw-medium" style="max-width: 140px; border-left: 1px solid #ced4da; border-top-left-radius: 0; border-bottom-left-radius: 0;">
                                             {% for u in age_units %}
                                             <option value="{{ u.code }}" {% if (flock_data.bird_age_unit or 'weeks') == u.code %}selected{% endif %}>
-                                                {{ u.name_km if session.get('lang', 'km') == 'km' else u.name_en }}
+                                                {{ u.name_km if current_lang == 'km' else u.name_en }}
                                             </option>
                                             {% endfor %}
                                         </select>
@@ -1052,7 +1057,7 @@
                                             <option value="">{{ t('diag.select_breed') }}</option>
                                             {% for b in chicken_breeds %}
                                             <option value="{{ b.code }}" {% if (flock_data.breed_code == b.code) or (not flock_data.breed_code and flock_data.breed == b.code) or (flock_data.breed == b.name_km) or (flock_data.breed == b.name_en) %}selected{% endif %}>
-                                                {{ b.name_km }} ({{ b.name_en }})
+                                                {{ b.name_km if current_lang == 'km' else b.name_en }}
                                             </option>
                                             {% endfor %}
                                         </select>
@@ -1071,7 +1076,7 @@
                                             <option value="">{{ t('diag.select_farm_type') }}</option>
                                             {% for ft in farm_types %}
                                             <option value="{{ ft.code }}" {% if flock_data.farm_type == ft.code %}selected{% endif %}>
-                                                {{ ft.name_km }} ({{ ft.name_en }})
+                                                {{ ft.name_km if current_lang == 'km' else ft.name_en }}
                                             </option>
                                             {% endfor %}
                                         </select>
@@ -1087,7 +1092,7 @@
                                             <option value="">{{ t('diag.select_farm_scale') }}</option>
                                             {% for fs in farm_scales %}
                                             <option value="{{ fs.code }}" {% if flock_data.farm_scale == fs.code %}selected{% endif %}>
-                                                {{ fs.name_km }} ({{ fs.name_en }})
+                                                {{ fs.name_km if current_lang == 'km' else fs.name_en }}
                                             </option>
                                             {% endfor %}
                                         </select>
@@ -1109,7 +1114,7 @@
                                             <option value="">{{ t('diag.select_province') }}</option>
                                             {% for p in cambodia_provinces %}
                                             <option value="{{ p.name_en }}" data-code="{{ p.code }}" data-lat="{{ p.lat }}" data-lng="{{ p.lng }}" {% if flock_data.province == p.name_en %}selected{% endif %}>
-                                                {{ p.name_km }} ({{ p.name_en }})
+                                                {{ p.name_km if current_lang == 'km' else p.name_en }}
                                             </option>
                                             {% endfor %}
                                         </select>
@@ -1454,7 +1459,7 @@
                             <h6 class="fw-bold text-primary mb-0">
                                 <i class="bi bi-magic me-1"></i> {{ t('diag.live_prediction_title') }}
                             </h6>
-                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 small">Live AI</span>
+                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 small">{{ t('diag.live_ai_badge') }}</span>
                         </div>
                         <div class="small text-muted mb-3">{{ t('diag.live_prediction_subtitle') }}</div>
                         <div id="topIllnesses">
@@ -1741,7 +1746,7 @@
 {% if step == '1' %}
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    // ── Cambodia Geography & Cascading District Handler ──────────
+    const currentLang = {{ current_lang | tojson }};
     const provincesData = {{ cambodia_provinces | tojson }};
     const currentDistrict = {{ (flock_data.district or '') | tojson }};
     const provinceSelect = document.getElementById('provinceSelect');
@@ -1765,7 +1770,7 @@ document.addEventListener('DOMContentLoaded', function () {
             prov.districts.forEach(d => {
                 const opt = document.createElement('option');
                 opt.value = d.name_en;
-                opt.textContent = `${d.name_km} (${d.name_en})`;
+                opt.textContent = currentLang === 'en' ? d.name_en : d.name_km;
                 if (preselectedDistrict && (preselectedDistrict === d.name_en || preselectedDistrict === d.name_km)) {
                     opt.selected = true;
                 }

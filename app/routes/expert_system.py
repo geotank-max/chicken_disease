@@ -405,6 +405,7 @@ def diagnose():
             if (b_str == b["code"] or
                 b_str == b["name_en"].lower() or
                 b_str == b["name_km"].lower() or
+                b["name_km"].lower() in b_str or
                 b["code"] in b_str):
                 matched_code = b["code"]
                 break

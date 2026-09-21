@@ -1,7 +1,9 @@
 # app/services/seed_service.py
 from extensions import db
 from app.models import PermissionTable, RoleTable, UserTable
-from app.models.expert_system import Category, Symptom, Disease, Rule
+from app.models.associations import tbl_cases_symptoms, tbl_rules_symptoms
+from app.models.expert_system import Category, Symptom, Disease, Rule, Case, CaseDiagnosis
+
 
 
 def _get_or_create(model, defaults=None, **kwargs):
@@ -93,7 +95,7 @@ def seed_admin_user():
 
 DISEASE_KNOWLEDGE = {
     "infectious_bronchitis": {
-        "name": "ជំងឺរលាកទងសួតឆ្លង (Infectious Bronchitis - IB)",
+        "name": "ជំងឺរលាកទងសួតឆ្លង",
         "category_key": "cat_resp",
         "severity": "ខ្ពស់",
         "is_contagious": True,
@@ -117,7 +119,7 @@ DISEASE_KNOWLEDGE = {
         ),
     },
     "newcastle": {
-        "name": "ជំងឺញូកាសល (Newcastle Disease - ND)",
+        "name": "ជំងឺញូកាសល",
         "category_key": "cat_resp",
         "severity": "ធ្ងន់ធ្ងរបំផុត",
         "is_contagious": True,
@@ -140,7 +142,7 @@ DISEASE_KNOWLEDGE = {
         ),
     },
     "coccidiosis": {
-        "name": "ជំងឺកុកស៊ីឌីយ៉ូស ឬ រាគឈាម (Coccidiosis)",
+        "name": "ជំងឺកុកស៊ីឌីយ៉ូស ឬ រាគឈាម",
         "category_key": "cat_digest",
         "severity": "ខ្ពស់",
         "is_contagious": True,
@@ -163,7 +165,7 @@ DISEASE_KNOWLEDGE = {
         ),
     },
     "fowl_cholera": {
-        "name": "ជំងឺអាសន្នរោគបក្សី (Fowl Cholera)",
+        "name": "ជំងឺអាសន្នរោគបក្សី",
         "category_key": "cat_bact",
         "severity": "ខ្ពស់",
         "is_contagious": True,
@@ -185,7 +187,7 @@ DISEASE_KNOWLEDGE = {
         ),
     },
     "marek": {
-        "name": "ជំងឺម៉ារ៉ែក (Marek's Disease)",
+        "name": "ជំងឺម៉ារ៉ែក",
         "category_key": "cat_neuro",
         "severity": "ខ្ពស់",
         "is_contagious": True,
@@ -207,7 +209,7 @@ DISEASE_KNOWLEDGE = {
         ),
     },
     "avian_influenza": {
-        "name": "ជំងឺផ្តាសាយបក្សី (Avian Influenza - Bird Flu)",
+        "name": "ជំងឺផ្តាសាយបក្សី",
         "category_key": "cat_resp",
         "severity": "គ្រោះថ្នាក់បំផុត",
         "is_contagious": True,
@@ -229,7 +231,7 @@ DISEASE_KNOWLEDGE = {
         ),
     },
     "infectious_bursal": {
-        "name": "ជំងឺហ្គាំបូរ៉ូ (Gumboro - IBD)",
+        "name": "ជំងឺហ្គាំបូរ៉ូ",
         "category_key": "cat_general",
         "severity": "ខ្ពស់",
         "is_contagious": True,
@@ -252,7 +254,7 @@ DISEASE_KNOWLEDGE = {
         ),
     },
     "fowl_pox": {
-        "name": "ជំងឺអុតបក្សី (Fowl Pox)",
+        "name": "ជំងឺអុតបក្សី",
         "category_key": "cat_skin",
         "severity": "មធ្យម",
         "is_contagious": True,
@@ -276,7 +278,7 @@ DISEASE_KNOWLEDGE = {
         ),
     },
     "ecoli": {
-        "name": "ជំងឺឆ្លងបាក់តេរី អ៊ីខូឡៃ (Colibacillosis - E. coli)",
+        "name": "ជំងឺឆ្លងបាក់តេរី អ៊ីខូឡៃ",
         "category_key": "cat_bact",
         "severity": "មធ្យមទៅខ្ពស់",
         "is_contagious": False,
@@ -298,7 +300,7 @@ DISEASE_KNOWLEDGE = {
         ),
     },
     "mycoplasmosis": {
-        "name": "ជំងឺរលាកផ្លូវដង្ហើមរ៉ាំរ៉ៃ ស៊ីអ័រឌី (Mycoplasmosis - CRD)",
+        "name": "ជំងឺរលាកផ្លូវដង្ហើមរ៉ាំរ៉ៃ (ស៊ីអ័រឌី)",
         "category_key": "cat_resp",
         "severity": "មធ្យម",
         "is_contagious": True,
@@ -320,7 +322,7 @@ DISEASE_KNOWLEDGE = {
         ),
     },
     "aspergillosis": {
-        "name": "ជំងឺផ្សិតសួតបក្សី (Aspergillosis)",
+        "name": "ជំងឺផ្សិតសួតបក្សី",
         "category_key": "cat_resp",
         "severity": "មធ្យម",
         "is_contagious": False,
@@ -436,7 +438,7 @@ def seed_expert_data():
     # Rules (12)
     rules = [
         Rule(
-            title="Infectious Bronchitis",
+            title="រោគសញ្ញាជំងឺរលាកទងសួតឆ្លង",
             description="ក្អក + កណ្តាស់ + ហៀរសំបោរ + ធ្លាក់ចុះការផលិតពង",
             priority=1,
             confidence=85.0,
@@ -444,7 +446,7 @@ def seed_expert_data():
             symptoms=[symptoms["coughing"], symptoms["sneezing"], symptoms["nasal_discharge"], symptoms["drop_egg"]],
         ),
         Rule(
-            title="Newcastle Disease",
+            title="រោគសញ្ញាជំងឺញូកាសល",
             description="ក្អក + ហៀរសំបោរ + ស្រពោន/អសកម្ម + ក្បាលរមួលបង្វិល",
             priority=1,
             confidence=82.0,
@@ -452,7 +454,7 @@ def seed_expert_data():
             symptoms=[symptoms["coughing"], symptoms["nasal_discharge"], symptoms["lethargy"], symptoms["twisted_neck"]],
         ),
         Rule(
-            title="Coccidiosis",
+            title="រោគសញ្ញាជំងឺកុកស៊ីឌីយ៉ូស (រាគឈាម)",
             description="រាគមានឈាម + ស្រពោន/អសកម្ម + ខ្វះជាតិទឹក",
             priority=1,
             confidence=90.0,
@@ -460,7 +462,7 @@ def seed_expert_data():
             symptoms=[symptoms["bloody_diarrhea"], symptoms["lethargy"], symptoms["dehydration"]],
         ),
         Rule(
-            title="Fowl Cholera",
+            title="រោគសញ្ញាជំងឺអាសន្នរោគបក្សី",
             description="ហើមមុខ/ក្បាល + ស្រពោន/អសកម្ម + រោមរញ៉េរញ៉ៃ/បះ + ងាប់ភ្លាមៗ",
             priority=1,
             confidence=80.0,
@@ -468,7 +470,7 @@ def seed_expert_data():
             symptoms=[symptoms["swollen_face"], symptoms["lethargy"], symptoms["ruffled"], symptoms["sudden_death"]],
         ),
         Rule(
-            title="Marek Disease",
+            title="រោគសញ្ញាជំងឺម៉ារ៉ែក",
             description="ទន់ជើង/ដើរខ្វិន + ស្រពោន/អសកម្ម + ស្រកទម្ងន់/ស្គម",
             priority=2,
             confidence=76.0,
@@ -476,7 +478,7 @@ def seed_expert_data():
             symptoms=[symptoms["lameness"], symptoms["lethargy"], symptoms["weight_loss"]],
         ),
         Rule(
-            title="Avian Influenza",
+            title="រោគសញ្ញាជំងឺផ្តាសាយបក្សី",
             description="ក្អក + ស្រពោន/អសកម្ម + បាត់បង់ចំណង់អាហារ + ហៀរទឹកភ្នែក + កំបិតឡើងពណ៌ស្វាយជាំ",
             priority=1,
             confidence=88.0,
@@ -484,7 +486,7 @@ def seed_expert_data():
             symptoms=[symptoms["coughing"], symptoms["lethargy"], symptoms["loss_appetite"], symptoms["watery_eyes"], symptoms["bluish_comb"]],
         ),
         Rule(
-            title="Gumboro (IBD)",
+            title="រោគសញ្ញាជំងឺហ្គាំបូរ៉ូ",
             description="រាគពណ៌សកំបោរ + ស្រពោន/អសកម្ម + ខ្វះជាតិទឹក + រោមរញ៉េរញ៉ៃ/បះ",
             priority=1,
             confidence=83.0,
@@ -492,7 +494,7 @@ def seed_expert_data():
             symptoms=[symptoms["white_diarrhea"], symptoms["lethargy"], symptoms["dehydration"], symptoms["ruffled"]],
         ),
         Rule(
-            title="Fowl Pox",
+            title="រោគសញ្ញាជំងឺអុតបក្សី",
             description="ដំបៅស្បែក/ពងបែក + ក្រមរខ្មៅលើស្បែក + បាត់បង់ចំណង់អាហារ",
             priority=2,
             confidence=82.0,
@@ -500,7 +502,7 @@ def seed_expert_data():
             symptoms=[symptoms["skin_lesions"], symptoms["scabs"], symptoms["loss_appetite"]],
         ),
         Rule(
-            title="E. coli Infection",
+            title="រោគសញ្ញាជំងឺឆ្លងបាក់តេរី អ៊ីខូឡៃ",
             description="រាគពណ៌បៃតង + ស្រពោន/អសកម្ម + រោមរញ៉េរញ៉ៃ/បះ + ហើមមុខ/ក្បាល",
             priority=2,
             confidence=75.0,
@@ -508,7 +510,7 @@ def seed_expert_data():
             symptoms=[symptoms["green_diarrhea"], symptoms["lethargy"], symptoms["ruffled"], symptoms["swollen_face"]],
         ),
         Rule(
-            title="Mycoplasmosis (CRD)",
+            title="រោគសញ្ញាជំងឺរលាកផ្លូវដង្ហើមរ៉ាំរ៉ៃ (ស៊ីអ័រឌី)",
             description="ក្អក + កណ្តាស់ + ហើមប្រហោងមុខ + ហៀរទឹកភ្នែក",
             priority=2,
             confidence=80.0,
@@ -516,7 +518,7 @@ def seed_expert_data():
             symptoms=[symptoms["coughing"], symptoms["sneezing"], symptoms["swollen_sinus"], symptoms["watery_eyes"]],
         ),
         Rule(
-            title="Aspergillosis",
+            title="រោគសញ្ញាជំងឺផ្សិតសួតបក្សី",
             description="ពិបាកដកដង្ហើម/ហារមាត់ + ស្រពោន/អសកម្ម + ស្រកទម្ងន់/ស្គម",
             priority=3,
             confidence=72.0,
@@ -524,7 +526,7 @@ def seed_expert_data():
             symptoms=[symptoms["gasping"], symptoms["lethargy"], symptoms["weight_loss"]],
         ),
         Rule(
-            title="Newcastle (Neurological)",
+            title="រោគសញ្ញាប្រព័ន្ធប្រសាទ ជំងឺញូកាសល",
             description="ក្បាលផ្អៀង/វៀច + ញ័រខ្លួន/កន្ត្រាក់ + ទន់ជើង/ដើរខ្វិន + រាគពណ៌បៃតង",
             priority=1,
             confidence=85.0,
@@ -576,9 +578,9 @@ def upgrade_permissions():
 
 
 def update_disease_knowledge():
-    """Sync all 11 diseases, symptoms, and categories in existing databases with professional Khmer literature."""
+    """Sync all diseases, symptoms, rules, and categories in existing databases into pure professional Khmer."""
     try:
-        # 1. Update Categories
+        # 1. Update / Create Categories
         categories_data = {
             "ប្រព័ន្ធដង្ហើម": "រោគសញ្ញាទាក់ទងនឹងប្រព័ន្ធដង្ហើម",
             "ប្រព័ន្ធរំលាយអាហារ": "រោគសញ្ញាទាក់ទងនឹងពោះវៀន និងប្រព័ន្ធរំលាយអាហារ",
@@ -589,6 +591,13 @@ def update_disease_knowledge():
             "ការផលិតពង": "រោគសញ្ញាទាក់ទងនឹងការបញ្ចេញពង និងបន្តពូជ",
         }
         legacy_cat_map = {
+            "respiratory": "ប្រព័ន្ធដង្ហើម",
+            "digestive": "ប្រព័ន្ធរំលាយអាហារ",
+            "neurological": "ប្រព័ន្ធសរសៃប្រសាទ",
+            "bacterial": "ការឆ្លងបាក់តេរី",
+            "general": "រោគសញ្ញាទូទៅ",
+            "skin": "ស្បែកនិងរោម",
+            "reproductive": "ការផលិតពង",
             "របបដង្ហើម": "ប្រព័ន្ធដង្ហើម",
             "រំលាយអាហារ": "ប្រព័ន្ធរំលាយអាហារ",
             "សរសៃប្រសាទ": "ប្រព័ន្ធសរសៃប្រសាទ",
@@ -598,57 +607,178 @@ def update_disease_knowledge():
             "បន្តពូជ": "ការផលិតពង",
         }
         for old_name, new_name in legacy_cat_map.items():
-            cat = db.session.scalar(db.select(Category).filter_by(name=old_name))
-            if cat:
-                cat.name = new_name
-                cat.description = categories_data.get(new_name, cat.description)
+            for cat in db.session.scalars(db.select(Category)).all():
+                if cat.name.strip().lower() == old_name:
+                    target_existing = db.session.scalar(db.select(Category).filter_by(name=new_name))
+                    if target_existing and target_existing.id != cat.id:
+                        # Move relations to target_existing and remove duplicate cat
+                        for s in cat.symptoms:
+                            s.category = target_existing
+                        for d in cat.diseases:
+                            d.category = target_existing
+                        db.session.delete(cat)
+                    else:
+                        cat.name = new_name
+                        cat.description = categories_data.get(new_name, cat.description)
 
         for cat_name, cat_desc in categories_data.items():
             cat = db.session.scalar(db.select(Category).filter_by(name=cat_name))
-            if cat and not cat.description:
+            if not cat:
+                cat = Category(name=cat_name, description=cat_desc)
+                db.session.add(cat)
+            else:
                 cat.description = cat_desc
 
-        # 2. Update Symptoms
-        symptoms_clean = {
-            "ក្អក": ("ក្អក", "ក្អកញឹកញាប់ ឬពិបាកដកដង្ហើម"),
-            "កណ្តាស់": ("កណ្តាស់", "កណ្តាស់ញឹកញាប់"),
-            "ហៀរសំបោរ": ("ហៀរសំបោរ", "មានសំបោរ ឬស្លេស្មចេញពីរន្ធច្រមុះ"),
-            "ហៀរទឹកភ្នែក": ("ហៀរទឹកភ្នែក", "ភ្នែកហៀរទឹក ហើម ឬបិទជិត"),
-            "ពិបាកដកដង្ហើម": ("ពិបាកដកដង្ហើម/ហារមាត់", "ហារមាត់ដកដង្ហើម ឬដកដង្ហើមញាប់ខ្លាំង"),
-            "រលាកច្រមុះ/ប្រហោងមុខ": ("ហើមប្រហោងមុខ", "ហើមរលាកក្បែរភ្នែក ឬប្រហោងច្រមុះ"),
-            "សំឡេងខ្យល់ស្អក": ("សំឡេងខ្យល់ដង្ហើមស្អក", "សំឡេងខ្យល់ដង្ហើមមិនប្រក្រតីឮសូរគ្រតៗក្នុងបំពង់ក"),
-            "រាគរូស": ("រាគរូស", "រាគលាមករាវ ឬជាទឹក"),
-            "រាគមានឈាម": ("រាគមានឈាម", "មានឈាមស្រស់ ឬកំទេចឈាមលាយឡំក្នុងលាមក"),
-            "រាគពណ៌បៃតង": ("រាគពណ៌បៃតង", "លាមករាវពណ៌បៃតងស្រស់ ឬលាយស"),
-            "រាគពណ៌ស": ("រាគពណ៌សកំបោរ", "លាមករាវពណ៌សកំបោរស្អិតជាប់គូទ"),
-            "ប៉ោងក្រពះចំណី": ("ប៉ោងក្រពះចំណី", "ក្រពះចំណី (ពោះវៀនក) ឡើងប៉ោងតឹងពេញដោយទឹកឬខ្យល់"),
-            "ខ្វិនជើង": ("ទន់ជើង/ដើរខ្វិន", "ពិបាកដើរ ជើងទន់ខ្សោយ ឬដើរទាក់"),
-            "ក្បាលវៀច": ("ក្បាលផ្អៀង/វៀច", "ក្បាលផ្អៀងទៅម្ខាង ឬងាកចុះក្រោម"),
-            "ញ័រខ្លួន": ("ញ័រខ្លួន/កន្ត្រាក់", "រាងកាយញ័រ ឬកន្ត្រាក់សាច់ដុំ"),
-            "ខ្វិនជើង ឬស្លាប": ("ខ្វិនជើង ឬស្លាប", "មិនអាចដើរបាន ឬជើងនិងស្លាបទន់លែងកម្រើក"),
-            "ក្បាលបង្វិល": ("ក្បាលរមួលបង្វិល", "ក្បាលរមួលបង្វិលខុសធម្មជាតិ (Torticollis)"),
-            "ស្រពោន/អសកម្ម": ("ស្រពោន/អសកម្ម", "ថយចុះថាមពល ដេកសណ្តូកស្ងប់ស្ងៀម មិនរវើករវាយ"),
-            "រោមរញ៉េរញ៉ៃ": ("រោមរញ៉េរញ៉ៃ/បះ", "រោមបះមិនស្អាត ឬរញ៉េរញ៉ៃ ធ្លាក់ស្លាប"),
-            "បាត់បង់ចំណង់អាហារ": ("បាត់បង់ចំណង់អាហារ", "មិនស៊ីចំណី ឬស៊ីតិចតួចខុសធម្មតា"),
-            "ស្រកទម្ងន់": ("ស្រកទម្ងន់/ស្គម", "ស្រកទម្ងន់លឿន ឬស្គមរីងរៃសល់តែឆ្អឹងទ្រូង"),
-            "ងាប់ភ្លាមៗ": ("ងាប់ភ្លាមៗ", "ងាប់យ៉ាងឆាប់រហ័សដោយគ្មានរោគសញ្ញាព្រមាន"),
-            "ក្តៅខ្លួន": ("ក្តៅខ្លួនខ្លាំង", "សីតុណ្ហភាពរាងកាយឡើងខ្ពស់ ជើងក្តៅ"),
-            "ខ្វះជាតិទឹក": ("ខ្វះជាតិទឹក", "ស្បែកស្ងួត ភ្នែកខូងស្រពោន ជើងស្វិតស្ងួត"),
-            "ហើមមុខ": ("ហើមមុខ/ក្បាល", "ផ្ទៃមុខ ក្បាល ឬកំបិតឡើងហើមធំ"),
-            "ដំបៅស្បែក": ("ដំបៅស្បែក/ពងបែក", "របួស ដំបៅ ឬពងបែកលើស្បែក"),
-            "ក្រមរស្បែក": ("ក្រមរខ្មៅលើស្បែក", "ក្រមរខ្មៅ ឬកន្ទួលលើស្បែក កំបិត និងជើង"),
-            "កំបិតស្វាយ/ជាំ": ("កំបិតឡើងពណ៌ស្វាយជាំ", "កំបិត និងសន្ទះកំបិតឡើងពណ៌ខៀវស្វាយ ឬជាំខ្មៅ"),
-            "ធ្លាក់ចុះការផលិតពង": ("ធ្លាក់ចុះការផលិតពង", "ការបញ្ចេញពងថយចុះយ៉ាងខ្លាំង ឬឈប់ពងទាំងស្រុង"),
-            "សំបកពងទន់": ("ពងសំបកទន់", "ពងសំបកទន់ ឬគ្មានសំបកកំបោររឹង"),
-            "ពងខូចទ្រង់ទ្រាយ": ("ពងខូចទ្រង់ទ្រាយ", "ពងមានរូបរាងប្រែប្រួល រលក ឬតូចខុសប្រក្រតី"),
-        }
-        for old_name, (new_name, new_desc) in symptoms_clean.items():
-            sym = db.session.scalar(db.select(Symptom).filter_by(name=old_name))
-            if sym:
-                sym.name = new_name
-                sym.description = new_desc
+        db.session.flush()
 
-        # 3. Update Diseases
+        cat_objs = {c.name: c for c in db.session.scalars(db.select(Category)).all()}
+
+        # 2. Update / Clean Symptoms (English -> Khmer map)
+        symptoms_map = {
+            "coughing": ("ក្អក", "ក្អកញឹកញាប់ ឬពិបាកដកដង្ហើម", "ប្រព័ន្ធដង្ហើម"),
+            "sneezing": ("កណ្តាស់", "កណ្តាស់ញឹកញាប់", "ប្រព័ន្ធដង្ហើម"),
+            "nasal discharge": ("ហៀរសំបោរ", "មានសំបោរ ឬស្លេស្មចេញពីរន្ធច្រមុះ", "ប្រព័ន្ធដង្ហើម"),
+            "watery eyes": ("ហៀរទឹកភ្នែក", "ភ្នែកហៀរទឹក ហើម ឬបិទជិត", "ប្រព័ន្ធដង្ហើម"),
+            "gasping": ("ពិបាកដកដង្ហើម/ហារមាត់", "ហារមាត់ដកដង្ហើម ឬដកដង្ហើមញាប់ខ្លាំង", "ប្រព័ន្ធដង្ហើម"),
+            "swollen sinus": ("ហើមប្រហោងមុខ", "ហើមរលាកក្បែរភ្នែក ឬប្រហោងច្រមុះ", "ប្រព័ន្ធដង្ហើម"),
+            "tracheal rales": ("សំឡេងខ្យល់ដង្ហើមស្អក", "សំឡេងខ្យល់ដង្ហើមមិនប្រក្រតីឮសូរគ្រតៗក្នុងបំពង់ក", "ប្រព័ន្ធដង្ហើម"),
+            "diarrhea": ("រាគរូស", "រាគលាមករាវ ឬជាទឹក", "ប្រព័ន្ធរំលាយអាហារ"),
+            "bloody diarrhea": ("រាគមានឈាម", "មានឈាមស្រស់ ឬកំទេចឈាមលាយឡំក្នុងលាមក", "ប្រព័ន្ធរំលាយអាហារ"),
+            "green diarrhea": ("រាគពណ៌បៃតង", "លាមករាវពណ៌បៃតងស្រស់ ឬលាយស", "ប្រព័ន្ធរំលាយអាហារ"),
+            "white diarrhea": ("រាគពណ៌សកំបោរ", "លាមករាវពណ៌សកំបោរស្អិតជាប់គូទ", "ប្រព័ន្ធរំលាយអាហារ"),
+            "crop distension": ("ប៉ោងក្រពះចំណី", "ក្រពះចំណី (ពោះវៀនក) ឡើងប៉ោងតឹងពេញដោយទឹកឬខ្យល់", "ប្រព័ន្ធរំលាយអាហារ"),
+            "lameness": ("ទន់ជើង/ដើរខ្វិន", "ពិបាកដើរ ជើងទន់ខ្សោយ ឬដើរទាក់", "ប្រព័ន្ធសរសៃប្រសាទ"),
+            "head tilt": ("ក្បាលផ្អៀង/វៀច", "ក្បាលផ្អៀងទៅម្ខាង ឬងាកចុះក្រោម", "ប្រព័ន្ធសរសៃប្រសាទ"),
+            "tremors": ("ញ័រខ្លួន/កន្ត្រាក់", "រាងកាយញ័រ ឬកន្ត្រាក់សាច់ដុំ", "ប្រព័ន្ធសរសៃប្រសាទ"),
+            "paralysis": ("ខ្វិនជើង ឬស្លាប", "មិនអាចដើរបាន ឬជើងនិងស្លាបទន់លែងកម្រើក", "ប្រព័ន្ធសរសៃប្រសាទ"),
+            "twisted neck": ("ក្បាលរមួលបង្វិល", "ក្បាលរមួលបង្វិលខុសធម្មជាតិ (Torticollis)", "ប្រព័ន្ធសរសៃប្រសាទ"),
+            "lethargy": ("ស្រពោន/អសកម្ម", "ថយចុះថាមពល ដេកសណ្តូកស្ងប់ស្ងៀម មិនរវើករវាយ", "រោគសញ្ញាទូទៅ"),
+            "ruffled feathers": ("រោមរញ៉េរញ៉ៃ/បះ", "រោមបះមិនស្អាត ឬរញ៉េរញ៉ៃ ធ្លាក់ស្លាប", "រោគសញ្ញាទូទៅ"),
+            "ruffled": ("រោមរញ៉េរញ៉ៃ/បះ", "រោមបះមិនស្អាត ឬរញ៉េរញ៉ៃ ធ្លាក់ស្លាប", "រោគសញ្ញាទូទៅ"),
+            "loss of appetite": ("បាត់បង់ចំណង់អាហារ", "មិនស៊ីចំណី ឬស៊ីតិចតួចខុសធម្មតា", "រោគសញ្ញាទូទៅ"),
+            "loss appetite": ("បាត់បង់ចំណង់អាហារ", "មិនស៊ីចំណី ឬស៊ីតិចតួចខុសធម្មតា", "រោគសញ្ញាទូទៅ"),
+            "weight loss": ("ស្រកទម្ងន់/ស្គម", "ស្រកទម្ងន់លឿន ឬស្គមរីងរៃសល់តែឆ្អឹងទ្រូង", "រោគសញ្ញាទូទៅ"),
+            "sudden death": ("ងាប់ភ្លាមៗ", "ងាប់យ៉ាងឆាប់រហ័សដោយគ្មានរោគសញ្ញាព្រមាន", "រោគសញ្ញាទូទៅ"),
+            "fever": ("ក្តៅខ្លួនខ្លាំង", "សីតុណ្ហភាពរាងកាយឡើងខ្ពស់ ជើងក្តៅ", "រោគសញ្ញាទូទៅ"),
+            "dehydration": ("ខ្វះជាតិទឹក", "ស្បែកស្ងួត ភ្នែកខូងស្រពោន ជើងស្វិតស្ងួត", "រោគសញ្ញាទូទៅ"),
+            "swollen face": ("ហើមមុខ/ក្បាល", "ផ្ទៃមុខ ក្បាល ឬកំបិតឡើងហើមធំ", "ការឆ្លងបាក់តេរី"),
+            "skin lesions": ("ដំបៅស្បែក/ពងបែក", "របួស ដំបៅ ឬពងបែកលើស្បែក", "ស្បែកនិងរោម"),
+            "scabs": ("ក្រមរខ្មៅលើស្បែក", "ក្រមរខ្មៅ ឬកន្ទួលលើស្បែក កំបិត និងជើង", "ស្បែកនិងរោម"),
+            "bluish comb": ("កំបិតឡើងពណ៌ស្វាយជាំ", "កំបិត និងសន្ទះកំបិតឡើងពណ៌ខៀវស្វាយ ឬជាំខ្មៅ", "ស្បែកនិងរោម"),
+            "drop in egg production": ("ធ្លាក់ចុះការផលិតពង", "ការបញ្ចេញពងថយចុះយ៉ាងខ្លាំង ឬឈប់ពងទាំងស្រុង", "ការផលិតពង"),
+            "drop egg": ("ធ្លាក់ចុះការផលិតពង", "ការបញ្ចេញពងថយចុះយ៉ាងខ្លាំង ឬឈប់ពងទាំងស្រុង", "ការផលិតពង"),
+            "soft shell eggs": ("ពងសំបកទន់", "ពងសំបកទន់ ឬគ្មានសំបកកំបោររឹង", "ការផលិតពង"),
+            "misshapen eggs": ("ពងខូចទ្រង់ទ្រាយ", "ពងមានរូបរាងប្រែប្រួល រលក ឬតូចខុសប្រក្រតី", "ការផលិតពង"),
+            "diarear": ("រាគរូស", "រាគលាមករាវ ឬជាទឹក", "ប្រព័ន្ធរំលាយអាហារ"),
+            "diarear2": ("រាគមានឈាម", "មានឈាមស្រស់ ឬកំទេចឈាមលាយឡំក្នុងលាមក", "ប្រព័ន្ធរំលាយអាហារ"),
+            "laid": ("ធ្លាក់ចុះការផលិតពង", "ការបញ្ចេញពងថយចុះយ៉ាងខ្លាំង ឬឈប់ពងទាំងស្រុង", "ការផលិតពង"),
+        }
+
+        # Update existing symptoms
+        all_symptoms = db.session.scalars(db.select(Symptom)).all()
+        for sym in all_symptoms:
+            s_name_lower = sym.name.strip().lower()
+            if s_name_lower in symptoms_map:
+                new_km, new_desc, cat_key = symptoms_map[s_name_lower]
+                # Check if target already exists with new_km
+                existing_km = db.session.scalar(db.select(Symptom).filter_by(name=new_km))
+                if existing_km and existing_km.id != sym.id:
+                    # Safely transfer rule associations
+                    rules_with_target = [r.id for r in existing_km.rules]
+                    if rules_with_target:
+                        db.session.execute(
+                            tbl_rules_symptoms.delete().where(
+                                (tbl_rules_symptoms.c.symptom_id == sym.id) &
+                                (tbl_rules_symptoms.c.rule_id.in_(rules_with_target))
+                            )
+                        )
+                    db.session.execute(
+                        tbl_rules_symptoms.update()
+                        .where(tbl_rules_symptoms.c.symptom_id == sym.id)
+                        .values(symptom_id=existing_km.id)
+                    )
+                    # Safely transfer case associations
+                    cases_with_target = [c.id for c in getattr(existing_km, "cases", [])]
+                    if cases_with_target:
+                        db.session.execute(
+                            tbl_cases_symptoms.delete().where(
+                                (tbl_cases_symptoms.c.symptom_id == sym.id) &
+                                (tbl_cases_symptoms.c.case_id.in_(cases_with_target))
+                            )
+                        )
+                    db.session.execute(
+                        tbl_cases_symptoms.update()
+                        .where(tbl_cases_symptoms.c.symptom_id == sym.id)
+                        .values(symptom_id=existing_km.id)
+                    )
+                    db.session.delete(sym)
+                else:
+                    sym.name = new_km
+                    sym.description = new_desc
+                    if cat_key in cat_objs:
+                        sym.category = cat_objs[cat_key]
+
+        # Ensure all 31 standard symptoms exist
+        full_symptoms_clean = [
+            ("ក្អក", "ក្អកញឹកញាប់ ឬពិបាកដកដង្ហើម", "ប្រព័ន្ធដង្ហើម"),
+            ("កណ្តាស់", "កណ្តាស់ញឹកញាប់", "ប្រព័ន្ធដង្ហើម"),
+            ("ហៀរសំបោរ", "មានសំបោរ ឬស្លេស្មចេញពីរន្ធច្រមុះ", "ប្រព័ន្ធដង្ហើម"),
+            ("ហៀរទឹកភ្នែក", "ភ្នែកហៀរទឹក ហើម ឬបិទជិត", "ប្រព័ន្ធដង្ហើម"),
+            ("ពិបាកដកដង្ហើម/ហារមាត់", "ហារមាត់ដកដង្ហើម ឬដកដង្ហើមញាប់ខ្លាំង", "ប្រព័ន្ធដង្ហើម"),
+            ("ហើមប្រហោងមុខ", "ហើមរលាកក្បែរភ្នែក ឬប្រហោងច្រមុះ", "ប្រព័ន្ធដង្ហើម"),
+            ("សំឡេងខ្យល់ដង្ហើមស្អក", "សំឡេងខ្យល់ដង្ហើមមិនប្រក្រតីឮសូរគ្រតៗក្នុងបំពង់ក", "ប្រព័ន្ធដង្ហើម"),
+            ("រាគរូស", "រាគលាមករាវ ឬជាទឹក", "ប្រព័ន្ធរំលាយអាហារ"),
+            ("រាគមានឈាម", "មានឈាមស្រស់ ឬកំទេចឈាមលាយឡំក្នុងលាមក", "ប្រព័ន្ធរំលាយអាហារ"),
+            ("រាគពណ៌បៃតង", "លាមករាវពណ៌បៃតងស្រស់ ឬលាយស", "ប្រព័ន្ធរំលាយអាហារ"),
+            ("រាគពណ៌សកំបោរ", "លាមករាវពណ៌សកំបោរស្អិតជាប់គូទ", "ប្រព័ន្ធរំលាយអាហារ"),
+            ("ប៉ោងក្រពះចំណី", "ក្រពះចំណី (ពោះវៀនក) ឡើងប៉ោងតឹងពេញដោយទឹកឬខ្យល់", "ប្រព័ន្ធរំលាយអាហារ"),
+            ("ទន់ជើង/ដើរខ្វិន", "ពិបាកដើរ ជើងទន់ខ្សោយ ឬដើរទាក់", "ប្រព័ន្ធសរសៃប្រសាទ"),
+            ("ក្បាលផ្អៀង/វៀច", "ក្បាលផ្អៀងទៅម្ខាង ឬងាកចុះក្រោម", "ប្រព័ន្ធសរសៃប្រសាទ"),
+            ("ញ័រខ្លួន/កន្ត្រាក់", "រាងកាយញ័រ ឬកន្ត្រាក់សាច់ដុំ", "ប្រព័ន្ធសរសៃប្រសាទ"),
+            ("ខ្វិនជើង ឬស្លាប", "មិនអាចដើរបាន ឬជើងនិងស្លាបទន់លែងកម្រើក", "ប្រព័ន្ធសរសៃប្រសាទ"),
+            ("ក្បាលរមួលបង្វិល", "ក្បាលរមួលបង្វិលខុសធម្មជាតិ (Torticollis)", "ប្រព័ន្ធសរសៃប្រសាទ"),
+            ("ស្រពោន/អសកម្ម", "ថយចុះថាមពល ដេកសណ្តូកស្ងប់ស្ងៀម មិនរវើករវាយ", "រោគសញ្ញាទូទៅ"),
+            ("រោមរញ៉េរញ៉ៃ/បះ", "រោមបះមិនស្អាត ឬរញ៉េរញ៉ៃ ធ្លាក់ស្លាប", "រោគសញ្ញាទូទៅ"),
+            ("បាត់បង់ចំណង់អាហារ", "មិនស៊ីចំណី ឬស៊ីតិចតួចខុសធម្មតា", "រោគសញ្ញាទូទៅ"),
+            ("ស្រកទម្ងន់/ស្គម", "ស្រកទម្ងន់លឿន ឬស្គមរីងរៃសល់តែឆ្អឹងទ្រូង", "រោគសញ្ញាទូទៅ"),
+            ("ងាប់ភ្លាមៗ", "ងាប់យ៉ាងឆាប់រហ័សដោយគ្មានរោគសញ្ញាព្រមាន", "រោគសញ្ញាទូទៅ"),
+            ("ក្តៅខ្លួនខ្លាំង", "សីតុណ្ហភាពរាងកាយឡើងខ្ពស់ ជើងក្តៅ", "រោគសញ្ញាទូទៅ"),
+            ("ខ្វះជាតិទឹក", "ស្បែកស្ងួត ភ្នែកខូងស្រពោន ជើងស្វិតស្ងួត", "រោគសញ្ញាទូទៅ"),
+            ("ហើមមុខ/ក្បាល", "ផ្ទៃមុខ ក្បាល ឬកំបិតឡើងហើមធំ", "ការឆ្លងបាក់តេរី"),
+            ("ដំបៅស្បែក/ពងបែក", "របួស ដំបៅ ឬពងបែកលើស្បែក", "ស្បែកនិងរោម"),
+            ("ក្រមរខ្មៅលើស្បែក", "ក្រមរខ្មៅ ឬកន្ទួលលើស្បែក កំបិត និងជើង", "ស្បែកនិងរោម"),
+            ("កំបិតឡើងពណ៌ស្វាយជាំ", "កំបិត និងសន្ទះកំបិតឡើងពណ៌ខៀវស្វាយ ឬជាំខ្មៅ", "ស្បែកនិងរោម"),
+            ("ធ្លាក់ចុះការផលិតពង", "ការបញ្ចេញពងថយចុះយ៉ាងខ្លាំង ឬឈប់ពងទាំងស្រុង", "ការផលិតពង"),
+            ("ពងសំបកទន់", "ពងសំបកទន់ ឬគ្មានសំបកកំបោររឹង", "ការផលិតពង"),
+            ("ពងខូចទ្រង់ទ្រាយ", "ពងមានរូបរាងប្រែប្រួល រលក ឬតូចខុសប្រក្រតី", "ការផលិតពង"),
+        ]
+        for name, desc, cat_key in full_symptoms_clean:
+            sym = db.session.scalar(db.select(Symptom).filter_by(name=name))
+            if not sym:
+                sym = Symptom(name=name, description=desc, category=cat_objs.get(cat_key))
+                db.session.add(sym)
+            else:
+                sym.description = desc
+                if cat_key in cat_objs:
+                    sym.category = cat_objs[cat_key]
+
+        db.session.flush()
+
+        # 3. Clean up invalid test diseases & update valid Diseases
+        test_diseases = db.session.scalars(db.select(Disease).filter(Disease.name.ilike("%asdf%"))).all()
+        for td in test_diseases:
+            db.session.execute(
+                db.update(Case).where(Case.override_disease_id == td.id).values(override_disease_id=None)
+            )
+            db.session.execute(
+                db.update(Case).where(Case.disease_id == td.id).values(disease_id=None)
+            )
+            db.session.execute(
+                db.delete(CaseDiagnosis).where(CaseDiagnosis.disease_id == td.id)
+            )
+            db.session.delete(td)
+
+
         keyword_map = {
             "infectious_bronchitis": ["bronchitis", "ទងសួត"],
             "newcastle": ["newcastle", "ញូកាសល"],
@@ -697,14 +827,22 @@ def update_disease_knowledge():
                 d.prevention = data["prevention"]
                 d.severity = data["severity"]
                 d.is_contagious = data["is_contagious"]
+                d_cat = cat_objs.get("ប្រព័ន្ធដង្ហើម")
+                if "digest" in data.get("category_key", ""):
+                    d_cat = cat_objs.get("ប្រព័ន្ធរំលាយអាហារ")
+                elif "neuro" in data.get("category_key", ""):
+                    d_cat = cat_objs.get("ប្រព័ន្ធសរសៃប្រសាទ")
+                elif "bact" in data.get("category_key", ""):
+                    d_cat = cat_objs.get("ការឆ្លងបាក់តេរី")
+                elif "skin" in data.get("category_key", ""):
+                    d_cat = cat_objs.get("ស្បែកនិងរោម")
+                d.category = d_cat
                 updated_keys.add(matched_key)
 
-        # If any disease was missing, create it
         for key, data in DISEASE_KNOWLEDGE.items():
             if key not in updated_keys:
                 existing = db.session.scalar(db.select(Disease).filter_by(name=data["name"]))
                 if not existing:
-                    cat = db.session.scalar(db.select(Category).filter_by(name="ប្រព័ន្ធដង្ហើម"))
                     new_d = Disease(
                         name=data["name"],
                         description=data["description"],
@@ -712,13 +850,86 @@ def update_disease_knowledge():
                         prevention=data["prevention"],
                         severity=data["severity"],
                         is_contagious=data["is_contagious"],
-                        category=cat,
+                        category=cat_objs.get("ប្រព័ន្ធដង្ហើម"),
                     )
                     db.session.add(new_d)
+
+        db.session.flush()
+
+        # 4. Update / Clean Rules
+        rules_map = {
+            "respiratory infection pattern": ("រោគសញ្ញាជំងឺរលាកទងសួតឆ្លង", "ក្អក + កណ្តាស់ + ហៀរសំបោរ + ធ្លាក់ចុះការផលិតពង", ["ក្អក", "កណ្តាស់", "ហៀរសំបោរ", "ធ្លាក់ចុះការផលិតពង"]),
+            "neurological respiratory combo": ("រោគសញ្ញាជំងឺញូកាសល", "ក្អក + ហៀរសំបោរ + ស្រពោន/អសកម្ម + ក្បាលរមួលបង្វិល", ["ក្អក", "ហៀរសំបោរ", "ស្រពោន/អសកម្ម", "ក្បាលរមួលបង្វិល"]),
+            "coccidiosis signature": ("រោគសញ្ញាជំងឺកុកស៊ីឌីយ៉ូស (រាគឈាម)", "រាគមានឈាម + ស្រពោន/អសកម្ម + ខ្វះជាតិទឹក", ["រាគមានឈាម", "ស្រពោន/អសកម្ម", "ខ្វះជាតិទឹក"]),
+            "fowl cholera indicators": ("រោគសញ្ញាជំងឺអាសន្នរោគបក្សី", "ហើមមុខ/ក្បាល + ស្រពោន/អសកម្ម + រោមរញ៉េរញ៉ៃ/បះ + ងាប់ភ្លាមៗ", ["ហើមមុខ/ក្បាល", "ស្រពោន/អសកម្ម", "រោមរញ៉េរញ៉ៃ/បះ", "ងាប់ភ្លាមៗ"]),
+            "marek's disease pattern": ("រោគសញ្ញាជំងឺម៉ារ៉ែក", "ទន់ជើង/ដើរខ្វិន + ស្រពោន/អសកម្ម + ស្រកទម្ងន់/ស្គម", ["ទន់ជើង/ដើរខ្វិន", "ស្រពោន/អសកម្ម", "ស្រកទម្ងន់/ស្គម"]),
+            "infectious bronchitis": ("រោគសញ្ញាជំងឺរលាកទងសួតឆ្លង", "ក្អក + កណ្តាស់ + ហៀរសំបោរ + ធ្លាក់ចុះការផលិតពង", ["ក្អក", "កណ្តាស់", "ហៀរសំបោរ", "ធ្លាក់ចុះការផលិតពង"]),
+            "newcastle disease": ("រោគសញ្ញាជំងឺញូកាសល", "ក្អក + ហៀរសំបោរ + ស្រពោន/អសកម្ម + ក្បាលរមួលបង្វិល", ["ក្អក", "ហៀរសំបោរ", "ស្រពោន/អសកម្ម", "ក្បាលរមួលបង្វិល"]),
+            "coccidiosis": ("រោគសញ្ញាជំងឺកុកស៊ីឌីយ៉ូស (រាគឈាម)", "រាគមានឈាម + ស្រពោន/អសកម្ម + ខ្វះជាតិទឹក", ["រាគមានឈាម", "ស្រពោន/អសកម្ម", "ខ្វះជាតិទឹក"]),
+            "fowl cholera": ("រោគសញ្ញាជំងឺអាសន្នរោគបក្សី", "ហើមមុខ/ក្បាល + ស្រពោន/អសកម្ម + រោមរញ៉េរញ៉ៃ/បះ + ងាប់ភ្លាមៗ", ["ហើមមុខ/ក្បាល", "ស្រពោន/អសកម្ម", "រោមរញ៉េរញ៉ៃ/បះ", "ងាប់ភ្លាមៗ"]),
+            "marek disease": ("រោគសញ្ញាជំងឺម៉ារ៉ែក", "ទន់ជើង/ដើរខ្វិន + ស្រពោន/អសកម្ម + ស្រកទម្ងន់/ស្គម", ["ទន់ជើង/ដើរខ្វិន", "ស្រពោន/អសកម្ម", "ស្រកទម្ងន់/ស្គម"]),
+            "avian influenza": ("រោគសញ្ញាជំងឺផ្តាសាយបក្សី", "ក្អក + ស្រពោន/អសកម្ម + បាត់បង់ចំណង់អាហារ + ហៀរទឹកភ្នែក + កំបិតឡើងពណ៌ស្វាយជាំ", ["ក្អក", "ស្រពោន/អសកម្ម", "បាត់បង់ចំណង់អាហារ", "ហៀរទឹកភ្នែក", "កំបិតឡើងពណ៌ស្វាយជាំ"]),
+            "gumboro (ibd)": ("រោគសញ្ញាជំងឺហ្គាំបូរ៉ូ", "រាគពណ៌សកំបោរ + ស្រពោន/អសកម្ម + ខ្វះជាតិទឹក + រោមរញ៉េរញ៉ៃ/បះ", ["រាគពណ៌សកំបោរ", "ស្រពោន/អសកម្ម", "ខ្វះជាតិទឹក", "រោមរញ៉េរញ៉ៃ/បះ"]),
+            "fowl pox": ("រោគសញ្ញាជំងឺអុតបក្សី", "ដំបៅស្បែក/ពងបែក + ក្រមរខ្មៅលើស្បែក + បាត់បង់ចំណង់អាហារ", ["ដំបៅស្បែក/ពងបែក", "ក្រមរខ្មៅលើស្បែក", "បាត់បង់ចំណង់អាហារ"]),
+            "e. coli infection": ("រោគសញ្ញាជំងឺឆ្លងបាក់តេរី អ៊ីខូឡៃ", "រាគពណ៌បៃតង + ស្រពោន/អសកម្ម + រោមរញ៉េរញ៉ៃ/បះ + ហើមមុខ/ក្បាល", ["រាគពណ៌បៃតង", "ស្រពោន/អសកម្ម", "រោមរញ៉េរញ៉ៃ/បះ", "ហើមមុខ/ក្បាល"]),
+            "mycoplasmosis (crd)": ("រោគសញ្ញាជំងឺរលាកផ្លូវដង្ហើមរ៉ាំរ៉ៃ (ស៊ីអ័រឌី)", "ក្អក + កណ្តាស់ + ហើមប្រហោងមុខ + ហៀរទឹកភ្នែក", ["ក្អក", "កណ្តាស់", "ហើមប្រហោងមុខ", "ហៀរទឹកភ្នែក"]),
+            "aspergillosis": ("រោគសញ្ញាជំងឺផ្សិតសួតបក្សី", "ពិបាកដកដង្ហើម/ហារមាត់ + ស្រពោន/អសកម្ម + ស្រកទម្ងន់/ស្គម", ["ពិបាកដកដង្ហើម/ហារមាត់", "ស្រពោន/អសកម្ម", "ស្រកទម្ងន់/ស្គម"]),
+            "newcastle (neurological)": ("រោគសញ្ញាប្រព័ន្ធប្រសាទ ជំងឺញូកាសល", "ក្បាលផ្អៀង/វៀច + ញ័រខ្លួន/កន្ត្រាក់ + ទន់ជើង/ដើរខ្វិន + រាគពណ៌បៃតង", ["ក្បាលផ្អៀង/វៀច", "ញ័រខ្លួន/កន្ត្រាក់", "ទន់ជើង/ដើរខ្វិន", "រាគពណ៌បៃតង"]),
+        }
+
+        all_rules = db.session.scalars(db.select(Rule)).all()
+        for r in all_rules:
+            r_title_lower = r.title.strip().lower()
+            if "dangerours" in r_title_lower or "test" in r_title_lower or "asdf" in r_title_lower:
+                db.session.delete(r)
+                continue
+            if r_title_lower in rules_map:
+                new_title, new_desc, sym_names = rules_map[r_title_lower]
+                r.title = new_title
+                r.description = new_desc
+                # Re-link symptoms if needed
+                rule_syms = []
+                for sn in sym_names:
+                    s_obj = db.session.scalar(db.select(Symptom).filter_by(name=sn))
+                    if s_obj:
+                        rule_syms.append(s_obj)
+                if rule_syms:
+                    r.symptoms = rule_syms
+
+        # Ensure all core standard rules exist in DB
+        standard_rules_data = [
+            ("រោគសញ្ញាជំងឺរលាកទងសួតឆ្លង", "ក្អក + កណ្តាស់ + ហៀរសំបោរ + ធ្លាក់ចុះការផលិតពង", 1, 85.0, "ជំងឺរលាកទងសួតឆ្លង", ["ក្អក", "កណ្តាស់", "ហៀរសំបោរ", "ធ្លាក់ចុះការផលិតពង"]),
+            ("រោគសញ្ញាជំងឺញូកាសល", "ក្អក + ហៀរសំបោរ + ស្រពោន/អសកម្ម + ក្បាលរមួលបង្វិល", 1, 90.0, "ជំងឺញូកាសល", ["ក្អក", "ហៀរសំបោរ", "ស្រពោន/អសកម្ម", "ក្បាលរមួលបង្វិល"]),
+            ("រោគសញ្ញាជំងឺកុកស៊ីឌីយ៉ូស (រាគឈាម)", "រាគមានឈាម + ស្រពោន/អសកម្ម + ខ្វះជាតិទឹក", 1, 88.0, "ជំងឺកុកស៊ីឌីយ៉ូស ឬ រាគឈាម", ["រាគមានឈាម", "ស្រពោន/អសកម្ម", "ខ្វះជាតិទឹក"]),
+            ("រោគសញ្ញាជំងឺអាសន្នរោគបក្សី", "ហើមមុខ/ក្បាល + ស្រពោន/អសកម្ម + រោមរញ៉េរញ៉ៃ/បះ + ងាប់ភ្លាមៗ", 1, 85.0, "ជំងឺអាសន្នរោគបក្សី", ["ហើមមុខ/ក្បាល", "ស្រពោន/អសកម្ម", "រោមរញ៉េរញ៉ៃ/បះ", "ងាប់ភ្លាមៗ"]),
+            ("រោគសញ្ញាជំងឺម៉ារ៉ែក", "ទន់ជើង/ដើរខ្វិន + ស្រពោន/អសកម្ម + ស្រកទម្ងន់/ស្គម", 2, 80.0, "ជំងឺម៉ារ៉ែក", ["ទន់ជើង/ដើរខ្វិន", "ស្រពោន/អសកម្ម", "ស្រកទម្ងន់/ស្គម"]),
+            ("រោគសញ្ញាជំងឺផ្តាសាយបក្សី", "ក្អក + ស្រពោន/អសកម្ម + បាត់បង់ចំណង់អាហារ + ហៀរទឹកភ្នែក + កំបិតឡើងពណ៌ស្វាយជាំ", 1, 92.0, "ជំងឺផ្តាសាយបក្សី", ["ក្អក", "ស្រពោន/អសកម្ម", "បាត់បង់ចំណង់អាហារ", "ហៀរទឹកភ្នែក", "កំបិតឡើងពណ៌ស្វាយជាំ"]),
+            ("រោគសញ្ញាជំងឺហ្គាំបូរ៉ូ", "រាគពណ៌សកំបោរ + ស្រពោន/អសកម្ម + ខ្វះជាតិទឹក + រោមរញ៉េរញ៉ៃ/បះ", 1, 85.0, "ជំងឺហ្គាំបូរ៉ូ", ["រាគពណ៌សកំបោរ", "ស្រពោន/អសកម្ម", "ខ្វះជាតិទឹក", "រោមរញ៉េរញ៉ៃ/បះ"]),
+            ("រោគសញ្ញាជំងឺអុតបក្សី", "ដំបៅស្បែក/ពងបែក + ក្រមរខ្មៅលើស្បែក + បាត់បង់ចំណង់អាហារ", 2, 82.0, "ជំងឺអុតបក្សី", ["ដំបៅស្បែក/ពងបែក", "ក្រមរខ្មៅលើស្បែក", "បាត់បង់ចំណង់អាហារ"]),
+            ("រោគសញ្ញាជំងឺឆ្លងបាក់តេរី អ៊ីខូឡៃ", "រាគពណ៌បៃតង + ស្រពោន/អសកម្ម + រោមរញ៉េរញ៉ៃ/បះ + ហើមមុខ/ក្បាល", 2, 75.0, "ជំងឺឆ្លងបាក់តេរី អ៊ីខូឡៃ", ["រាគពណ៌បៃតង", "ស្រពោន/អសកម្ម", "រោមរញ៉េរញ៉ៃ/បះ", "ហើមមុខ/ក្បាល"]),
+            ("រោគសញ្ញាជំងឺរលាកផ្លូវដង្ហើមរ៉ាំរ៉ៃ (ស៊ីអ័រឌី)", "ក្អក + កណ្តាស់ + ហើមប្រហោងមុខ + ហៀរទឹកភ្នែក", 2, 80.0, "ជំងឺរលាកផ្លូវដង្ហើមរ៉ាំរ៉ៃ (ស៊ីអ័រឌី)", ["ក្អក", "កណ្តាស់", "ហើមប្រហោងមុខ", "ហៀរទឹកភ្នែក"]),
+            ("រោគសញ្ញាជំងឺផ្សិតសួតបក្សី", "ពិបាកដកដង្ហើម/ហារមាត់ + ស្រពោន/អសកម្ម + ស្រកទម្ងន់/ស្គម", 3, 72.0, "ជំងឺផ្សិតសួតបក្សី", ["ពិបាកដកដង្ហើម/ហារមាត់", "ស្រពោន/អសកម្ម", "ស្រកទម្ងន់/ស្គម"]),
+            ("រោគសញ្ញាប្រព័ន្ធប្រសាទ ជំងឺញូកាសល", "ក្បាលផ្អៀង/វៀច + ញ័រខ្លួន/កន្ត្រាក់ + ទន់ជើង/ដើរខ្វិន + រាគពណ៌បៃតង", 1, 85.0, "ជំងឺញូកាសល", ["ក្បាលផ្អៀង/វៀច", "ញ័រខ្លួន/កន្ត្រាក់", "ទន់ជើង/ដើរខ្វិន", "រាគពណ៌បៃតង"]),
+        ]
+        for r_title, r_desc, r_prio, r_conf, d_name, sym_names in standard_rules_data:
+            existing_rule = db.session.scalar(db.select(Rule).filter_by(title=r_title))
+            if not existing_rule:
+                d_obj = db.session.scalar(db.select(Disease).filter_by(name=d_name))
+                r_syms = [s for s in [db.session.scalar(db.select(Symptom).filter_by(name=sn)) for sn in sym_names] if s]
+                new_rule = Rule(
+                    title=r_title,
+                    description=r_desc,
+                    priority=r_prio,
+                    confidence=r_conf,
+                    disease=d_obj,
+                    symptoms=r_syms
+                )
+                db.session.add(new_rule)
 
         db.session.commit()
     except Exception as e:
         db.session.rollback()
+        raise e
 
 
 def seed_all():

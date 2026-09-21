@@ -458,9 +458,9 @@ FARM_SCALES = [
 
 CHICKEN_BREEDS = [
     {"code": "native", "name_en": "Native / Local (Moan Srae)", "name_km": "មាន់ស្រែ / មាន់ស្រុក"},
-    {"code": "broiler", "name_en": "Commercial Broiler (Meat)", "name_km": "មាន់សាច់ (Broiler)"},
-    {"code": "layer", "name_en": "Commercial Layer (Eggs)", "name_km": "មាន់ពង (Layer)"},
-    {"code": "crossbred", "name_en": "Crossbred / Hybrid", "name_km": "មាន់កូនកាត់ / បីសាសន៍"},
+    {"code": "broiler", "name_en": "Commercial Broiler (Meat)", "name_km": "មាន់សាច់"},
+    {"code": "layer", "name_en": "Commercial Layer (Eggs)", "name_km": "មាន់ពង"},
+    {"code": "crossbred", "name_en": "Crossbred / Hybrid", "name_km": "មាន់កូនកាត់ / ប៊ីសាសន៍"},
     {"code": "gamefowl", "name_en": "Fighting Cock (Gamefowl)", "name_km": "មាន់ជល់ / មាន់គក"},
     {"code": "other", "name_en": "Other / Specify", "name_km": "ផ្សេងៗ (បញ្ជាក់បន្ថែម)"},
 ]
